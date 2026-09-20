@@ -1,0 +1,7 @@
+[gd_scene format=3 uid="uid://dkmnbuc0ob0ua"]
+
+[ext_resource type="PackedScene" uid="uid://b4mcv3knbmvn1" path="res://Scenes/file_inspector.tscn" id="1_uys8m"]
+
+[node name="Main" type="Node2D" unique_id=940976714]
+
+[node name="FileInspector" parent="." unique_id=949069753 instance=ExtResource("1_uys8m")]

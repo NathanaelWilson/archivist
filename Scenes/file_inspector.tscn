@@ -1,0 +1,8 @@
+[gd_scene format=3 uid="uid://b4mcv3knbmvn1"]
+
+[ext_resource type="Script" uid="uid://0r7qwgss114x" path="res://Scenes/redaction_layer.gd" id="1_7185u"]
+
+[node name="FileInspector" type="CanvasLayer" unique_id=949069753]
+
+[node name="RedactionLayer" type="Sprite2D" parent="." unique_id=370673501]
+script = ExtResource("1_7185u")
