@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://cenp6uxk5h1im"
-path="res://.godot/imported/gear.png-675dc4a0a69bd2e3ebd8fd7e2ef1aedc.ctex"
+uid="uid://d4fmnpnemrd5v"
+path="res://.godot/imported/page_flip_02.png-26f8bc06c69458cbffbf7768846364f8.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://Assets/Images/Icons/gear.png"
-dest_files=["res://.godot/imported/gear.png-675dc4a0a69bd2e3ebd8fd7e2ef1aedc.ctex"]
+source_file="res://Assets/GUI/Records/page_flip_02.png"
+dest_files=["res://.godot/imported/page_flip_02.png-26f8bc06c69458cbffbf7768846364f8.ctex"]
 
 [params]
 

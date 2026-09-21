@@ -19,10 +19,9 @@ config/icon="res://Assets/Images/icon.svg"
 
 window/size/viewport_width=874
 window/size/viewport_height=402
-window/size/window_width_override=1311
-window/size/window_height_override=603
+window/size/window_width_override=1748
+window/size/window_height_override=804
 window/stretch/mode="canvas_items"
-window/stretch/aspect="keep"
 window/handheld/orientation="landscape"
 
 [input]
