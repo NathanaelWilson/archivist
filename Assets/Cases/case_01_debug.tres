@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="ArchiveFile" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://Scenes/archive_file.gd" id="1_archive_file"]
+[ext_resource type="Texture2D" path="res://Assets/Images/icon.svg" id="2_document_texture"]
+
+[resource]
+script = ExtResource("1_archive_file")
+case_id = "CASE-01-DEBUG"
+title = "Debug Anomaly Case"
+document_texture = ExtResource("2_document_texture")
+anomaly_regions = Array[Rect2]([Rect2(0.35, 0.35, 0.3, 0.3)])
+required_coverage = 0.95
+maximum_overspill = 0.15

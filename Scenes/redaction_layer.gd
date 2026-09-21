@@ -85,3 +85,142 @@ func _stamp(pos: Vector2) -> void:
 func _to_image_pos(screen_pos: Vector2) -> Vector2:
 	var lpos := to_local(screen_pos)
 	return lpos - offset + get_rect().size / 2.0
+const REDACT_COLOR: Color = Color(0.0, 0.0, 0.0)
+const REDACT_SIZE : int = 5
+const DEBUG_TARGET_RED := Color(1.0, 0.0, 0.0, 0.38)
+const DEBUG_TARGET_GREEN := Color(0.0, 1.0, 0.0, 0.38)
+## The current case supplies both the document texture and its hidden anomaly map.
+var case_file: ArchiveFile
+var img: Image
+var anomaly_mask: Image
+var debug_image: Image
+var last_ink_position := Vector2(-1, -1)
+
+@export var show_debug_anomaly_regions := true
+@onready var debug_overlay: Sprite2D = $"../DebugAnomalyOverlay"
+
+signal redaction_evaluated(result: Dictionary)
+
+func _ready() -> void:
+	_create_ink_canvas(IMG_SIZE)
+
+
+func set_case_file(new_case_file: ArchiveFile) -> void:
+	case_file = new_case_file
+	var image_size := IMG_SIZE
+	if case_file != null and case_file.document_texture != null:
+		image_size = case_file.document_texture.get_size()
+	_create_ink_canvas(image_size)
+
+
+func clear_ink() -> void:
+	_create_ink_canvas(img.get_size())
+
+
+func _create_ink_canvas(image_size: Vector2i) -> void:
+	img = Image.create_empty(image_size.x, image_size.y, false, Image.FORMAT_RGBA8)
+	img.fill(Color.TRANSPARENT)
+	texture = ImageTexture.create_from_image(img)
+	_build_anomaly_mask(image_size)
+
+
+func _build_anomaly_mask(image_size: Vector2i) -> void:
+	anomaly_mask = Image.create_empty(image_size.x, image_size.y, false, Image.FORMAT_L8)
+	anomaly_mask.fill(Color.BLACK)
+	debug_image = Image.create_empty(image_size.x, image_size.y, false, Image.FORMAT_RGBA8)
+	debug_image.fill(Color.TRANSPARENT)
+	if case_file == null:
+		_update_debug_overlay(false)
+		return
+	for region in case_file.get_pixel_regions(image_size):
+		anomaly_mask.fill_rect(region, Color.WHITE)
+		debug_image.fill_rect(region, DEBUG_TARGET_RED)
+	_update_debug_overlay(false)
+
+
+func _update_debug_overlay(passed: bool) -> void:
+	if not show_debug_anomaly_regions or debug_image == null:
+		debug_overlay.visible = false
+		return
+	var debug_color := DEBUG_TARGET_GREEN if passed else DEBUG_TARGET_RED
+	debug_image.fill(Color.TRANSPARENT)
+	if case_file != null:
+		for region in case_file.get_pixel_regions(img.get_size()):
+			debug_image.fill_rect(region, debug_color)
+	debug_overlay.texture = ImageTexture.create_from_image(debug_image)
+	debug_overlay.visible = true
+	
+
+func _redact_image(position: Vector2) -> void:
+	var pixel := Vector2i(roundi(position.x), roundi(position.y))
+	var canvas_bounds := Rect2i(Vector2i.ZERO, img.get_size())
+	var stroke := Rect2i(pixel, Vector2i.ONE).grow(REDACT_SIZE).intersection(canvas_bounds)
+	if stroke.has_area():
+		img.fill_rect(stroke, REDACT_COLOR)
+
+
+func evaluate_redaction() -> Dictionary:
+	if case_file == null or case_file.anomaly_regions.is_empty():
+		return { "is_valid": false, "reason": "No anomaly regions have been authored for this case." }
+
+	var required_pixels := 0
+	var covered_pixels := 0
+	var ink_pixels := 0
+	var ink_outside_anomaly := 0
+	for y in img.get_height():
+		for x in img.get_width():
+			var inked := img.get_pixel(x, y).a > 0.5
+			var required := anomaly_mask.get_pixel(x, y).r > 0.5
+			if required:
+				required_pixels += 1
+				if inked:
+					covered_pixels += 1
+			if inked:
+				ink_pixels += 1
+				if not required:
+					ink_outside_anomaly += 1
+
+	var coverage: float = float(covered_pixels) / float(maxi(required_pixels, 1))
+	var overspill: float = float(ink_outside_anomaly) / float(maxi(ink_pixels, 1))
+	var is_valid: bool = coverage >= case_file.required_coverage and overspill <= case_file.maximum_overspill
+	var result := {
+		"is_valid": is_valid,
+		"coverage": coverage,
+		"overspill": overspill,
+		"required_pixels": required_pixels,
+		"covered_pixels": covered_pixels,
+	}
+	_update_debug_overlay(is_valid)
+	redaction_evaluated.emit(result)
+	return result
+	
+
+func _input(event: InputEvent)-> void:
+	if event is InputEventMouseButton:
+		if event.pressed and event.is_echo() == false:
+			var impos := _event_to_image_position(event.position)
+			_redact_image(impos)
+			last_ink_position = impos
+			texture.update(img)
+		elif not event.pressed:
+			last_ink_position = Vector2(-1, -1)
+	if event is InputEventMouseMotion:
+		if event.button_mask == MOUSE_BUTTON_LEFT:
+			var impos := _event_to_image_position(event.position)
+			if last_ink_position.x >= 0.0:
+				var distance := last_ink_position.distance_to(impos)
+				for step in ceili(distance):
+					_redact_image(last_ink_position.lerp(impos, float(step) / max(distance, 1.0)))
+			else:
+				_redact_image(impos)
+			last_ink_position = impos
+			texture.update(img)
+
+
+func _event_to_image_position(screen_position: Vector2) -> Vector2:
+	var local_position := to_local(screen_position)
+	return local_position - offset + get_rect().size * 0.5
+
+# Called every frame. 'delta' is the elapsed time since the previous frame.
+func _process(delta: float) -> void:
+	pass
