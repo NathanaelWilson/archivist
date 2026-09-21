@@ -3,38 +3,29 @@ extends Area2D
 
 ## The "dummy" file/document object the player interacts with all game.
 ##
-## The tricky part the GDD sets up and never resolves for you: a single-
-## finger drag on the paper means two different things depending on context
-## — "COVER" (ink, permanent) and "FILE" (hold, drag to a tray, no confirm).
-## Both start as a touch-down inside the document's bounds. This node
-## resolves which one it is *before* forwarding anything, using a short
-## hold-threshold: if the finger holds still past the threshold it's a
-## pickup; if it moves past the deadzone first, it's an ink stroke. That
-## mirrors "Hold and drag the paper = pick it up" vs "drag a finger across
-## the paper = ink" in the Game Plan's Control(s) section.
+## On the desk, the paper only has two gestures: tap to open it, or hold and
+## drag it to a tray. Redaction belongs to DocumentViewer after it is opened,
+## so the two gestures can never compete for the same touch.
 ##
 ## State machine: RESTING -> (INKING | HELD) -> RESTING, or HELD -> FILING -> freed.
 
+signal open_requested
 signal picked_up
 signal returned_to_desk
 signal filed(tray_type: int)
-signal stroke_scored(result: Dictionary) ## forward to the session scorer (DEV-05)
+signal filing_evaluated(tray_type: int, redaction_result: Dictionary)
 
-enum State { RESTING, INKING, HELD, FILING }
+enum State { RESTING, HELD, FILING }
 
-## Tuned for a phone-sized touch target. Below hold_threshold_sec a quick
-## drag reads as ink; above it, a still finger promotes to a pickup.
+## A short hold promotes a touch to a pickup. Releasing before it elapses
+## opens the document instead.
 @export var hold_threshold_sec: float = 0.16
-@export var move_deadzone_px: float = 8.0
 @export var max_tilt_deg: float = 10.0
 @export var return_time_sec: float = 0.18
 @export var file_time_sec: float = 0.12
 
 @export var case_data: CaseData
 
-@onready var paper: CanvasItem = $Paper
-@onready var asset_sprite: Sprite2D = $Asset
-@onready var redaction: RedactionLayer = $RedactionLayer
 @onready var collision: CollisionShape2D = $CollisionShape2D
 
 var _state: State = State.RESTING
@@ -47,6 +38,8 @@ var _drag_offset: Vector2 = Vector2.ZERO
 var _pending: bool = false
 var _touch_start_pos: Vector2 = Vector2.ZERO
 var _hold_timer_id: int = 0
+var _interaction_enabled := true
+var _redaction_result: Dictionary = {"is_valid": false, "reason": "Document has not been checked."}
 
 
 func _ready() -> void:
@@ -54,14 +47,16 @@ func _ready() -> void:
 	_rest_rotation = rotation
 	monitoring = true
 	monitorable = true
-	if case_data:
-		_apply_case_data()
 
 
-func _apply_case_data() -> void:
-	if case_data.asset:
-		asset_sprite.texture = case_data.asset
-	redaction.hidden_boxes = case_data.hidden_boxes
+func set_interaction_enabled(enabled: bool) -> void:
+	_interaction_enabled = enabled
+	_pending = false
+	_hold_timer_id += 1
+
+
+func set_redaction_result(result: Dictionary) -> void:
+	_redaction_result = result
 
 
 func is_held() -> bool:
@@ -77,7 +72,7 @@ func is_held() -> bool:
 # here since it doesn't interact with filing.
 
 func _input(event: InputEvent) -> void:
-	if _state == State.FILING:
+	if not _interaction_enabled or _state == State.FILING:
 		return
 
 	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT:
@@ -87,7 +82,16 @@ func _input(event: InputEvent) -> void:
 			_end_touch(event.position)
 
 	elif event is InputEventMouseMotion and (event.button_mask & MOUSE_BUTTON_MASK_LEFT):
-		_move_touch(event.position, event.relative)
+		_move_touch(event.position)
+
+	elif event is InputEventScreenTouch:
+		if event.pressed:
+			_begin_touch(event.position)
+		else:
+			_end_touch(event.position)
+
+	elif event is InputEventScreenDrag:
+		_move_touch(event.position)
 
 
 func _begin_touch(screen_pos: Vector2) -> void:
@@ -108,15 +112,8 @@ func _on_hold_elapsed(timer_id: int) -> void:
 		_begin_pickup()
 
 
-func _move_touch(screen_pos: Vector2, relative: Vector2) -> void:
-	if _pending and _state == State.RESTING:
-		if screen_pos.distance_to(_touch_start_pos) > move_deadzone_px:
-			_pending = false
-			_begin_inking(_touch_start_pos)
-
-	if _state == State.INKING:
-		redaction.stroke_to(screen_pos, relative)
-	elif _state == State.HELD:
+func _move_touch(screen_pos: Vector2) -> void:
+	if _state == State.HELD:
 		_drag_to(screen_pos)
 
 
@@ -124,21 +121,19 @@ func _end_touch(screen_pos: Vector2) -> void:
 	_pending = false
 	_hold_timer_id += 1 # invalidate any pending hold timer
 	match _state:
-		State.INKING:
-			var result := redaction.end_stroke()
-			stroke_scored.emit(result)
-			_state = State.RESTING
 		State.HELD:
 			_try_drop(screen_pos)
-		_:
-			pass
+		State.RESTING:
+			open_requested.emit()
 
 
 func _contains_point(screen_pos: Vector2) -> bool:
 	var shape := collision.shape as RectangleShape2D
 	if shape == null:
 		return false
-	var extents: Vector2 = shape.size * 0.5 * abs(scale)
+	# to_local() already accounts for this node's scale, so multiplying by
+	# scale here would make the touch hitbox incorrectly larger a second time.
+	var extents: Vector2 = shape.size * 0.5
 	var local := to_local(screen_pos)
 	return abs(local.x) <= extents.x and abs(local.y) <= extents.y
 
@@ -149,11 +144,6 @@ func _begin_pickup() -> void:
 	_state = State.HELD
 	z_index = 100
 	picked_up.emit()
-
-
-func _begin_inking(start_pos: Vector2) -> void:
-	_state = State.INKING
-	redaction.begin_stroke(start_pos)
 
 
 func _drag_to(screen_pos: Vector2) -> void:
@@ -192,6 +182,7 @@ func _commit_to_tray(tray: FilingTray) -> void:
 	tw.parallel().tween_property(self, "modulate:a", 0.0, file_time_sec)
 	tw.finished.connect(func():
 		filed.emit(tray_type)
+		filing_evaluated.emit(tray_type, _redaction_result)
 		queue_free()
 	)
 

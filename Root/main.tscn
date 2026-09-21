@@ -1,13 +1,11 @@
-[gd_scene format=3 uid="uid://dkmnbuc0ob0ua"]
+[gd_scene load_steps=3 format=3 uid="uid://dkmnbuc0ob0ua"]
 
-[ext_resource type="Script" uid="uid://ce5p26unyxnbq" path="res://Scenes/archive_file.gd" id="1_h55oq"]
-[ext_resource type="PackedScene" uid="uid://b4mcv3knbmvn1" path="res://Scenes/file_inspector.tscn" id="1_uys8m"]
+[ext_resource type="Script" path="res://Root/main.gd" id="1_main"]
+[ext_resource type="Resource" path="res://Assets/Cases/case_01_debug.tres" id="2_debug_case"]
+[ext_resource type="PackedScene" path="res://Scenes/document_viewer.tscn" id="3_document_viewer"]
 
-[sub_resource type="Resource" id="Resource_h55oq"]
-script = ExtResource("1_h55oq")
-metadata/_custom_type_script = "uid://ce5p26unyxnbq"
+[node name="Main" type="Node2D"]
+script = ExtResource("1_main")
+current_case = ExtResource("2_debug_case")
 
-[node name="Main" type="Node2D" unique_id=940976714]
-
-[node name="FileInspector" parent="." unique_id=949069753 instance=ExtResource("1_uys8m")]
-current_file = SubResource("Resource_h55oq")
+[node name="DocumentViewer" parent="." instance=ExtResource("3_document_viewer")]

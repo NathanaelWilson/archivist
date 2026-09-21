@@ -15,11 +15,13 @@ enum TrayType { PUBLIC_ARCHIVE, DEPARTMENT_OF_TRUTH, INCINERATOR }
 @export var brighten_speed: float = 8.0
 
 @onready var visual: CanvasItem = $Visual
+@onready var label: Label = $Label
 
 var _hover_count: int = 0
 
 
 func _ready() -> void:
+	label.text = _display_name()
 	monitoring = true
 	monitorable = true
 	area_entered.connect(_on_area_entered)
@@ -44,3 +46,14 @@ func _process(delta: float) -> void:
 ## Called by FileEntity when it drops while overlapping this tray.
 func notify_received(_file: FileEntity) -> void:
 	_hover_count = 0
+
+
+func _display_name() -> String:
+	match tray_type:
+		TrayType.PUBLIC_ARCHIVE:
+			return "Public Archive"
+		TrayType.DEPARTMENT_OF_TRUTH:
+			return "Department\nof Truth"
+		TrayType.INCINERATOR:
+			return "Incinerator"
+	return "Unknown Tray"
