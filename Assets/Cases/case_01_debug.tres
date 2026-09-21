@@ -1,0 +1,10 @@
+[gd_resource type="Resource" script_class="CaseData" format=3 uid="uid://dpn0ckn4xonp7"]
+
+[ext_resource type="Script" uid="uid://dyxpn0feejs5a" path="res://Scenes/case_data.gd" id="1_case_data"]
+[ext_resource type="Texture2D" uid="uid://dx732j3qsclyg" path="res://Assets/Images/icon.svg" id="2_document_texture"]
+
+[resource]
+script = ExtResource("1_case_data")
+id = "CASE-01-DEBUG"
+anomaly_regions = Array[Rect2]([Rect2(0.35, 0.35, 0.3, 0.3)])
+asset = ExtResource("2_document_texture")

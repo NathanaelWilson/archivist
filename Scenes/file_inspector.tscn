@@ -1,8 +1,18 @@
-[gd_scene format=3 uid="uid://b4mcv3knbmvn1"]
+[gd_scene format=3 uid="uid://qg30op3j4h85"]
 
-[ext_resource type="Script" uid="uid://0r7qwgss114x" path="res://Scenes/redaction_layer.gd" id="1_7185u"]
+[ext_resource type="Script" uid="uid://dsme712y8c4gh" path="res://Scenes/redaction_layer.gd" id="1_7185u"]
+[ext_resource type="Script" path="res://Scenes/file_inspector.gd" id="2_inspector"]
+[ext_resource type="Resource" uid="uid://dpn0ckn4xonp7" path="res://Assets/Cases/case_01_debug.tres" id="3_debug_case"]
 
 [node name="FileInspector" type="CanvasLayer" unique_id=949069753]
+script = ExtResource("2_inspector")
+current_file = ExtResource("3_debug_case")
+
+[node name="DocumentImage" type="Sprite2D" parent="." unique_id=107156582]
+
+[node name="DebugAnomalyOverlay" type="Sprite2D" parent="." unique_id=204391595]
+z_index = 1
 
 [node name="RedactionLayer" type="Sprite2D" parent="." unique_id=370673501]
+z_index = 2
 script = ExtResource("1_7185u")
