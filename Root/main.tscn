@@ -1,7 +1,12 @@
 [gd_scene format=3 uid="uid://dkmnbuc0ob0ua"]
 
 [ext_resource type="PackedScene" uid="uid://b4mcv3knbmvn1" path="res://Scenes/file_inspector.tscn" id="1_uys8m"]
+[ext_resource type="Texture2D" uid="uid://0pq4aslyemjg" path="res://Assets/Images/Background/menu-bg.jpeg" id="2_h55oq"]
 
 [node name="Main" type="Node2D" unique_id=940976714]
 
 [node name="FileInspector" parent="." unique_id=949069753 instance=ExtResource("1_uys8m")]
+
+[node name="MenuBg" type="Sprite2D" parent="." unique_id=1956322675]
+position = Vector2(1691, 976)
+texture = ExtResource("2_h55oq")

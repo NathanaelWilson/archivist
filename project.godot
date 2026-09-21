@@ -11,9 +11,19 @@ config_version=5
 [application]
 
 config/name="Archivist"
-run/main_scene="uid://dkmnbuc0ob0ua"
-config/features=PackedStringArray("4.6", "Mobile")
+run/main_scene="res://Scenes/main_menu.tscn"
+config/features=PackedStringArray("4.7", "Mobile")
 config/icon="res://Assets/Images/icon.svg"
+
+[display]
+
+window/size/viewport_width=874
+window/size/viewport_height=402
+window/size/window_width_override=1311
+window/size/window_height_override=603
+window/stretch/mode="canvas_items"
+window/stretch/aspect="keep"
+window/handheld/orientation="landscape"
 
 [input]
 
