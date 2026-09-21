@@ -4,12 +4,12 @@ extends Sprite2D
 ## Permanent ink and validation for one CaseData document. FileEntity owns
 ## gesture recognition and calls begin_stroke/stroke_to/end_stroke.
 
-const IMG_SIZE := Vector2i(512, 1024)
+const IMG_SIZE := Vector2i(171, 342)
 const REDACT_COLOR := Color.BLACK
 ## A broad, horizontal chisel tip: closer to a Stabilo marker than a square
 ## pixel stamp. The soft edge is only visual; the opaque centre is scored.
-const MARKER_SIZE := Vector2i(24, 10)
-const MARKER_CORNER_RADIUS := 4.0
+const MARKER_SIZE := Vector2i(12, 6)
+const MARKER_CORNER_RADIUS := 2.0
 const DEBUG_TARGET_RED := Color(1.0, 0.0, 0.0, 0.38)
 const DEBUG_TARGET_GREEN := Color(0.0, 1.0, 0.0, 0.38)
 
