@@ -1,22 +1,48 @@
 extends Node2D
 
-## The playable one-case loop. Assign another CaseData resource to current_case
-## when the next document should slide onto the desk.
+## The playable shift loop. Each ShiftData resource owns the ordered cases for
+## one shift; the same CaseData can intentionally be reused across shifts.
 
 const FILE_ENTITY_SCENE := preload("res://Scenes/file_entity.tscn")
 const FILING_TRAY_SCENE := preload("res://Scenes/filing_tray.tscn")
 
-@export var current_case: CaseData
+@export var shifts: Array[ShiftData] = []
 
 @onready var document_viewer: DocumentViewer = $DocumentViewer
+@onready var shift_screen: ShiftScreen = $ShiftScreen
 var active_file: FileEntity
+var _shift_index := 0
+var _case_index := 0
 
 
 func _ready() -> void:
 	_spawn_trays()
 	document_viewer.closed.connect(_on_document_closed)
-	if current_case != null:
-		spawn_case(current_case)
+	shift_screen.begin_requested.connect(_begin_current_shift)
+	_show_current_shift()
+
+
+func _show_current_shift() -> void:
+	if _shift_index >= shifts.size():
+		shift_screen.present_complete()
+		return
+	shift_screen.present_shift(shifts[_shift_index], _shift_index + 1, shifts.size())
+
+
+func _begin_current_shift() -> void:
+	if _shift_index >= shifts.size():
+		return
+	shift_screen.dismiss()
+	_case_index = 0
+	_spawn_next_case()
+
+
+func _spawn_next_case() -> void:
+	var shift := shifts[_shift_index]
+	if _case_index >= shift.cases.size():
+		_finish_current_shift()
+		return
+	spawn_case(shift.cases[_case_index])
 
 
 func spawn_case(case_data: CaseData) -> void:
@@ -54,6 +80,14 @@ func _spawn_trays() -> void:
 func _on_file_filed(tray_type: int, redaction_result: Dictionary, case_data: CaseData) -> void:
 	var correct_tray: bool = tray_type == case_data.correct_tray
 	var redaction_passed: bool = bool(redaction_result.get("is_valid", false))
-	print("Filed ", case_data.id, " | tray correct: ", correct_tray, " | redaction correct: ", redaction_passed)
-	# Hook the printer-slip / next-case code here. This method intentionally does
-	# not tell the player whether either value was correct.
+	print("Filed ", case_data.id, " | tray correct: ", correct_tray, " | redaction correct: ", redaction_passed,
+		" | ", redaction_result.get("reason", ""),
+		" (coverage %.0f%%, overspill %.0f%%)" % [float(redaction_result.get("coverage", 0.0)) * 100.0, float(redaction_result.get("overspill", 0.0)) * 100.0])
+	_case_index += 1
+	# The document finishes its filing tween before the next one is spawned.
+	call_deferred("_spawn_next_case")
+
+
+func _finish_current_shift() -> void:
+	_shift_index += 1
+	_show_current_shift()

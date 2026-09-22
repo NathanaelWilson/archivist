@@ -6,11 +6,18 @@ extends CanvasLayer
 
 signal closed(redaction_result: Dictionary)
 
+## Space kept clear between the document and the screen edges, in viewport
+## pixels. The document is also kept clear of the Close button on the left
+## (mirrored on the right so it stays centred).
+@export var screen_margin := 16.0
+
 var case_data: CaseData
 var _inking := false
+var _document_size := Vector2(RedactionLayer.IMG_SIZE)
 
 @onready var document: Node2D = $Document
 @onready var asset: Sprite2D = $Document/Asset
+@onready var paper: ColorRect = $Document/Paper
 @onready var redaction: RedactionLayer = $Document/RedactionLayer
 @onready var close_button: Button = $CloseButton
 @onready var backdrop: ColorRect = $Backdrop
@@ -27,8 +34,31 @@ func open(new_case_data: CaseData) -> void:
 	backdrop.size = viewport_size
 	document.position = viewport_size * 0.5
 	asset.texture = case_data.asset
-	redaction.set_case_data(case_data)
+	_document_size = _fit_document(viewport_size)
+	paper.position = -_document_size * 0.5
+	paper.size = _document_size
+	redaction.set_case_data(case_data, Vector2i(_document_size))
 	visible = true
+
+
+## Scales the case art so the whole page fits on screen, keeping its aspect
+## ratio. Returns the on-screen size of the document in viewport pixels; the
+## redaction canvas is created at this size so one ink pixel = one screen pixel
+## and the normalized anomaly regions still line up with the art.
+func _fit_document(viewport_size: Vector2) -> Vector2:
+	var side_gutter := maxf(screen_margin, close_button.get_rect().end.x + screen_margin)
+	var available := Vector2(
+		viewport_size.x - side_gutter * 2.0,
+		viewport_size.y - screen_margin * 2.0
+	)
+	var source_size := Vector2(RedactionLayer.IMG_SIZE)
+	if asset.texture != null:
+		source_size = asset.texture.get_size()
+	var fit_scale := minf(available.x / source_size.x, available.y / source_size.y)
+	var fitted := (source_size * fit_scale).floor()
+	# Scale from the rounded size so the art exactly matches the ink canvas.
+	asset.scale = fitted / source_size
+	return fitted
 
 
 func close() -> void:
@@ -70,4 +100,4 @@ func _unhandled_input(event: InputEvent) -> void:
 
 func _contains_document(screen_position: Vector2) -> bool:
 	var local := document.to_local(screen_position)
-	return Rect2(-RedactionLayer.IMG_SIZE * 0.5, RedactionLayer.IMG_SIZE).has_point(local)
+	return Rect2(-_document_size * 0.5, _document_size).has_point(local)

@@ -1,0 +1,9 @@
+[gd_resource type="Resource" script_class="ShiftData" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://Scenes/shift_data.gd" id="1_shift_data"]
+[ext_resource type="Resource" path="res://Assets/Cases/case_01_debug.tres" id="2_case"]
+
+[resource]
+script = ExtResource("1_shift_data")
+display_name = "Afternoon Intake"
+cases = Array[Resource]([ExtResource("2_case")])
