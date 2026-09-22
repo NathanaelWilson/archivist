@@ -11,7 +11,11 @@ const REDACT_COLOR := Color.BLACK
 const MARKER_SIZE := Vector2i(12, 6)
 const MARKER_CORNER_RADIUS := 2.0
 const DEBUG_TARGET_RED := Color(1.0, 0.0, 0.0, 0.38)
+const DEBUG_TARGET_YELLOW := Color(1.0, 0.85, 0.0, 0.45)
 const DEBUG_TARGET_GREEN := Color(0.0, 1.0, 0.0, 0.38)
+const DEBUG_SAFE_ZONE := Color(0.2, 0.55, 1.0, 0.22)
+## Mask values: required anomaly pixels are white, safe-zone pixels grey.
+const MASK_SAFE_ZONE := Color(0.5, 0.5, 0.5)
 
 @export var show_debug_anomaly_regions := true
 
@@ -30,9 +34,11 @@ func _ready() -> void:
 	_create_canvases(IMG_SIZE)
 
 
-func set_case_data(new_case_data: CaseData) -> void:
+## canvas_size is the document's on-screen size; DocumentViewer passes the
+## size it fitted the case art to so ink, anomaly mask and art stay aligned.
+func set_case_data(new_case_data: CaseData, canvas_size: Vector2i = IMG_SIZE) -> void:
 	case_data = new_case_data
-	_create_canvases(IMG_SIZE)
+	_create_canvases(canvas_size)
 
 
 func clear_ink() -> void:
@@ -84,30 +90,39 @@ func evaluate_redaction() -> Dictionary:
 	for y in ink_image.get_height():
 		for x in ink_image.get_width():
 			var inked := ink_image.get_pixel(x, y).a > 0.5
-			var required := anomaly_mask.get_pixel(x, y).r > 0.5
+			var mask_value := anomaly_mask.get_pixel(x, y).r
+			var required := mask_value > 0.75
+			var allowed := mask_value > 0.25 # anomaly or a safe zone
 			if required:
 				required_pixels += 1
 				if inked:
 					covered_pixels += 1
 			if inked:
 				ink_pixels += 1
-				if not required:
+				if not allowed:
 					ink_outside_anomaly += 1
 
 	var coverage: float = float(covered_pixels) / float(maxi(required_pixels, 1))
 	var overspill: float = float(ink_outside_anomaly) / float(maxi(ink_pixels, 1))
-	var is_valid: bool = coverage >= case_data.required_coverage and overspill <= case_data.maximum_overspill
+	var covered_enough: bool = coverage >= case_data.required_coverage
+	var clean_enough: bool = overspill <= case_data.maximum_overspill
+	var is_valid: bool = covered_enough and clean_enough
+	var reason := "OK"
+	if not covered_enough:
+		reason = "Anomaly not covered enough (%.0f%% of %.0f%% needed)." % [coverage * 100.0, case_data.required_coverage * 100.0]
+	elif not clean_enough:
+		reason = "Too much ink outside the anomaly (%.0f%% of ink, max %.0f%%)." % [overspill * 100.0, case_data.maximum_overspill * 100.0]
 	var result := {
 		"is_valid": is_valid,
+		"reason": reason,
 		"coverage": coverage,
 		"overspill": overspill,
 		"required_pixels": required_pixels,
 		"covered_pixels": covered_pixels,
 	}
-	# The debug colour answers the narrow question it is for: did the player
-	# cover the required anomaly? Filing can still apply the separate overspill
-	# rule through is_valid without making this visual test misleading.
-	_update_debug_overlay(coverage >= case_data.required_coverage)
+	# Debug colour mirrors the real verdict: green = valid, yellow = covered
+	# but too much ink outside, red = anomaly not covered enough.
+	_update_debug_overlay(covered_enough, clean_enough)
 	redaction_evaluated.emit(result)
 	return result
 
@@ -121,9 +136,14 @@ func _create_canvases(image_size: Vector2i) -> void:
 	debug_image = Image.create_empty(image_size.x, image_size.y, false, Image.FORMAT_RGBA8)
 	debug_image.fill(Color.TRANSPARENT)
 	if case_data != null:
-		for region in case_data.get_pixel_regions(image_size):
+		var bounds := Rect2i(Vector2i.ZERO, image_size)
+		var regions := case_data.get_pixel_regions(image_size)
+		# Safe zones first, then the required areas on top of them.
+		for region in case_data.get_overspill_pixel_regions(image_size):
+			anomaly_mask.fill_rect(region.intersection(bounds), MASK_SAFE_ZONE)
+		for region in regions:
 			anomaly_mask.fill_rect(region, Color.WHITE)
-	_update_debug_overlay(false)
+	_update_debug_overlay(false, true)
 
 
 func _stamp(image_position: Vector2) -> void:
@@ -145,14 +165,18 @@ func _stamp(image_position: Vector2) -> void:
 				ink_image.set_pixel(x, y, Color(0.0, 0.0, 0.0, maxf(existing_alpha, alpha)))
 
 
-func _update_debug_overlay(passed: bool) -> void:
+func _update_debug_overlay(covered: bool, clean: bool) -> void:
 	if not is_instance_valid(debug_overlay):
 		return
 	debug_overlay.visible = show_debug_anomaly_regions and case_data != null
 	if not debug_overlay.visible:
 		return
 	debug_image.fill(Color.TRANSPARENT)
-	var color := DEBUG_TARGET_GREEN if passed else DEBUG_TARGET_RED
+	var color := DEBUG_TARGET_RED
+	if covered:
+		color = DEBUG_TARGET_GREEN if clean else DEBUG_TARGET_YELLOW
+	for region in case_data.get_overspill_pixel_regions(ink_image.get_size()):
+		debug_image.fill_rect(region, DEBUG_SAFE_ZONE)
 	for region in case_data.get_pixel_regions(ink_image.get_size()):
 		debug_image.fill_rect(region, color)
 	debug_overlay.texture = ImageTexture.create_from_image(debug_image)

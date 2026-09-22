@@ -1,18 +1,18 @@
-[gd_scene format=3]
+[gd_scene format=3 uid="uid://dlafi6sf1c6hq"]
 
 [ext_resource type="Script" uid="uid://cpx3fbcj52r6k" path="res://Scenes/main_menu.gd" id="1"]
-[ext_resource type="Texture2D" path="res://Assets/Images/Background/menu-bg.png" id="2"]
+[ext_resource type="Texture2D" uid="uid://b6uomawahgvx3" path="res://Assets/Images/Background/menu-bg.png" id="2"]
 [ext_resource type="Texture2D" uid="uid://cenp6uxk5h1im" path="res://Assets/GUI/gear.png" id="3"]
 [ext_resource type="StyleBox" path="res://Assets/GUI/Buttons/button_style_normal.tres" id="4"]
 [ext_resource type="StyleBox" path="res://Assets/GUI/Buttons/button_style_pressed.tres" id="5"]
-[ext_resource type="Texture2D" path="res://Assets/GUI/Records/page_flip_01.png" id="6"]
-[ext_resource type="Texture2D" path="res://Assets/GUI/Screens/window_journal.png" id="7"]
-[ext_resource type="AudioStream" path="res://Assets/SFX/FlippingPages.ogg" id="8"]
+[ext_resource type="Texture2D" uid="uid://c0ddksrq45h0n" path="res://Assets/GUI/Records/page_flip_01.png" id="6"]
+[ext_resource type="Texture2D" uid="uid://vlfdk4m42kgf" path="res://Assets/GUI/Screens/window_journal.png" id="7"]
+[ext_resource type="AudioStream" uid="uid://boi0x8i5j85to" path="res://Assets/SFX/FlippingPages.ogg" id="8"]
 [ext_resource type="StyleBox" path="res://Assets/GUI/Buttons/hover_outline_style.tres" id="9"]
-[ext_resource type="Script" path="res://Scenes/interactable_outline.gd" id="11"]
+[ext_resource type="Script" uid="uid://dvc136ufgma6s" path="res://Scenes/interactable_outline.gd" id="11"]
 [ext_resource type="Theme" path="res://Assets/Fonts/main_menu_theme.tres" id="12"]
 
-[node name="MainMenu" type="Control"]
+[node name="MainMenu" type="Control" unique_id=718313872]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -22,7 +22,7 @@ grow_vertical = 2
 theme = ExtResource("12")
 script = ExtResource("1")
 
-[node name="Background" type="TextureRect" parent="."]
+[node name="Background" type="TextureRect" parent="." unique_id=1193797113]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -33,7 +33,7 @@ texture = ExtResource("2")
 expand_mode = 1
 stretch_mode = 6
 
-[node name="CenterContainer" type="CenterContainer" parent="."]
+[node name="CenterContainer" type="CenterContainer" parent="." unique_id=379938620]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -41,21 +41,21 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="VBoxContainer" type="VBoxContainer" parent="CenterContainer"]
+[node name="VBoxContainer" type="VBoxContainer" parent="CenterContainer" unique_id=1519991201]
 layout_mode = 2
 theme_override_constants/separation = 24
 
-[node name="StartButton" type="Button" parent="CenterContainer/VBoxContainer"]
-layout_mode = 2
+[node name="StartButton" type="Button" parent="CenterContainer/VBoxContainer" unique_id=1681488663]
 custom_minimum_size = Vector2(280, 60)
+layout_mode = 2
 focus_mode = 0
 theme_override_styles/normal = ExtResource("4")
-theme_override_styles/hover = ExtResource("4")
 theme_override_styles/pressed = ExtResource("5")
+theme_override_styles/hover = ExtResource("4")
 theme_override_styles/disabled = ExtResource("4")
 text = "Start Investigating"
 
-[node name="HoverOutline" type="Panel" parent="CenterContainer/VBoxContainer/StartButton"]
+[node name="HoverOutline" type="Panel" parent="CenterContainer/VBoxContainer/StartButton" unique_id=1502928108]
 visible = false
 layout_mode = 1
 anchors_preset = 15
@@ -70,17 +70,17 @@ grow_vertical = 2
 mouse_filter = 2
 theme_override_styles/panel = ExtResource("9")
 
-[node name="RecordsButton" type="Button" parent="CenterContainer/VBoxContainer"]
-layout_mode = 2
+[node name="RecordsButton" type="Button" parent="CenterContainer/VBoxContainer" unique_id=1746853873]
 custom_minimum_size = Vector2(280, 60)
+layout_mode = 2
 focus_mode = 0
 theme_override_styles/normal = ExtResource("4")
-theme_override_styles/hover = ExtResource("4")
 theme_override_styles/pressed = ExtResource("5")
+theme_override_styles/hover = ExtResource("4")
 theme_override_styles/disabled = ExtResource("4")
 text = "Records"
 
-[node name="HoverOutline" type="Panel" parent="CenterContainer/VBoxContainer/RecordsButton"]
+[node name="HoverOutline" type="Panel" parent="CenterContainer/VBoxContainer/RecordsButton" unique_id=480678615]
 visible = false
 layout_mode = 1
 anchors_preset = 15
@@ -95,17 +95,17 @@ grow_vertical = 2
 mouse_filter = 2
 theme_override_styles/panel = ExtResource("9")
 
-[node name="ExitButton" type="Button" parent="CenterContainer/VBoxContainer"]
-layout_mode = 2
+[node name="ExitButton" type="Button" parent="CenterContainer/VBoxContainer" unique_id=961556298]
 custom_minimum_size = Vector2(280, 60)
+layout_mode = 2
 focus_mode = 0
 theme_override_styles/normal = ExtResource("4")
-theme_override_styles/hover = ExtResource("4")
 theme_override_styles/pressed = ExtResource("5")
+theme_override_styles/hover = ExtResource("4")
 theme_override_styles/disabled = ExtResource("4")
 text = "Exit"
 
-[node name="HoverOutline" type="Panel" parent="CenterContainer/VBoxContainer/ExitButton"]
+[node name="HoverOutline" type="Panel" parent="CenterContainer/VBoxContainer/ExitButton" unique_id=725619110]
 visible = false
 layout_mode = 1
 anchors_preset = 15
@@ -120,7 +120,7 @@ grow_vertical = 2
 mouse_filter = 2
 theme_override_styles/panel = ExtResource("9")
 
-[node name="SettingsButton" type="TextureButton" parent="."]
+[node name="SettingsButton" type="TextureButton" parent="." unique_id=1357986551]
 layout_mode = 1
 anchors_preset = 3
 anchor_left = 1.0
@@ -138,10 +138,10 @@ texture_normal = ExtResource("3")
 ignore_texture_size = true
 stretch_mode = 5
 
-[node name="InteractableOutline" type="Node" parent="SettingsButton"]
+[node name="InteractableOutline" type="Node" parent="SettingsButton" unique_id=508912074]
 script = ExtResource("11")
 
-[node name="RecordsScreen" type="Control" parent="."]
+[node name="RecordsScreen" type="Control" parent="." unique_id=1117396483]
 visible = false
 layout_mode = 1
 anchors_preset = 15
@@ -150,7 +150,7 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="Dim" type="ColorRect" parent="RecordsScreen"]
+[node name="Dim" type="ColorRect" parent="RecordsScreen" unique_id=990901721]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -159,7 +159,7 @@ grow_horizontal = 2
 grow_vertical = 2
 color = Color(0, 0, 0, 0.55)
 
-[node name="PageArt" type="TextureRect" parent="RecordsScreen"]
+[node name="PageArt" type="TextureRect" parent="RecordsScreen" unique_id=1400990783]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -170,7 +170,7 @@ texture = ExtResource("6")
 expand_mode = 1
 stretch_mode = 5
 
-[node name="CloseButton" type="Button" parent="RecordsScreen"]
+[node name="CloseButton" type="Button" parent="RecordsScreen" unique_id=1883347311]
 layout_mode = 1
 offset_left = 32.0
 offset_top = 28.0
@@ -179,10 +179,10 @@ offset_bottom = 66.0
 focus_mode = 0
 text = "< Return"
 
-[node name="PageFlipSFX" type="AudioStreamPlayer" parent="RecordsScreen"]
+[node name="PageFlipSFX" type="AudioStreamPlayer" parent="RecordsScreen" unique_id=2007186244]
 stream = ExtResource("8")
 
-[node name="JournalScreen" type="Control" parent="."]
+[node name="JournalScreen" type="Control" parent="." unique_id=978156159]
 visible = false
 layout_mode = 1
 anchors_preset = 15
@@ -191,7 +191,7 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="Dim" type="ColorRect" parent="JournalScreen"]
+[node name="Dim" type="ColorRect" parent="JournalScreen" unique_id=1948237742]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -200,7 +200,7 @@ grow_horizontal = 2
 grow_vertical = 2
 color = Color(0, 0, 0, 0.55)
 
-[node name="WindowArt" type="TextureRect" parent="JournalScreen"]
+[node name="WindowArt" type="TextureRect" parent="JournalScreen" unique_id=1929283251]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -211,7 +211,7 @@ texture = ExtResource("7")
 expand_mode = 1
 stretch_mode = 5
 
-[node name="CloseButton" type="Button" parent="JournalScreen"]
+[node name="CloseButton" type="Button" parent="JournalScreen" unique_id=871591866]
 layout_mode = 1
 offset_left = 32.0
 offset_top = 28.0
