@@ -1,0 +1,35 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://Scenes/Records/outcome_slot.gd" id="1_outcome_slot"]
+[ext_resource type="Texture2D" path="res://Assets/Agents/loyalist_locked_default.svg" id="2_default_icon"]
+
+[node name="OutcomeSlot" type="VBoxContainer"]
+custom_minimum_size = Vector2(72, 90)
+script = ExtResource("1_outcome_slot")
+theme_override_constants/separation = 6
+
+[node name="Icon" type="TextureRect" parent="."]
+custom_minimum_size = Vector2(72, 72)
+layout_mode = 2
+texture = ExtResource("2_default_icon")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Button" type="Button" parent="Icon"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+focus_mode = 0
+flat = true
+text = ""
+
+[node name="StatusLabel" type="Label" parent="."]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.24, 0.21, 0.18, 1)
+theme_override_font_sizes/font_size = 9
+horizontal_alignment = 1
+autowrap_mode = 2
+text = "NOT YET FILED"

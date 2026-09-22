@@ -18,6 +18,7 @@ config/icon="res://Assets/Images/icon.svg"
 [autoload]
 
 GameScore="*res://Scenes/game_score.gd"
+OutcomeRecord="*res://Scenes/outcome_record.gd"
 
 [display]
 

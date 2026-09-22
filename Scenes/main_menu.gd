@@ -11,7 +11,7 @@ const GAME_SCENE_PATH := "res://Root/main.tscn"
 @onready var settings_button: TextureButton = $SettingsButton
 @onready var settings_outline: InteractableOutline = $SettingsButton/InteractableOutline
 
-@onready var records_screen: Control = $RecordsScreen
+@onready var records_screen: RecordsScreen = $RecordsScreen
 @onready var records_close_button: Button = $RecordsScreen/CloseButton
 @onready var page_flip_sfx: AudioStreamPlayer = $RecordsScreen/PageFlipSFX
 
@@ -51,7 +51,7 @@ func _on_exit_pressed() -> void:
 
 
 func _on_records_pressed() -> void:
-	# TODO: placeholder screen/template for the real Record of Outcomes screen
+	records_screen.refresh()
 	records_screen.visible = true
 	page_flip_sfx.play()
 

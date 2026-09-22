@@ -112,6 +112,7 @@ func _finish_current_shift() -> void:
 func _present_ending() -> void:
 	shift_screen.dismiss()
 	var ending_id := GameScore.evaluate_ending()
+	OutcomeRecord.file_ending(ending_id)
 	print("Run complete | accuracy: ", GameScore.accuracy, " paranoia: ", GameScore.paranoia, " -> ", ending_id)
 	var ending_scene: PackedScene = ENDING_SCENES.get(ending_id)
 	if ending_scene == null:
