@@ -57,11 +57,12 @@ func spawn_case(case_data: CaseData) -> void:
 func _open_document(file: FileEntity) -> void:
 	active_file = file
 	file.set_interaction_enabled(false)
-	document_viewer.open(file.case_data)
+	document_viewer.open(file.case_data, file.ink_image)
 
 
-func _on_document_closed(redaction_result: Dictionary) -> void:
+func _on_document_closed(redaction_result: Dictionary, ink_image: Image) -> void:
 	if is_instance_valid(active_file):
+		active_file.ink_image = ink_image
 		active_file.set_redaction_result(redaction_result)
 		active_file.set_interaction_enabled(true)
 	active_file = null
