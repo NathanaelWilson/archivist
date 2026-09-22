@@ -2,9 +2,12 @@ extends Control
 
 const GAME_SCENE_PATH := "res://Root/main.tscn"
 
-@onready var start_button: Button = $CenterContainer/VBoxContainer/StartButton
-@onready var exit_button: Button = $CenterContainer/VBoxContainer/ExitButton
-@onready var records_button: Button = $CenterContainer/VBoxContainer/RecordsButton
+@onready var start_button: TextureButton = $CenterContainer/MarginTop/ButtonRow/StartButton
+@onready var start_outline: InteractableOutline = $CenterContainer/MarginTop/ButtonRow/StartButton/InteractableOutline
+@onready var records_button: TextureButton = $CenterContainer/MarginTop/ButtonRow/RecordsButton
+@onready var records_outline: InteractableOutline = $CenterContainer/MarginTop/ButtonRow/RecordsButton/InteractableOutline
+@onready var exit_button: TextureButton = $ExitButton
+@onready var exit_outline: InteractableOutline = $ExitButton/InteractableOutline
 @onready var settings_button: TextureButton = $SettingsButton
 @onready var settings_outline: InteractableOutline = $SettingsButton/InteractableOutline
 
@@ -25,19 +28,18 @@ func _ready() -> void:
 	records_close_button.pressed.connect(_on_records_close_pressed)
 	journal_close_button.pressed.connect(_on_journal_close_pressed)
 
-	_setup_hover_outline(start_button, start_button.get_node("HoverOutline"))
-	_setup_hover_outline(exit_button, exit_button.get_node("HoverOutline"))
-	_setup_hover_outline(records_button, records_button.get_node("HoverOutline"))
+	# all four buttons are illustrations with real silhouettes now, so they
+	# all share the same alpha-based outline shader via InteractableOutline
+	# (Start/Records use a white outline_color, Exit/Settings use the default gold)
+	_wire_outline(start_button, start_outline)
+	_wire_outline(records_button, records_outline)
+	_wire_outline(exit_button, exit_outline)
+	_wire_outline(settings_button, settings_outline)
 
-	# the gear's icon has a real silhouette (teeth, center hole), so it uses
-	# the alpha-based outline shader instead of a bounding-box panel
-	settings_button.mouse_entered.connect(func(): settings_outline.show_outline(true))
-	settings_button.mouse_exited.connect(func(): settings_outline.show_outline(false))
 
-
-func _setup_hover_outline(control: Control, outline: Control) -> void:
-	control.mouse_entered.connect(func(): outline.visible = true)
-	control.mouse_exited.connect(func(): outline.visible = false)
+func _wire_outline(control: Control, outline: InteractableOutline) -> void:
+	control.mouse_entered.connect(func(): outline.show_outline(true))
+	control.mouse_exited.connect(func(): outline.show_outline(false))
 
 
 func _on_start_pressed() -> void:
