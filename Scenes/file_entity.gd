@@ -40,6 +40,9 @@ var _touch_start_pos: Vector2 = Vector2.ZERO
 var _hold_timer_id: int = 0
 var _interaction_enabled := true
 var _redaction_result: Dictionary = {"is_valid": false, "reason": "Document has not been checked."}
+## Ink the player has put on this document, kept while the viewer is closed.
+## null until the document is opened and closed for the first time.
+var ink_image: Image
 
 
 func _ready() -> void:

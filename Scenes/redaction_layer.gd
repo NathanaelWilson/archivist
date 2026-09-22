@@ -36,9 +36,21 @@ func _ready() -> void:
 
 ## canvas_size is the document's on-screen size; DocumentViewer passes the
 ## size it fitted the case art to so ink, anomaly mask and art stay aligned.
-func set_case_data(new_case_data: CaseData, canvas_size: Vector2i = IMG_SIZE) -> void:
+## saved_ink restores ink the player already put on this document.
+func set_case_data(new_case_data: CaseData, canvas_size: Vector2i = IMG_SIZE, saved_ink: Image = null) -> void:
 	case_data = new_case_data
 	_create_canvases(canvas_size)
+	if saved_ink != null and not saved_ink.is_empty():
+		ink_image = saved_ink.duplicate()
+		if ink_image.get_size() != canvas_size:
+			ink_image.resize(canvas_size.x, canvas_size.y, Image.INTERPOLATE_NEAREST)
+		(texture as ImageTexture).set_image(ink_image)
+		evaluate_redaction() # refresh the debug colour for the restored ink
+
+
+## A copy of the current ink, for the document to keep while it is closed.
+func get_ink_image() -> Image:
+	return ink_image.duplicate()
 
 
 func clear_ink() -> void:
