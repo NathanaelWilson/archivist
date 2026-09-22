@@ -6,6 +6,17 @@ extends Node2D
 const FILE_ENTITY_SCENE := preload("res://Scenes/file_entity.tscn")
 const FILING_TRAY_SCENE := preload("res://Scenes/filing_tray.tscn")
 
+## One scene per Record-of-Outcomes ending (Scenes/Endings/). Keyed by the
+## same StringName ids GameScore.evaluate_ending() returns.
+const ENDING_SCENES := {
+	&"loyalist": preload("res://Scenes/Endings/ending_loyalist.tscn"),
+	&"liability": preload("res://Scenes/Endings/ending_liability.tscn"),
+	&"paranoid": preload("res://Scenes/Endings/ending_paranoid.tscn"),
+	&"zealot": preload("res://Scenes/Endings/ending_zealot.tscn"),
+}
+
+const MAIN_MENU_SCENE_PATH := "res://Scenes/main_menu.tscn"
+
 @export var shifts: Array[ShiftData] = []
 
 @onready var document_viewer: DocumentViewer = $DocumentViewer
@@ -16,6 +27,7 @@ var _case_index := 0
 
 
 func _ready() -> void:
+	GameScore.reset()
 	_spawn_trays()
 	document_viewer.closed.connect(_on_document_closed)
 	shift_screen.begin_requested.connect(_begin_current_shift)
@@ -24,7 +36,7 @@ func _ready() -> void:
 
 func _show_current_shift() -> void:
 	if _shift_index >= shifts.size():
-		shift_screen.present_complete()
+		_present_ending()
 		return
 	shift_screen.present_shift(shifts[_shift_index], _shift_index + 1, shifts.size())
 
@@ -80,9 +92,11 @@ func _spawn_trays() -> void:
 func _on_file_filed(tray_type: int, redaction_result: Dictionary, case_data: CaseData) -> void:
 	var correct_tray: bool = tray_type == case_data.correct_tray
 	var redaction_passed: bool = bool(redaction_result.get("is_valid", false))
+	GameScore.register_case_result(case_data, tray_type, redaction_result)
 	print("Filed ", case_data.id, " | tray correct: ", correct_tray, " | redaction correct: ", redaction_passed,
 		" | ", redaction_result.get("reason", ""),
-		" (coverage %.0f%%, overspill %.0f%%)" % [float(redaction_result.get("coverage", 0.0)) * 100.0, float(redaction_result.get("overspill", 0.0)) * 100.0])
+		" (coverage %.0f%%, overspill %.0f%%)" % [float(redaction_result.get("coverage", 0.0)) * 100.0, float(redaction_result.get("overspill", 0.0)) * 100.0],
+		" | accuracy: ", GameScore.accuracy, " paranoia: ", GameScore.paranoia)
 	_case_index += 1
 	# The document finishes its filing tween before the next one is spawned.
 	call_deferred("_spawn_next_case")
@@ -91,3 +105,19 @@ func _on_file_filed(tray_type: int, redaction_result: Dictionary, case_data: Cas
 func _finish_current_shift() -> void:
 	_shift_index += 1
 	_show_current_shift()
+
+
+## Reads GameScore's tally, picks the matching Record-of-Outcomes ending
+## scene, and shows it in place of the old generic "SHIFT COMPLETE" screen.
+func _present_ending() -> void:
+	shift_screen.dismiss()
+	var ending_id := GameScore.evaluate_ending()
+	print("Run complete | accuracy: ", GameScore.accuracy, " paranoia: ", GameScore.paranoia, " -> ", ending_id)
+	var ending_scene: PackedScene = ENDING_SCENES.get(ending_id)
+	if ending_scene == null:
+		push_warning("No ending scene registered for id: %s" % ending_id)
+		return
+	var ending: EndingScreen = ending_scene.instantiate()
+	add_child(ending)
+	ending.clocked_out.connect(func(): get_tree().change_scene_to_file(MAIN_MENU_SCENE_PATH))
+	ending.present()

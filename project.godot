@@ -12,8 +12,12 @@ config_version=5
 
 config/name="Archivist"
 run/main_scene="res://Scenes/main_menu.tscn"
-config/features=PackedStringArray("4.6", "Mobile")
+config/features=PackedStringArray("4.7", "Mobile")
 config/icon="res://Assets/Images/icon.svg"
+
+[autoload]
+
+GameScore="*res://Scenes/game_score.gd"
 
 [display]
 
