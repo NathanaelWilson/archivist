@@ -1,16 +1,17 @@
-[gd_scene load_steps=6 format=3 uid="uid://dkmnbuc0ob0ua"]
+[gd_scene format=3 uid="uid://dkmnbuc0ob0ua"]
 
-[ext_resource type="Script" path="res://Root/main.gd" id="1_main"]
-[ext_resource type="Resource" path="res://Assets/Shifts/shift_01.tres" id="2_shift_01"]
+[ext_resource type="Script" uid="uid://dcw036o4m46ju" path="res://Root/main.gd" id="1_main"]
+[ext_resource type="Script" uid="uid://cvc4kljkh5fmu" path="res://Scenes/shift_data.gd" id="2_ro5j4"]
+[ext_resource type="Resource" uid="uid://cm0difdnr8uen" path="res://Assets/Shifts/shift_01.tres" id="2_shift_01"]
 [ext_resource type="Resource" path="res://Assets/Shifts/shift_02.tres" id="3_shift_02"]
 [ext_resource type="Resource" path="res://Assets/Shifts/shift_03.tres" id="4_shift_03"]
 [ext_resource type="PackedScene" path="res://Scenes/document_viewer.tscn" id="5_document_viewer"]
-[ext_resource type="PackedScene" path="res://Scenes/shift_screen.tscn" id="6_shift_screen"]
+[ext_resource type="PackedScene" uid="uid://citvx2uyr8itb" path="res://Scenes/shift_screen.tscn" id="6_shift_screen"]
 
-[node name="Main" type="Node2D"]
+[node name="Main" type="Node2D" unique_id=1907770346]
 script = ExtResource("1_main")
-shifts = Array[Resource]([ExtResource("2_shift_01"), ExtResource("3_shift_02"), ExtResource("4_shift_03")])
+shifts = Array[ExtResource("2_ro5j4")]([ExtResource("2_shift_01"), ExtResource("3_shift_02"), ExtResource("4_shift_03")])
 
-[node name="DocumentViewer" parent="." instance=ExtResource("5_document_viewer")]
+[node name="DocumentViewer" parent="." unique_id=866617788 instance=ExtResource("5_document_viewer")]
 
-[node name="ShiftScreen" parent="." instance=ExtResource("6_shift_screen")]
+[node name="ShiftScreen" parent="." unique_id=1104705691 instance=ExtResource("6_shift_screen")]

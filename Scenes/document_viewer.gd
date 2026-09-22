@@ -4,7 +4,9 @@ extends CanvasLayer
 ## Full-screen document view. While visible, this is the only node that
 ## receives document strokes; the desk paper is disabled by Main.
 
-signal closed(redaction_result: Dictionary)
+## ink_image is a copy of the ink on the page, so the file can keep it and
+## hand it back the next time it is opened.
+signal closed(redaction_result: Dictionary, ink_image: Image)
 
 ## Space kept clear between the document and the screen edges, in viewport
 ## pixels. The document is also kept clear of the Close button on the left
@@ -28,7 +30,7 @@ func _ready() -> void:
 	visible = false
 
 
-func open(new_case_data: CaseData) -> void:
+func open(new_case_data: CaseData, saved_ink: Image = null) -> void:
 	case_data = new_case_data
 	var viewport_size := get_viewport().get_visible_rect().size
 	backdrop.size = viewport_size
@@ -37,7 +39,7 @@ func open(new_case_data: CaseData) -> void:
 	_document_size = _fit_document(viewport_size)
 	paper.position = -_document_size * 0.5
 	paper.size = _document_size
-	redaction.set_case_data(case_data, Vector2i(_document_size))
+	redaction.set_case_data(case_data, Vector2i(_document_size), saved_ink)
 	visible = true
 
 
@@ -66,7 +68,7 @@ func close() -> void:
 		return
 	_inking = false
 	visible = false
-	closed.emit(redaction.evaluate_redaction())
+	closed.emit(redaction.evaluate_redaction(), redaction.get_ink_image())
 
 
 func _unhandled_input(event: InputEvent) -> void:
