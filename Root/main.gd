@@ -17,6 +17,28 @@ const ENDING_SCENES := {
 
 const MAIN_MENU_SCENE_PATH := "res://Scenes/main_menu.tscn"
 
+
+const CLIPBOARD_BOARDS := {
+	&"A": preload("res://Scenes/clipboard_boards/a.tres"),
+	&"A2": preload("res://Scenes/clipboard_boards/a2.tres"),
+	&"B": preload("res://Scenes/clipboard_boards/b.tres"),
+	&"B2": preload("res://Scenes/clipboard_boards/b2.tres"),
+	&"C": preload("res://Scenes/clipboard_boards/c.tres"),
+	&"C2": preload("res://Scenes/clipboard_boards/c2.tres"),
+}
+
+## Per shift: [board before swap, board after swap, case index when the swap
+## fires]. Case index is shift-relative and matches _case_index, so a swap
+## at index N means every case below N uses the first board and N onward
+## uses the second. Fire points come from the GDD: Shift One swaps before
+## case 4, Shift Two before case 8, Shift Three before case 11.
+const BOARD_PLAN := [
+	[&"A", &"A2", 3],
+	[&"B", &"B2", 2],
+	[&"C", &"C2", 1],
+]
+
+
 @export var shifts: Array[ShiftData] = []
 ## Random atmosphere sounds: each plays again after a random wait in its range.
 @export var knock_min_sec := 35.0
@@ -52,6 +74,16 @@ func _show_current_shift() -> void:
 		_present_ending()
 		return
 	shift_screen.present_shift(shifts[_shift_index], _shift_index + 1, shifts.size())
+	
+	
+## Which clipboard board is live right now. Called lazily by the clipboard
+## UI when the player lifts it. Returns null past the last shift.
+func get_active_board() -> ClipboardBoard:
+	if _shift_index >= BOARD_PLAN.size():
+		return null
+	var plan: Array = BOARD_PLAN[_shift_index]
+	var board_id: StringName = plan[0] if _case_index < plan[2] else plan[1]
+	return CLIPBOARD_BOARDS.get(board_id)
 
 
 func _begin_current_shift() -> void:

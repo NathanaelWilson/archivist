@@ -1,0 +1,9 @@
+[gd_resource type="Resource" script_class="ClipboardBoard" format=3 uid="uid://iq661nuofnci"]
+
+[ext_resource type="Script" uid="uid://b15dnmj1xcu7s" path="res://Scenes/clipboard_board.gd" id="1_xlivk"]
+
+[resource]
+script = ExtResource("1_xlivk")
+id = &"C2"
+notice_text = "READ THIS BOARD BEFORE EVERY FILE.\\nIT HAS BEEN READING YOU.\\n\\nYou have been watched. Keep working."
+metadata/_custom_type_script = "uid://b15dnmj1xcu7s"
