@@ -1,17 +1,17 @@
-[gd_scene format=3 uid="uid://dsdeqwfvpkl36"]
+[gd_scene format=3 uid="uid://c83ej1051d6vr"]
 
 [ext_resource type="Script" uid="uid://cpx3fbcj52r6k" path="res://Scenes/main_menu.gd" id="1"]
 [ext_resource type="Texture2D" uid="uid://cenp6uxk5h1im" path="res://Assets/GUI/gear.png" id="3"]
 [ext_resource type="Texture2D" uid="uid://cdjr1k85r1rhl" path="res://Assets/Images/Background/menu-bg.jpg" id="3_vr1f0"]
+[ext_resource type="Texture2D" uid="uid://c0ddksrq45h0n" path="res://Assets/GUI/Records/page_flip_01.png" id="6"]
 [ext_resource type="Texture2D" uid="uid://vlfdk4m42kgf" path="res://Assets/GUI/Screens/window_journal.png" id="7"]
 [ext_resource type="AudioStream" uid="uid://boi0x8i5j85to" path="res://Assets/SFX/FlippingPages.ogg" id="8"]
 [ext_resource type="Script" uid="uid://dvc136ufgma6s" path="res://Scenes/interactable_outline.gd" id="11"]
 [ext_resource type="Theme" path="res://Assets/Fonts/main_menu_theme.tres" id="12"]
-[ext_resource type="Texture2D" uid="uid://c0ddksrq45h0n" path="res://Assets/GUI/Records/page_flip_01.png" id="6"]
 [ext_resource type="Texture2D" uid="uid://cvsc4a3k1fdu0" path="res://Assets/GUI/Buttons/Case_Profile.png" id="13"]
 [ext_resource type="Texture2D" uid="uid://cjb8n4rpqojiv" path="res://Assets/GUI/Buttons/Record_of_Outcomes.png" id="14"]
 [ext_resource type="Texture2D" uid="uid://dn1w7ipuwfkya" path="res://Assets/GUI/exitRight.png" id="15"]
-[ext_resource type="Script" path="res://Scenes/records_screen.gd" id="16"]
+[ext_resource type="Script" uid="uid://cclbq85god4ll" path="res://Scenes/records_screen.gd" id="16"]
 [ext_resource type="PackedScene" path="res://Scenes/Records/outcome_slot.tscn" id="17"]
 
 [sub_resource type="StyleBoxEmpty" id="StyleBox_transparent"]
@@ -136,7 +136,7 @@ grow_horizontal = 2
 grow_vertical = 2
 color = Color(0, 0, 0, 0.55)
 
-[node name="PageArt" type="TextureRect" parent="RecordsScreen"]
+[node name="PageArt" type="TextureRect" parent="RecordsScreen" unique_id=273177719]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -147,7 +147,7 @@ texture = ExtResource("6")
 expand_mode = 1
 stretch_mode = 5
 
-[node name="BookSpread" type="CenterContainer" parent="RecordsScreen"]
+[node name="BookSpread" type="CenterContainer" parent="RecordsScreen" unique_id=818904515]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -155,81 +155,81 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="Pages" type="HBoxContainer" parent="RecordsScreen/BookSpread"]
+[node name="Pages" type="HBoxContainer" parent="RecordsScreen/BookSpread" unique_id=677270286]
 layout_mode = 2
 theme_override_constants/separation = 23
 
-[node name="LeftPage" type="PanelContainer" parent="RecordsScreen/BookSpread/Pages"]
+[node name="LeftPage" type="PanelContainer" parent="RecordsScreen/BookSpread/Pages" unique_id=1530824154]
 custom_minimum_size = Vector2(258, 360)
 layout_mode = 2
 theme_override_styles/panel = SubResource("StyleBox_transparent")
 
-[node name="Margin" type="MarginContainer" parent="RecordsScreen/BookSpread/Pages/LeftPage"]
+[node name="Margin" type="MarginContainer" parent="RecordsScreen/BookSpread/Pages/LeftPage" unique_id=936410170]
 layout_mode = 2
 theme_override_constants/margin_left = 16
 theme_override_constants/margin_top = 46
 theme_override_constants/margin_right = 16
 theme_override_constants/margin_bottom = 16
 
-[node name="Content" type="VBoxContainer" parent="RecordsScreen/BookSpread/Pages/LeftPage/Margin"]
+[node name="Content" type="VBoxContainer" parent="RecordsScreen/BookSpread/Pages/LeftPage/Margin" unique_id=1890680715]
 layout_mode = 2
 theme_override_constants/separation = 14
 
-[node name="LeftTitle" type="Label" parent="RecordsScreen/BookSpread/Pages/LeftPage/Margin/Content"]
+[node name="LeftTitle" type="Label" parent="RecordsScreen/BookSpread/Pages/LeftPage/Margin/Content" unique_id=858466753]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.098, 0.082, 0.071, 1)
 theme_override_font_sizes/font_size = 21
-autowrap_mode = 2
 text = "Record of Outcomes"
+autowrap_mode = 2
 
-[node name="LeftBody" type="Label" parent="RecordsScreen/BookSpread/Pages/LeftPage/Margin/Content"]
+[node name="LeftBody" type="Label" parent="RecordsScreen/BookSpread/Pages/LeftPage/Margin/Content" unique_id=834205395]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.24, 0.21, 0.18, 1)
 theme_override_font_sizes/font_size = 15
 autowrap_mode = 2
 
-[node name="RightPage" type="PanelContainer" parent="RecordsScreen/BookSpread/Pages"]
+[node name="RightPage" type="PanelContainer" parent="RecordsScreen/BookSpread/Pages" unique_id=190263107]
 custom_minimum_size = Vector2(258, 360)
 layout_mode = 2
 theme_override_styles/panel = SubResource("StyleBox_transparent")
 
-[node name="Margin" type="MarginContainer" parent="RecordsScreen/BookSpread/Pages/RightPage"]
+[node name="Margin" type="MarginContainer" parent="RecordsScreen/BookSpread/Pages/RightPage" unique_id=2047197229]
 layout_mode = 2
 theme_override_constants/margin_left = 10
 theme_override_constants/margin_top = 46
 theme_override_constants/margin_right = 10
 theme_override_constants/margin_bottom = 10
 
-[node name="Content" type="VBoxContainer" parent="RecordsScreen/BookSpread/Pages/RightPage/Margin"]
+[node name="Content" type="VBoxContainer" parent="RecordsScreen/BookSpread/Pages/RightPage/Margin" unique_id=1079947270]
 layout_mode = 2
 theme_override_constants/separation = 12
 
-[node name="FiledCountHeader" type="Label" parent="RecordsScreen/BookSpread/Pages/RightPage/Margin/Content"]
+[node name="FiledCountHeader" type="Label" parent="RecordsScreen/BookSpread/Pages/RightPage/Margin/Content" unique_id=531274081]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.098, 0.082, 0.071, 1)
 theme_override_font_sizes/font_size = 15
-horizontal_alignment = 2
 text = "0 OF 4 FILED"
+horizontal_alignment = 2
 
-[node name="Grid" type="GridContainer" parent="RecordsScreen/BookSpread/Pages/RightPage/Margin/Content"]
+[node name="Grid" type="GridContainer" parent="RecordsScreen/BookSpread/Pages/RightPage/Margin/Content" unique_id=528094632]
 layout_mode = 2
 theme_override_constants/h_separation = 10
 theme_override_constants/v_separation = 8
 columns = 3
 
-[node name="Loyalist" parent="RecordsScreen/BookSpread/Pages/RightPage/Margin/Content/Grid" instance=ExtResource("17")]
+[node name="Loyalist" parent="RecordsScreen/BookSpread/Pages/RightPage/Margin/Content/Grid" unique_id=363240129 instance=ExtResource("17")]
 layout_mode = 2
 ending_id = &"loyalist"
 
-[node name="Liability" parent="RecordsScreen/BookSpread/Pages/RightPage/Margin/Content/Grid" instance=ExtResource("17")]
+[node name="Liability" parent="RecordsScreen/BookSpread/Pages/RightPage/Margin/Content/Grid" unique_id=1184733062 instance=ExtResource("17")]
 layout_mode = 2
 ending_id = &"liability"
 
-[node name="Paranoid" parent="RecordsScreen/BookSpread/Pages/RightPage/Margin/Content/Grid" instance=ExtResource("17")]
+[node name="Paranoid" parent="RecordsScreen/BookSpread/Pages/RightPage/Margin/Content/Grid" unique_id=1429275696 instance=ExtResource("17")]
 layout_mode = 2
 ending_id = &"paranoid"
 
-[node name="Zealot" parent="RecordsScreen/BookSpread/Pages/RightPage/Margin/Content/Grid" instance=ExtResource("17")]
+[node name="Zealot" parent="RecordsScreen/BookSpread/Pages/RightPage/Margin/Content/Grid" unique_id=2120126365 instance=ExtResource("17")]
 layout_mode = 2
 ending_id = &"zealot"
 

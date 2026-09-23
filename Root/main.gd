@@ -94,6 +94,7 @@ func _on_file_filed(tray_type: int, redaction_result: Dictionary, case_data: Cas
 	var correct_tray: bool = tray_type == case_data.correct_tray
 	var redaction_passed: bool = bool(redaction_result.get("is_valid", false))
 	GameScore.register_case_result(case_data, tray_type, redaction_result)
+	FilingLog.record_filing(case_data, tray_type, redaction_result)
 	print("Filed ", case_data.id, " | tray correct: ", correct_tray, " | redaction correct: ", redaction_passed,
 		" | ", redaction_result.get("reason", ""),
 		" (coverage %.0f%%, overspill %.0f%%)" % [float(redaction_result.get("coverage", 0.0)) * 100.0, float(redaction_result.get("overspill", 0.0)) * 100.0],
@@ -101,6 +102,8 @@ func _on_file_filed(tray_type: int, redaction_result: Dictionary, case_data: Cas
 	_case_index += 1
 	# The document finishes its filing tween before the next one is spawned.
 	call_deferred("_spawn_next_case")
+
+
 
 
 func _finish_current_shift() -> void:
