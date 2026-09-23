@@ -1,7 +1,7 @@
 [gd_scene format=3 uid="uid://bf4ub55ailomj"]
 
 [ext_resource type="Script" uid="uid://d1wp08ifth0k2" path="res://Scenes/redaction_box.gd" id="1_box"]
-[ext_resource type="Resource" uid="uid://bnsavybtk1qqe" path="res://Assets/Cases/case_01.tres" id="2_case"]
+[ext_resource type="Resource" uid="uid://bnsavybtk1qqe" path="res://Resources/Cases/case_01.tres" id="2_case"]
 [ext_resource type="Texture2D" uid="uid://dbegv1prp1ucg" path="res://Assets/Images/Cases/Case_1.png" id="3_image"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape_safe_zone"]

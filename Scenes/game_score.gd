@@ -63,7 +63,11 @@ func add_paranoia(amount: int = 1) -> void:
 ##   Paranoia — +1 per case where any ink landed outside the anomaly/safe
 ##              zones, +2 extra for incinerating a case that was clean all along.
 func register_case_result(case_data: CaseData, tray_type: int, redaction_result: Dictionary) -> void:
-	var correct_tray: bool = tray_type == case_data.correct_tray
+	# A case whose correct_tray is ANY has no right or wrong drawer: the tray
+	# the player picked earns no Accuracy and costs no Paranoia either way.
+	# Its redaction is still scored like any other case.
+	var tray_matters: bool = not FilingTray.is_wildcard(case_data.correct_tray)
+	var correct_tray: bool = tray_matters and tray_type == case_data.correct_tray
 	var redaction_passed: bool = bool(redaction_result.get("is_valid", false))
 	var overspill: float = float(redaction_result.get("overspill", 0.0))
 
@@ -74,7 +78,7 @@ func register_case_result(case_data: CaseData, tray_type: int, redaction_result:
 
 	if overspill > 0.0:
 		add_paranoia(1)
-	if case_data.level == CaseData.Level.CLEAN and tray_type == FilingTray.TrayType.INCINERATOR:
+	if tray_matters and case_data.level == CaseData.Level.CLEAN and tray_type == FilingTray.TrayType.INCINERATOR:
 		add_paranoia(2)
 
 

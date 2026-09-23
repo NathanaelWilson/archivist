@@ -129,15 +129,17 @@ func _on_document_closed(redaction_result: Dictionary, ink_image: Image) -> void
 func _spawn_trays() -> void:
 	var viewport_size := get_viewport_rect().size
 	var tray_x := viewport_size.x * 0.82
-	for type in FilingTray.TrayType.values():
+	# ANY is a case-side marker, not a drawer, so it is not spawned here.
+	for index in FilingTray.SPAWNED_TRAY_TYPES.size():
+		var type: int = FilingTray.SPAWNED_TRAY_TYPES[index]
 		var tray: FilingTray = FILING_TRAY_SCENE.instantiate()
 		tray.tray_type = type
-		tray.position = Vector2(tray_x, viewport_size.y * (0.25 + 0.25 * type))
+		tray.position = Vector2(tray_x, viewport_size.y * (0.25 + 0.25 * index))
 		add_child(tray)
 
 
 func _on_file_filed(tray_type: int, redaction_result: Dictionary, case_data: CaseData) -> void:
-	var correct_tray: bool = tray_type == case_data.correct_tray
+	var correct_tray: bool = FilingTray.is_wildcard(case_data.correct_tray) or tray_type == case_data.correct_tray
 	var redaction_passed: bool = bool(redaction_result.get("is_valid", false))
 	GameScore.register_case_result(case_data, tray_type, redaction_result)
 	FilingLog.record_filing(case_data, tray_type, redaction_result)

@@ -12,7 +12,7 @@ config_version=5
 
 config/name="Archivist"
 run/main_scene="res://Scenes/main_menu.tscn"
-config/features=PackedStringArray("4.7", "Mobile")
+config/features=PackedStringArray("4.6", "Mobile")
 config/icon="res://Assets/Images/icon.svg"
 
 [autoload]
@@ -35,7 +35,7 @@ window/handheld/orientation="landscape"
 [file_customization]
 
 folder_colors={
-"res://Assets/Cases/": "red"
+"res://Resources/Cases/": "red"
 }
 
 [input]

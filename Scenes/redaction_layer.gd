@@ -40,8 +40,9 @@ func _ready() -> void:
 func set_case_data(new_case_data: CaseData, canvas_size: Vector2i = IMG_SIZE, saved_ink: Image = null) -> void:
 	case_data = new_case_data
 	_create_canvases(canvas_size)
-	if saved_ink != null and not saved_ink.is_empty():
-		ink_image = saved_ink.duplicate()
+	if saved_ink != null and not saved_ink.is_empty() and saved_ink.get_format() == Image.FORMAT_RGBA8:
+		# duplicate() is typed Resource, so the cast is needed to assign it.
+		ink_image = saved_ink.duplicate() as Image
 		if ink_image.get_size() != canvas_size:
 			ink_image.resize(canvas_size.x, canvas_size.y, Image.INTERPOLATE_NEAREST)
 		(texture as ImageTexture).set_image(ink_image)
@@ -50,7 +51,9 @@ func set_case_data(new_case_data: CaseData, canvas_size: Vector2i = IMG_SIZE, sa
 
 ## A copy of the current ink, for the document to keep while it is closed.
 func get_ink_image() -> Image:
-	return ink_image.duplicate()
+	if ink_image == null:
+		return null
+	return ink_image.duplicate() as Image
 
 
 func clear_ink() -> void:
@@ -79,7 +82,9 @@ func end_stroke() -> Dictionary:
 func evaluate_redaction() -> Dictionary:
 	if case_data == null:
 		return {"is_valid": false, "reason": "No case data is assigned."}
-	if case_data.anomaly_regions.is_empty():
+	# A Public Archive case (and any case with no anomaly authored) must be
+	# filed exactly as it arrived: any ink at all fails it.
+	if not case_data.requires_redaction() or case_data.anomaly_regions.is_empty():
 		var clean_ink_pixels := 0
 		for y in ink_image.get_height():
 			for x in ink_image.get_width():
@@ -87,6 +92,7 @@ func evaluate_redaction() -> Dictionary:
 					clean_ink_pixels += 1
 		var clean_result := {
 			"is_valid": clean_ink_pixels == 0,
+			"reason": "OK" if clean_ink_pixels == 0 else "This document needs no redaction — remove the ink.",
 			"coverage": 1.0,
 			"overspill": 0.0 if clean_ink_pixels == 0 else 1.0,
 			"required_pixels": 0,

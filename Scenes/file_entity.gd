@@ -39,6 +39,7 @@ var _pending: bool = false
 var _touch_start_pos: Vector2 = Vector2.ZERO
 var _hold_timer_id: int = 0
 var _interaction_enabled := true
+var _hover_tray: FilingTray
 var _redaction_result: Dictionary = {"is_valid": false, "reason": "Document has not been checked."}
 ## Ink the player has put on this document, kept while the viewer is closed.
 ## null until the document is opened and closed for the first time.
@@ -118,16 +119,21 @@ func _on_hold_elapsed(timer_id: int) -> void:
 func _move_touch(screen_pos: Vector2) -> void:
 	if _state == State.HELD:
 		_drag_to(screen_pos)
+		_set_hover_tray(_tray_at(screen_pos))
 
 
 func _end_touch(screen_pos: Vector2) -> void:
+	var was_tap_on_paper := _pending and _contains_point(screen_pos)
 	_pending = false
 	_hold_timer_id += 1 # invalidate any pending hold timer
 	match _state:
 		State.HELD:
 			_try_drop(screen_pos)
 		State.RESTING:
-			open_requested.emit()
+			# Only a tap that both started and ended on the paper opens it —
+			# a tap anywhere else on the desk is not meant for this document.
+			if was_tap_on_paper:
+				open_requested.emit()
 
 
 func _contains_point(screen_pos: Vector2) -> bool:
@@ -160,19 +166,38 @@ func _drag_to(screen_pos: Vector2) -> void:
 	rotation = deg_to_rad(max_tilt_deg) * tilt_t
 
 
-func _try_drop(_screen_pos: Vector2) -> void:
-	var tray := _first_overlapping_tray()
+func _try_drop(screen_pos: Vector2) -> void:
+	_set_hover_tray(null)
+	var tray := _tray_at(screen_pos)
 	if tray:
 		_commit_to_tray(tray)
 	else:
 		_return_to_desk()
 
 
-func _first_overlapping_tray() -> FilingTray:
+## The tray the player is pointing at. The paper is taller than the gap
+## between trays, so it usually overlaps all three at once — the overlap list
+## alone would pick an arbitrary one. The pointer is what decides.
+func _tray_at(screen_pos: Vector2) -> FilingTray:
+	var best: FilingTray = null
+	var best_distance := INF
 	for area in get_overlapping_areas():
 		if area is FilingTray:
-			return area
-	return null
+			var distance: float = area.global_position.distance_to(screen_pos)
+			if distance < best_distance:
+				best_distance = distance
+				best = area
+	return best
+
+
+func _set_hover_tray(tray: FilingTray) -> void:
+	if tray == _hover_tray:
+		return
+	if is_instance_valid(_hover_tray):
+		_hover_tray.set_hovered(false)
+	_hover_tray = tray
+	if is_instance_valid(_hover_tray):
+		_hover_tray.set_hovered(true)
 
 
 func _commit_to_tray(tray: FilingTray) -> void:
@@ -202,6 +227,7 @@ func _filing_sound(tray_type: int) -> StringName:
 
 
 func _return_to_desk() -> void:
+	_set_hover_tray(null)
 	_state = State.RESTING
 	SFX.play(&"file_return")
 	z_index = 0

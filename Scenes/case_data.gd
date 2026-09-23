@@ -1,3 +1,4 @@
+@tool
 class_name CaseData
 extends Resource
 
@@ -7,11 +8,20 @@ extends Resource
 ## special-case a specific case by id.
 
 enum DocType { PORTRAIT, FORM, RECORD_SHEET }
-enum Level { CLEAN, WRONG } ## CLEAN = correct as-is; WRONG = has an anomaly to cover
+enum Level { CLEAN, WRONG } ## CLEAN = nothing to cover; WRONG = has an anomaly to cover
 
 @export var id: String = ""
 @export var doc_type: DocType = DocType.PORTRAIT
-@export var level: Level = Level.WRONG
+## CLEAN means there is nothing on this document to redact: the redaction
+## fields below are hidden and ignored, and any ink is a mistake. WRONG means
+## an anomaly must be covered. This is independent of the tray — a document
+## with nothing to cover can still belong to the Department of Truth because
+## the whole thing is false.
+@export var level: Level = Level.WRONG:
+	set(value):
+		level = value
+		notify_property_list_changed()
+## Which tray this document belongs in, whatever its level.
 @export var correct_tray: FilingTray.TrayType = FilingTray.TrayType.PUBLIC_ARCHIVE
 
 ## Rectangles normalized to the document (x/y/width/height from 0.0 to 1.0).
@@ -34,12 +44,31 @@ enum Level { CLEAN, WRONG } ## CLEAN = correct as-is; WRONG = has an anomaly to 
 @export var clipboard_board_id: String = "" ## which board should be showing
 
 
+## False for CLEAN documents: nothing on them may be redacted.
+func requires_redaction() -> bool:
+	return level == Level.WRONG
+
+
 func get_pixel_regions(image_size: Vector2i) -> Array[Rect2i]:
+	if not requires_redaction():
+		return []
 	return _to_pixel_regions(anomaly_regions, image_size)
 
 
 func get_overspill_pixel_regions(image_size: Vector2i) -> Array[Rect2i]:
+	if not requires_redaction():
+		return []
 	return _to_pixel_regions(overspill_regions, image_size)
+
+
+## Hides the redaction settings in the Inspector for CLEAN cases, so a
+## document with nothing to cover cannot be given an anomaly by accident.
+func _validate_property(property: Dictionary) -> void:
+	const REDACTION_PROPERTIES := [
+		"anomaly_regions", "overspill_regions", "required_coverage", "maximum_overspill"
+	]
+	if property.name in REDACTION_PROPERTIES and not requires_redaction():
+		property.usage = PROPERTY_USAGE_NO_EDITOR
 
 
 func _to_pixel_regions(normalized_regions: Array[Rect2], image_size: Vector2i) -> Array[Rect2i]:

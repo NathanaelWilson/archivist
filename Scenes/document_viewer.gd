@@ -31,6 +31,9 @@ func _ready() -> void:
 
 
 func open(new_case_data: CaseData, saved_ink: Image = null) -> void:
+	if new_case_data == null:
+		push_error("DocumentViewer.open() was called without a CaseData.")
+		return
 	case_data = new_case_data
 	var viewport_size := get_viewport().get_visible_rect().size
 	backdrop.size = viewport_size
