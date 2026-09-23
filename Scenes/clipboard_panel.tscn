@@ -1,0 +1,92 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://Scenes/clipboard_panel.gd" id="1_panel"]
+[ext_resource type="FontFile" path="res://Assets/Fonts/SpecialElite-Regular.ttf" id="2_font"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_board"]
+bg_color = Color(0.878, 0.859, 0.792, 1)
+border_width_left = 3
+border_width_top = 3
+border_width_right = 3
+border_width_bottom = 3
+border_color = Color(0.22, 0.2, 0.17, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_notice"]
+bg_color = Color(0.82, 0.8, 0.72, 1)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.22, 0.2, 0.17, 1)
+content_margin_left = 8.0
+content_margin_top = 6.0
+content_margin_right = 8.0
+content_margin_bottom = 6.0
+
+[node name="ClipboardPanel" type="CanvasLayer"]
+layer = 5
+script = ExtResource("1_panel")
+
+[node name="Handle" type="Button" parent="."]
+offset_left = 16.0
+offset_top = 336.0
+offset_right = 152.0
+offset_bottom = 386.0
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 16
+text = "CLIPBOARD"
+
+[node name="Board" type="PanelContainer" parent="."]
+offset_left = 16.0
+offset_top = 16.0
+offset_right = 556.0
+offset_bottom = 326.0
+theme_override_styles/panel = SubResource("StyleBoxFlat_board")
+
+[node name="Margin" type="MarginContainer" parent="Board"]
+layout_mode = 2
+theme_override_constants/margin_left = 18
+theme_override_constants/margin_top = 14
+theme_override_constants/margin_right = 18
+theme_override_constants/margin_bottom = 14
+
+[node name="Content" type="VBoxContainer" parent="Board/Margin"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="Notice" type="Label" parent="Board/Margin/Content"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.12, 0.1, 0.08, 1)
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 15
+theme_override_styles/normal = SubResource("StyleBoxFlat_notice")
+text = "READ THIS BOARD BEFORE EVERY FILE."
+autowrap_mode = 2
+
+[node name="CoverHeading" type="Label" parent="Board/Margin/Content"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.3, 0.12, 0.1, 1)
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 14
+text = "WHAT TO COVER"
+
+[node name="CoverLines" type="Label" parent="Board/Margin/Content"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.12, 0.1, 0.08, 1)
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 13
+autowrap_mode = 2
+
+[node name="FileHeading" type="Label" parent="Board/Margin/Content"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.3, 0.12, 0.1, 1)
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 14
+text = "WHERE IT GOES"
+
+[node name="FileLines" type="Label" parent="Board/Margin/Content"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.12, 0.1, 0.08, 1)
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 13
+autowrap_mode = 2

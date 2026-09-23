@@ -50,6 +50,7 @@ const BOARD_PLAN := [
 
 @onready var document_viewer: DocumentViewer = $DocumentViewer
 @onready var shift_screen: ShiftScreen = $ShiftScreen
+@onready var clipboard_panel: ClipboardPanel = $ClipboardPanel
 var active_file: FileEntity
 var _shift_index := 0
 var _case_index := 0
@@ -64,6 +65,8 @@ func _ready() -> void:
 	_start_ambient(&"door_knock", knock_min_sec, knock_max_sec)
 	_start_ambient(&"whisper", whisper_min_sec, whisper_max_sec)
 	_spawn_trays()
+	# The clipboard asks Main which board is live, so swaps stay Main's call.
+	clipboard_panel.board_source = get_active_board
 	document_viewer.closed.connect(_on_document_closed)
 	shift_screen.begin_requested.connect(_begin_current_shift)
 	_show_current_shift()
@@ -113,6 +116,7 @@ func spawn_case(case_data: CaseData) -> void:
 
 
 func _open_document(file: FileEntity) -> void:
+	clipboard_panel.close()
 	active_file = file
 	file.set_interaction_enabled(false)
 	document_viewer.open(file.case_data, file.ink_image)

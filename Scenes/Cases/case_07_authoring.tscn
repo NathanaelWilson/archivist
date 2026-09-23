@@ -1,11 +1,11 @@
 [gd_scene format=3 uid="uid://dsph0pqhjgkim"]
 
 [ext_resource type="Script" uid="uid://d1wp08ifth0k2" path="res://Scenes/redaction_box.gd" id="1_box"]
-[ext_resource type="Resource" path="res://Resources/Cases/case_07.tres" id="2_case"]
+[ext_resource type="Resource" uid="uid://86wpeo76geq6" path="res://Resources/Cases/case_07.tres" id="2_case"]
 [ext_resource type="Texture2D" uid="uid://cn6adtqvbx437" path="res://Assets/Images/Cases/Case_7.jpg" id="3_image"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape_safe_zone"]
-size = Vector2(196, 98)
+size = Vector2(191, 98)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape_box"]
 size = Vector2(130, 56.999992)
@@ -17,22 +17,21 @@ texture = ExtResource("3_image")
 centered = false
 
 [node name="SafeZoneBox" type="Area2D" parent="." unique_id=1658067913]
-position = Vector2(407.535, 419.64)
+position = Vector2(402, 487)
 script = ExtResource("1_box")
 case_data = ExtResource("2_case")
 region_kind = 1
 document_size = Vector2(807, 1076)
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="SafeZoneBox" unique_id=358872802]
-position = Vector2(-5.5350037, 67.359985)
+position = Vector2(2.5, 0)
 shape = SubResource("RectangleShape_safe_zone")
 
 [node name="RedactionBox" type="Area2D" parent="." unique_id=1449099866]
-position = Vector2(407.535, 419.64)
+position = Vector2(407, 474.49997)
 script = ExtResource("1_box")
 case_data = ExtResource("2_case")
 document_size = Vector2(807, 1076)
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="RedactionBox" unique_id=581105273]
-position = Vector2(-0.53500366, 54.859985)
 shape = SubResource("RectangleShape_box")

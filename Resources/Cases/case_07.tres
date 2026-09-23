@@ -1,4 +1,4 @@
-[gd_resource type="Resource" script_class="CaseData" format=3]
+[gd_resource type="Resource" script_class="CaseData" format=3 uid="uid://86wpeo76geq6"]
 
 [ext_resource type="Texture2D" uid="uid://cn6adtqvbx437" path="res://Assets/Images/Cases/Case_7.jpg" id="1_art"]
 [ext_resource type="Script" uid="uid://dyxpn0feejs5a" path="res://Scenes/case_data.gd" id="2_case_data"]
@@ -6,9 +6,7 @@
 [resource]
 script = ExtResource("2_case_data")
 id = "CASE-07"
-level = 1
-correct_tray = 0
-anomaly_regions = Array[Rect2]([Rect2(0.42379182, 0.41449813, 0.16109046, 0.05297397)])
-overspill_regions = Array[Rect2]([Rect2(0.37670384, 0.40706318, 0.24287485, 0.091078067)])
+anomaly_regions = Array[Rect2]([Rect2(0.42379183, 0.41449812, 0.16109046, 0.05297397)])
+overspill_regions = Array[Rect2]([Rect2(0.38289964, 0.4070632, 0.23667906, 0.091078065)])
 required_coverage = 0.9
 asset = ExtResource("1_art")

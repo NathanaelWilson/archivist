@@ -2,8 +2,8 @@
 
 [ext_resource type="Script" uid="uid://dyxpn0feejs5a" path="res://Scenes/case_data.gd" id="1_case_data"]
 [ext_resource type="Script" uid="uid://cvc4kljkh5fmu" path="res://Scenes/shift_data.gd" id="1_shift_data"]
-[ext_resource type="Resource" path="res://Resources/Cases/case_06.tres" id="2_case_06"]
-[ext_resource type="Resource" path="res://Resources/Cases/case_07.tres" id="3_case_07"]
+[ext_resource type="Resource" uid="uid://d053kcfov6hjo" path="res://Resources/Cases/case_06.tres" id="2_case_06"]
+[ext_resource type="Resource" uid="uid://86wpeo76geq6" path="res://Resources/Cases/case_07.tres" id="3_case_07"]
 [ext_resource type="Resource" path="res://Resources/Cases/case_08.tres" id="4_case_08"]
 [ext_resource type="Resource" path="res://Resources/Cases/case_09.tres" id="5_case_09"]
 

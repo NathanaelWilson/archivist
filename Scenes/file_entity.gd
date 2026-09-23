@@ -68,34 +68,31 @@ func is_held() -> bool:
 
 
 # ---------------------------------------------------------------- Input --
-# NOTE: this handles a single pointer (mouse, or one finger via Godot's
-# "emulate touch from mouse" project setting). The GDD also calls for
-# two-finger pan and pinch-to-zoom on the document — those are a separate,
-# additive gesture layer (distinct touch indices via InputEventScreenDrag)
-# that should sit above this node rather than inside it; not implemented
-# here since it doesn't interact with filing.
+# One finger: tap the paper to open it, or press and drag it to a tray.
+# PointerInput turns touch (the real control) and a debug mouse into the same
+# three gestures, and drops the mouse events a phone emulates from the touch
+# so a single tap is never handled twice. The GDD also calls for two-finger
+# pan and pinch-to-zoom on the document — a separate gesture layer above this
+# node, using the other touch indices; not implemented here since it doesn't
+# interact with filing.
 
 func _input(event: InputEvent) -> void:
 	if not _interaction_enabled or _state == State.FILING:
 		return
 
-	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT:
-		if event.pressed and not event.is_echo():
-			_begin_touch(event.position)
-		elif not event.pressed:
-			_end_touch(event.position)
+	var press: Variant = PointerInput.press_position(event)
+	if press != null:
+		_begin_touch(press as Vector2)
+		return
 
-	elif event is InputEventMouseMotion and (event.button_mask & MOUSE_BUTTON_MASK_LEFT):
-		_move_touch(event.position)
+	var drag: Variant = PointerInput.drag_position(event)
+	if drag != null:
+		_move_touch(drag as Vector2)
+		return
 
-	elif event is InputEventScreenTouch:
-		if event.pressed:
-			_begin_touch(event.position)
-		else:
-			_end_touch(event.position)
-
-	elif event is InputEventScreenDrag:
-		_move_touch(event.position)
+	var release: Variant = PointerInput.release_position(event)
+	if release != null:
+		_end_touch(release as Vector2)
 
 
 func _begin_touch(screen_pos: Vector2) -> void:

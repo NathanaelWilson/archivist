@@ -1,4 +1,4 @@
-[gd_resource type="Resource" script_class="CaseData" format=3]
+[gd_resource type="Resource" script_class="CaseData" format=3 uid="uid://rwyvdlcxh2l2"]
 
 [ext_resource type="Texture2D" uid="uid://bdqxffs440c6u" path="res://Assets/Images/Cases/Case_9.png" id="1_art"]
 [ext_resource type="Script" uid="uid://dyxpn0feejs5a" path="res://Scenes/case_data.gd" id="2_case_data"]

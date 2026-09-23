@@ -53,8 +53,8 @@ func refresh() -> void:
 func _on_button_gui_input(event: InputEvent) -> void:
 	if not button.disabled:
 		return
-	# Touch taps arrive here as emulated mouse clicks, so this covers mobile too.
-	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
+	# Handles a real finger and a debug mouse click, once each.
+	if PointerInput.press_position(event) != null:
 		SFX.play(&"slot_locked")
 
 

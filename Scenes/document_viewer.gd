@@ -80,36 +80,38 @@ func close() -> void:
 func _unhandled_input(event: InputEvent) -> void:
 	if not visible:
 		return
-	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT:
-		if event.pressed and _contains_document(event.position):
-			_inking = true
-			SFX.play(&"marker_down")
-			SFX.start_loop(&"marker_loop")
-			redaction.begin_stroke(event.position)
+	# Touch drives the marker; the mouse is the desktop debug path. See
+	# PointerInput for why the phone's emulated mouse events are dropped.
+	var press: Variant = PointerInput.press_position(event)
+	if press != null:
+		if _contains_document(press as Vector2):
+			_begin_ink(press as Vector2)
 			get_viewport().set_input_as_handled()
-		elif not event.pressed and _inking:
-			_inking = false
-			SFX.stop_loop(&"marker_loop")
-			redaction.end_stroke()
-			get_viewport().set_input_as_handled()
-	elif event is InputEventMouseMotion and _inking and (event.button_mask & MOUSE_BUTTON_MASK_LEFT):
-		redaction.stroke_to(event.position)
+		return
+
+	var drag: Variant = PointerInput.drag_position(event)
+	if drag != null and _inking:
+		redaction.stroke_to(drag as Vector2)
 		get_viewport().set_input_as_handled()
-	elif event is InputEventScreenTouch:
-		if event.pressed and _contains_document(event.position):
-			_inking = true
-			SFX.play(&"marker_down")
-			SFX.start_loop(&"marker_loop")
-			redaction.begin_stroke(event.position)
-			get_viewport().set_input_as_handled()
-		elif not event.pressed and _inking:
-			_inking = false
-			SFX.stop_loop(&"marker_loop")
-			redaction.end_stroke()
-			get_viewport().set_input_as_handled()
-	elif event is InputEventScreenDrag and _inking:
-		redaction.stroke_to(event.position)
+		return
+
+	var release: Variant = PointerInput.release_position(event)
+	if release != null and _inking:
+		_end_ink()
 		get_viewport().set_input_as_handled()
+
+
+func _begin_ink(position: Vector2) -> void:
+	_inking = true
+	SFX.play(&"marker_down")
+	SFX.start_loop(&"marker_loop")
+	redaction.begin_stroke(position)
+
+
+func _end_ink() -> void:
+	_inking = false
+	SFX.stop_loop(&"marker_loop")
+	redaction.end_stroke()
 
 
 func _contains_document(screen_position: Vector2) -> bool:

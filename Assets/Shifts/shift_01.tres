@@ -4,7 +4,7 @@
 [ext_resource type="Script" uid="uid://cvc4kljkh5fmu" path="res://Scenes/shift_data.gd" id="1_shift_data"]
 [ext_resource type="Resource" uid="uid://bnsavybtk1qqe" path="res://Resources/Cases/case_01.tres" id="2_80b5a"]
 [ext_resource type="Resource" uid="uid://cqgjxvihpxwp2" path="res://Resources/Cases/case_02.tres" id="3_f502a"]
-[ext_resource type="Resource" path="res://Resources/Cases/case_03.tres" id="4_tj5a5"]
+[ext_resource type="Resource" uid="uid://dbt0qwuo68u48" path="res://Resources/Cases/case_03.tres" id="4_tj5a5"]
 [ext_resource type="Resource" path="res://Resources/Cases/case_04.tres" id="5_u80jp"]
 [ext_resource type="Resource" path="res://Resources/Cases/case_05.tres" id="6_bwslj"]
 

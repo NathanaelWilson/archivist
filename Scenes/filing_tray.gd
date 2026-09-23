@@ -41,18 +41,14 @@ func _ready() -> void:
 	monitorable = true
 
 
-func _on_area_entered(area: Area2D) -> void:
-	if area is FileEntity and area.is_held():
-		if _hover_count == 0:
-			SFX.play(&"tray_hover")
-		_hover_count += 1
-
-
-func _on_area_exited(area: Area2D) -> void:
-	if area is FileEntity:
-		_hover_count = maxi(0, _hover_count - 1)
+## Called by the held FileEntity. The sound fires on the rising edge only,
+## so sweeping the paper past a tray chirps once rather than every frame.
 func set_hovered(value: bool) -> void:
+	if value == _hovered:
+		return
 	_hovered = value
+	if _hovered:
+		SFX.play(&"tray_hover")
 
 
 func _process(delta: float) -> void:

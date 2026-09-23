@@ -38,6 +38,16 @@ folder_colors={
 "res://Resources/Cases/": "red"
 }
 
+[input_devices]
+
+; Touch is the control scheme. Mouse emulation stays on so Buttons and other
+; Controls remain tappable; gameplay input goes through PointerInput, which
+; drops the emulated events so one tap is never handled twice. Touch is NOT
+; emulated from the mouse, so a desktop debug session produces mouse events
+; only.
+pointing/emulate_mouse_from_touch=true
+pointing/emulate_touch_from_mouse=false
+
 [input]
 
 tap={
