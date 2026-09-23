@@ -146,6 +146,7 @@ func _contains_point(screen_pos: Vector2) -> bool:
 func _begin_pickup() -> void:
 	_state = State.HELD
 	z_index = 100
+	SFX.play(&"file_pickup")
 	picked_up.emit()
 
 
@@ -178,6 +179,7 @@ func _commit_to_tray(tray: FilingTray) -> void:
 	_state = State.FILING
 	tray.notify_received(self)
 	var tray_type: int = tray.tray_type
+	SFX.play(_filing_sound(tray_type))
 	var tw := create_tween()
 	tw.tween_property(self, "global_position", tray.global_position, file_time_sec) \
 		.set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
@@ -190,8 +192,18 @@ func _commit_to_tray(tray: FilingTray) -> void:
 	)
 
 
+func _filing_sound(tray_type: int) -> StringName:
+	match tray_type:
+		FilingTray.TrayType.DEPARTMENT_OF_TRUTH:
+			return &"file_truth"
+		FilingTray.TrayType.INCINERATOR:
+			return &"file_incinerate"
+	return &"file_archive"
+
+
 func _return_to_desk() -> void:
 	_state = State.RESTING
+	SFX.play(&"file_return")
 	z_index = 0
 	var tw := create_tween()
 	tw.set_parallel(true)

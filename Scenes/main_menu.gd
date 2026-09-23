@@ -20,6 +20,7 @@ const GAME_SCENE_PATH := "res://Root/main.tscn"
 
 
 func _ready() -> void:
+	Music.play(&"menu")
 	start_button.pressed.connect(_on_start_pressed)
 	exit_button.pressed.connect(_on_exit_pressed)
 	records_button.pressed.connect(_on_records_pressed)
@@ -38,11 +39,15 @@ func _ready() -> void:
 
 
 func _wire_outline(control: Control, outline: InteractableOutline) -> void:
-	control.mouse_entered.connect(func(): outline.show_outline(true))
+	control.mouse_entered.connect(func():
+		outline.show_outline(true)
+		SFX.play(&"ui_hover")
+	)
 	control.mouse_exited.connect(func(): outline.show_outline(false))
 
 
 func _on_start_pressed() -> void:
+	SFX.play(&"ui_click")
 	get_tree().change_scene_to_file(GAME_SCENE_PATH)
 
 
@@ -53,17 +58,20 @@ func _on_exit_pressed() -> void:
 func _on_records_pressed() -> void:
 	records_screen.refresh()
 	records_screen.visible = true
-	page_flip_sfx.play()
+	SFX.play(&"page_flip")
 
 
 func _on_records_close_pressed() -> void:
+	SFX.play(&"page_flip")
 	records_screen.visible = false
 
 
 func _on_settings_pressed() -> void:
 	# TODO: placeholder screen/template for the real settings panel
+	SFX.play(&"ui_click")
 	journal_screen.visible = true
 
 
 func _on_journal_close_pressed() -> void:
+	SFX.play(&"ui_click")
 	journal_screen.visible = false

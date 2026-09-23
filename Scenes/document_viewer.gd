@@ -41,6 +41,7 @@ func open(new_case_data: CaseData, saved_ink: Image = null) -> void:
 	paper.size = _document_size
 	redaction.set_case_data(case_data, Vector2i(_document_size), saved_ink)
 	visible = true
+	SFX.play(&"doc_open")
 
 
 ## Scales the case art so the whole page fits on screen, keeping its aspect
@@ -67,7 +68,9 @@ func close() -> void:
 	if not visible:
 		return
 	_inking = false
+	SFX.stop_loop(&"marker_loop")
 	visible = false
+	SFX.play(&"doc_close")
 	closed.emit(redaction.evaluate_redaction(), redaction.get_ink_image())
 
 
@@ -77,10 +80,13 @@ func _unhandled_input(event: InputEvent) -> void:
 	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT:
 		if event.pressed and _contains_document(event.position):
 			_inking = true
+			SFX.play(&"marker_down")
+			SFX.start_loop(&"marker_loop")
 			redaction.begin_stroke(event.position)
 			get_viewport().set_input_as_handled()
 		elif not event.pressed and _inking:
 			_inking = false
+			SFX.stop_loop(&"marker_loop")
 			redaction.end_stroke()
 			get_viewport().set_input_as_handled()
 	elif event is InputEventMouseMotion and _inking and (event.button_mask & MOUSE_BUTTON_MASK_LEFT):
@@ -89,10 +95,13 @@ func _unhandled_input(event: InputEvent) -> void:
 	elif event is InputEventScreenTouch:
 		if event.pressed and _contains_document(event.position):
 			_inking = true
+			SFX.play(&"marker_down")
+			SFX.start_loop(&"marker_loop")
 			redaction.begin_stroke(event.position)
 			get_viewport().set_input_as_handled()
 		elif not event.pressed and _inking:
 			_inking = false
+			SFX.stop_loop(&"marker_loop")
 			redaction.end_stroke()
 			get_viewport().set_input_as_handled()
 	elif event is InputEventScreenDrag and _inking:

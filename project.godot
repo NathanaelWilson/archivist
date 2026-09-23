@@ -20,6 +20,8 @@ config/icon="res://Assets/Images/icon.svg"
 GameScore="*res://Scenes/game_score.gd"
 OutcomeRecord="*res://Scenes/outcome_record.gd"
 FilingLog="*uid://dy34rl0ma3h2l"
+SFX="*res://Scenes/sfx.gd"
+Music="*res://Scenes/music.gd"
 
 [display]
 

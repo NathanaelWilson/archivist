@@ -27,7 +27,13 @@ var _is_chosen: bool = false ## only ever true while unlocked
 
 
 func _ready() -> void:
-	button.pressed.connect(func(): selected.emit(ending_id, self))
+	button.pressed.connect(func():
+		SFX.play(&"slot_select")
+		selected.emit(ending_id, self)
+	)
+	# A locked slot's Button is disabled, so `pressed` never fires — but it
+	# still receives raw input, which is where the "locked" error sound comes from.
+	button.gui_input.connect(_on_button_gui_input)
 	button.mouse_entered.connect(func(): _set_hovering(true))
 	button.mouse_exited.connect(func(): _set_hovering(false))
 	refresh()
@@ -42,6 +48,14 @@ func refresh() -> void:
 	if not filed:
 		_is_chosen = false
 	_update_icon()
+
+
+func _on_button_gui_input(event: InputEvent) -> void:
+	if not button.disabled:
+		return
+	# Touch taps arrive here as emulated mouse clicks, so this covers mobile too.
+	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
+		SFX.play(&"slot_locked")
 
 
 ## Called by RecordsScreen so only one slot at a time reads as "chosen".

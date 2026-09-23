@@ -23,10 +23,17 @@ signal clocked_out
 
 func _ready() -> void:
 	visible = false
-	clock_out_button.pressed.connect(func(): clocked_out.emit())
+	clock_out_button.pressed.connect(func():
+		SFX.play(&"clock_out")
+		clocked_out.emit()
+	)
 	title_label.text = GameScore.get_display_name(ending_id)
 	body_label.text = body_text
 
 
 func present() -> void:
 	visible = true
+	Music.play(&"ending")
+	# Per-ending stinger (ending_<id>) if it exists, otherwise the shared one.
+	if not SFX.play(StringName("ending_%s" % ending_id)):
+		SFX.play(&"ending_reveal")

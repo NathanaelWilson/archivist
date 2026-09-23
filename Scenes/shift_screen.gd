@@ -8,7 +8,10 @@ signal begin_requested
 
 
 func _ready() -> void:
-	begin_button.pressed.connect(func(): begin_requested.emit())
+	begin_button.pressed.connect(func():
+		SFX.play(&"shift_begin")
+		begin_requested.emit()
+	)
 	visible = false
 
 

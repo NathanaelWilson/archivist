@@ -18,16 +18,29 @@ const ENDING_SCENES := {
 const MAIN_MENU_SCENE_PATH := "res://Scenes/main_menu.tscn"
 
 @export var shifts: Array[ShiftData] = []
+## Random atmosphere sounds: each plays again after a random wait in its range.
+@export var knock_min_sec := 35.0
+@export var knock_max_sec := 75.0
+@export var whisper_min_sec := 60.0
+@export var whisper_max_sec := 120.0
+## Two random atmosphere sounds never play closer together than this.
+@export var ambient_min_gap_sec := 10.0
 
 @onready var document_viewer: DocumentViewer = $DocumentViewer
 @onready var shift_screen: ShiftScreen = $ShiftScreen
 var active_file: FileEntity
 var _shift_index := 0
 var _case_index := 0
+var _ambient_timers: Array[Timer] = []
+var _last_ambient_msec := -100000
 
 
 func _ready() -> void:
 	GameScore.reset()
+	Music.play(&"ingame")
+	SFX.start_loop(&"ambience_crickets")
+	_start_ambient(&"door_knock", knock_min_sec, knock_max_sec)
+	_start_ambient(&"whisper", whisper_min_sec, whisper_max_sec)
 	_spawn_trays()
 	document_viewer.closed.connect(_on_document_closed)
 	shift_screen.begin_requested.connect(_begin_current_shift)
@@ -64,6 +77,7 @@ func spawn_case(case_data: CaseData) -> void:
 	add_child(file)
 	file.filing_evaluated.connect(_on_file_filed.bind(case_data))
 	file.open_requested.connect(_open_document.bind(file))
+	SFX.play(&"case_arrive")
 
 
 func _open_document(file: FileEntity) -> void:
@@ -106,6 +120,39 @@ func _on_file_filed(tray_type: int, redaction_result: Dictionary, case_data: Cas
 
 
 
+func _start_ambient(id: StringName, min_sec: float, max_sec: float) -> void:
+	var timer := Timer.new()
+	timer.one_shot = true
+	timer.timeout.connect(_on_ambient_timeout.bind(timer, id, min_sec, max_sec))
+	add_child(timer)
+	_ambient_timers.append(timer)
+	timer.start(randf_range(min_sec, max_sec))
+
+
+func _on_ambient_timeout(timer: Timer, id: StringName, min_sec: float, max_sec: float) -> void:
+	var since_last := (Time.get_ticks_msec() - _last_ambient_msec) / 1000.0
+	if since_last < ambient_min_gap_sec:
+		# Too close to the other sound: wait until the gap has passed.
+		timer.start(ambient_min_gap_sec - since_last + randf_range(1.0, 4.0))
+		return
+	SFX.play(id)
+	_last_ambient_msec = Time.get_ticks_msec()
+	timer.start(randf_range(min_sec, max_sec))
+
+
+## The crickets loop lives on the SFX autoload, so it has to be stopped here
+## or it would keep playing into the main menu.
+func _stop_atmosphere() -> void:
+	SFX.stop_loop(&"ambience_crickets")
+	for timer in _ambient_timers:
+		if is_instance_valid(timer):
+			timer.stop()
+
+
+func _exit_tree() -> void:
+	_stop_atmosphere()
+
+
 func _finish_current_shift() -> void:
 	_shift_index += 1
 	_show_current_shift()
@@ -115,6 +162,7 @@ func _finish_current_shift() -> void:
 ## scene, and shows it in place of the old generic "SHIFT COMPLETE" screen.
 func _present_ending() -> void:
 	shift_screen.dismiss()
+	_stop_atmosphere()
 	var ending_id := GameScore.evaluate_ending()
 	OutcomeRecord.file_ending(ending_id)
 	print("Run complete | accuracy: ", GameScore.accuracy, " paranoia: ", GameScore.paranoia, " -> ", ending_id)

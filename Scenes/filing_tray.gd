@@ -30,6 +30,8 @@ func _ready() -> void:
 
 func _on_area_entered(area: Area2D) -> void:
 	if area is FileEntity and area.is_held():
+		if _hover_count == 0:
+			SFX.play(&"tray_hover")
 		_hover_count += 1
 
 
