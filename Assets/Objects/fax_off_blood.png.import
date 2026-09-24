@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://8ejw5px3lh6u"
-path="res://.godot/imported/page_flip_06.png-f7fc50a290c1b3dc89707e2b796308c1.ctex"
+uid="uid://deefgaec8pq3"
+path="res://.godot/imported/fax_off_blood.png-63c445cdd3785e73e0521140cb484040.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://Assets/GUI/Records/page_flip_06.png"
-dest_files=["res://.godot/imported/page_flip_06.png-f7fc50a290c1b3dc89707e2b796308c1.ctex"]
+source_file="res://Assets/Objects/fax_off_blood.png"
+dest_files=["res://.godot/imported/fax_off_blood.png-63c445cdd3785e73e0521140cb484040.ctex"]
 
 [params]
 
