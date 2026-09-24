@@ -1,7 +1,7 @@
 [gd_scene format=3]
 
-[ext_resource type="Script" path="res://Scenes/clipboard_panel.gd" id="1_panel"]
-[ext_resource type="FontFile" path="res://Assets/Fonts/SpecialElite-Regular.ttf" id="2_font"]
+[ext_resource type="Script" uid="uid://ce56jfxrlomq1" path="res://Scenes/DirectivesClipboard/clipboard_panel.gd" id="1_panel"]
+[ext_resource type="FontFile" uid="uid://c4ca10mvotspn" path="res://Assets/Fonts/SpecialElite-Regular.ttf" id="2_font"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_board"]
 bg_color = Color(0.878, 0.859, 0.792, 1)

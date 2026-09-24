@@ -15,16 +15,16 @@ const ENDING_SCENES := {
 	&"zealot": preload("res://Scenes/Endings/ending_zealot.tscn"),
 }
 
-const MAIN_MENU_SCENE_PATH := "res://Scenes/main_menu.tscn"
+const MAIN_MENU_SCENE_PATH := "res://Scenes/MainMenu/main_menu.tscn"
 
 
 const CLIPBOARD_BOARDS := {
-	&"A": preload("res://Scenes/clipboard_boards/a.tres"),
-	&"A2": preload("res://Scenes/clipboard_boards/a2.tres"),
-	&"B": preload("res://Scenes/clipboard_boards/b.tres"),
-	&"B2": preload("res://Scenes/clipboard_boards/b2.tres"),
-	&"C": preload("res://Scenes/clipboard_boards/c.tres"),
-	&"C2": preload("res://Scenes/clipboard_boards/c2.tres"),
+	&"A": preload("res://Scenes/DirectivesClipboard/clipboard_boards/a.tres"),
+	&"A2": preload("res://Scenes/DirectivesClipboard/clipboard_boards/a2.tres"),
+	&"B": preload("res://Scenes/DirectivesClipboard/clipboard_boards/b.tres"),
+	&"B2": preload("res://Scenes/DirectivesClipboard/clipboard_boards/b2.tres"),
+	&"C": preload("res://Scenes/DirectivesClipboard/clipboard_boards/c.tres"),
+	&"C2": preload("res://Scenes/DirectivesClipboard/clipboard_boards/c2.tres"),
 }
 
 ## Per shift: [board before swap, board after swap, case index when the swap

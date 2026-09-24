@@ -1,6 +1,6 @@
 [gd_resource type="Resource" script_class="ClipboardBoard" format=3 uid="uid://bxqfthus7wxw0"]
 
-[ext_resource type="Script" uid="uid://b15dnmj1xcu7s" path="res://Scenes/clipboard_board.gd" id="1_bo8ip"]
+[ext_resource type="Script" uid="uid://b15dnmj1xcu7s" path="res://Scenes/DirectivesClipboard/clipboard_board.gd" id="1_bo8ip"]
 
 [resource]
 script = ExtResource("1_bo8ip")

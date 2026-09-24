@@ -1,6 +1,6 @@
 [gd_scene format=3 uid="uid://citvx2uyr8itb"]
 
-[ext_resource type="Script" uid="uid://bgtssy0ujx6sv" path="res://Scenes/shift_screen.gd" id="1_shift_screen"]
+[ext_resource type="Script" uid="uid://bgtssy0ujx6sv" path="res://Scenes/Shifts/shift_screen.gd" id="1_shift_screen"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBox_panel"]
 bg_color = Color(0.12, 0.105, 0.085, 0.98)

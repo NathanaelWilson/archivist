@@ -1,7 +1,7 @@
 [gd_resource type="Resource" script_class="ShiftData" format=3 uid="uid://d0lral630pgr8"]
 
 [ext_resource type="Script" uid="uid://dyxpn0feejs5a" path="res://Scenes/case_data.gd" id="1_case_data"]
-[ext_resource type="Script" uid="uid://cvc4kljkh5fmu" path="res://Scenes/shift_data.gd" id="1_shift_data"]
+[ext_resource type="Script" uid="uid://cvc4kljkh5fmu" path="res://Scenes/Shifts/shift_data.gd" id="1_shift_data"]
 [ext_resource type="Resource" path="res://Resources/Cases/case_10.tres" id="2_case_10"]
 [ext_resource type="Resource" path="res://Resources/Cases/case_12.tres" id="3_case_12"]
 
