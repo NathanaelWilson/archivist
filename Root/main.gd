@@ -51,10 +51,14 @@ const BOARD_PLAN := [
 @onready var document_viewer: DocumentViewer = $DocumentViewer
 @onready var shift_screen: ShiftScreen = $ShiftScreen
 @onready var clipboard_panel: ClipboardPanel = $ClipboardPanel
+@onready var eyelids: EyelidOverlay = $EyelidOverlay
 var active_file: FileEntity
 var _shift_index := 0
 var _case_index := 0
 var _ambient_timers: Array[Timer] = []
+## False while the eyes are opening or closing — the desk is visible but must
+## not be touched, so no file can be picked up, opened or filed.
+var _desk_input_enabled := true
 var _last_ambient_msec := -100000
 
 
@@ -73,6 +77,8 @@ func _ready() -> void:
 
 
 func _show_current_shift() -> void:
+	# The eyes only blink while there is work in front of them.
+	eyelids.stop_blinking()
 	if _shift_index >= shifts.size():
 		_present_ending()
 		return
@@ -95,6 +101,15 @@ func _begin_current_shift() -> void:
 	shift_screen.dismiss()
 	_case_index = 0
 	_spawn_next_case()
+	# The very first shift is the archivist waking up at the desk; later
+	# shifts just carry on blinking.
+	if _shift_index == 0:
+		# Nothing can be touched until the eyes have finished opening.
+		_set_desk_input_enabled(false)
+		await eyelids.play_wake()
+		_set_desk_input_enabled(true)
+	else:
+		eyelids.start_blinking()
 
 
 func _spawn_next_case() -> void:
@@ -109,6 +124,7 @@ func spawn_case(case_data: CaseData) -> void:
 	var file: FileEntity = FILE_ENTITY_SCENE.instantiate()
 	file.case_data = case_data
 	file.position = get_viewport_rect().size * Vector2(0.34, 0.52)
+	file.set_interaction_enabled(_desk_input_enabled)
 	add_child(file)
 	file.filing_evaluated.connect(_on_file_filed.bind(case_data))
 	file.open_requested.connect(_open_document.bind(file))
@@ -116,6 +132,8 @@ func spawn_case(case_data: CaseData) -> void:
 
 
 func _open_document(file: FileEntity) -> void:
+	if not _desk_input_enabled:
+		return
 	clipboard_panel.close()
 	active_file = file
 	file.set_interaction_enabled(false)
@@ -126,7 +144,7 @@ func _on_document_closed(redaction_result: Dictionary, ink_image: Image) -> void
 	if is_instance_valid(active_file):
 		active_file.ink_image = ink_image
 		active_file.set_redaction_result(redaction_result)
-		active_file.set_interaction_enabled(true)
+		active_file.set_interaction_enabled(_desk_input_enabled)
 	active_file = null
 
 
@@ -156,6 +174,17 @@ func _on_file_filed(tray_type: int, redaction_result: Dictionary, case_data: Cas
 	call_deferred("_spawn_next_case")
 
 
+
+
+## Turns the whole desk on or off: every paper on it, and the clipboard. Used
+## for the eye-opening and eye-closing beats, where the desk is on screen but
+## the archivist cannot yet (or can no longer) work.
+func _set_desk_input_enabled(enabled: bool) -> void:
+	_desk_input_enabled = enabled
+	for child in get_children():
+		if child is FileEntity:
+			child.set_interaction_enabled(enabled)
+	clipboard_panel.set_interactive(enabled)
 
 
 func _start_ambient(id: StringName, min_sec: float, max_sec: float) -> void:
@@ -200,6 +229,10 @@ func _finish_current_shift() -> void:
 ## scene, and shows it in place of the old generic "SHIFT COMPLETE" screen.
 func _present_ending() -> void:
 	shift_screen.dismiss()
+	# After the last shift the eyes close for good, and the verdict fades up
+	# out of that darkness.
+	_set_desk_input_enabled(false)
+	await eyelids.play_sleep()
 	_stop_atmosphere()
 	var ending_id := GameScore.evaluate_ending()
 	OutcomeRecord.file_ending(ending_id)
@@ -212,3 +245,4 @@ func _present_ending() -> void:
 	add_child(ending)
 	ending.clocked_out.connect(func(): get_tree().change_scene_to_file(MAIN_MENU_SCENE_PATH))
 	ending.present()
+	eyelids.reveal()

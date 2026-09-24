@@ -8,6 +8,7 @@
 [ext_resource type="PackedScene" uid="uid://b8ceoj0rvef7n" path="res://Scenes/document_viewer.tscn" id="5_document_viewer"]
 [ext_resource type="PackedScene" uid="uid://citvx2uyr8itb" path="res://Scenes/Shifts/shift_screen.tscn" id="6_shift_screen"]
 [ext_resource type="PackedScene" path="res://Scenes/DirectivesClipboard/clipboard_panel.tscn" id="7_clipboard"]
+[ext_resource type="PackedScene" path="res://Scenes/Eyelids/eyelid_overlay.tscn" id="8_eyelids"]
 
 [node name="Main" type="Node2D" unique_id=1907770346]
 script = ExtResource("1_main")
@@ -18,3 +19,5 @@ shifts = Array[ExtResource("2_ro5j4")]([ExtResource("2_shift_01"), ExtResource("
 [node name="ShiftScreen" parent="." unique_id=1104705691 instance=ExtResource("6_shift_screen")]
 
 [node name="ClipboardPanel" parent="." unique_id=733570815 instance=ExtResource("7_clipboard")]
+
+[node name="EyelidOverlay" parent="." unique_id=1648783443 instance=ExtResource("8_eyelids")]

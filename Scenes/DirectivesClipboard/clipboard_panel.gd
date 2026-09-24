@@ -27,6 +27,14 @@ func _ready() -> void:
 	panel.visible = false
 
 
+## Locked while the eyes are opening or closing: the tab cannot be pressed,
+## and a board left open is put down.
+func set_interactive(enabled: bool) -> void:
+	handle.disabled = not enabled
+	if not enabled:
+		close()
+
+
 func toggle() -> void:
 	if panel.visible:
 		close()
