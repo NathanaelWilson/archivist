@@ -1,8 +1,11 @@
 class_name ClipboardPanel
 extends CanvasLayer
 
-## The rules clipboard on the desk. At rest it is just a tab at the edge of
-## the screen; lifting it shows whichever ClipboardBoard is live right now.
+## The rules clipboard on the desk. At rest it is the clipboard art on the
+## desk itself (Main opens this when that prop is tapped); lifting it shows
+## whichever ClipboardBoard is live right now, over a dimmed desk — tapping
+## anywhere off the board puts it back down. The old "CLIPBOARD" Handle
+## button is kept in the scene but hidden, as a fallback.
 ## The panel does not decide which board that is — Main does, through
 ## board_source — so the boards can swap silently mid-shift.
 
@@ -14,6 +17,7 @@ var board_source: Callable = Callable()
 var _files_at_last_read: int = -1
 
 @onready var handle: Button = $Handle
+@onready var dim: ColorRect = $Dim
 @onready var panel: Control = $Board
 @onready var notice: Label = $Board/Margin/Content/Notice
 @onready var cover_heading: Label = $Board/Margin/Content/CoverHeading
@@ -24,7 +28,13 @@ var _files_at_last_read: int = -1
 
 func _ready() -> void:
 	handle.pressed.connect(toggle)
+	dim.gui_input.connect(_on_dim_input)
 	panel.visible = false
+	dim.visible = false
+
+
+func is_open() -> bool:
+	return panel.visible
 
 
 ## Locked while the eyes are opening or closing: the tab cannot be pressed,
@@ -48,6 +58,7 @@ func open() -> void:
 		return
 	_render(board)
 	panel.visible = true
+	dim.visible = true
 	handle.text = "PUT DOWN"
 	SFX.play(&"page_flip")
 	_files_at_last_read = FilingLog.total_filed
@@ -55,6 +66,7 @@ func open() -> void:
 
 func close() -> void:
 	panel.visible = false
+	dim.visible = false
 	handle.text = "CLIPBOARD"
 
 
@@ -86,3 +98,11 @@ func _fill_notice(text: String) -> String:
 				kept.append(line)
 		return "\n".join(kept)
 	return text.replace("{N}", str(FilingLog.total_filed - _files_at_last_read))
+
+
+## A tap anywhere off the board puts the clipboard down. Controls get touch as
+## emulated mouse clicks, so this one check covers phone and desktop.
+func _on_dim_input(event: InputEvent) -> void:
+	if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
+		close()
+		dim.accept_event()

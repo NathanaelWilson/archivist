@@ -1,0 +1,28 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://Scenes/Desk/desk.gd" id="1_desk"]
+[ext_resource type="Texture2D" uid="uid://dkm04004dq7ju" path="res://Assets/Images/Background/menu-bg.jpg" id="2_bg"]
+[ext_resource type="Script" path="res://Scenes/Desk/case_container.gd" id="3_container_script"]
+[ext_resource type="Texture2D" uid="uid://bnri5t4cj61fk" path="res://Assets/Objects/container_on.png" id="4_container"]
+[ext_resource type="Script" path="res://Scenes/Desk/desk_prop.gd" id="5_prop_script"]
+[ext_resource type="Texture2D" uid="uid://drku8yx1vp3rg" path="res://Assets/Objects/clipboard_on.png" id="6_clipboard"]
+
+[node name="Desk" type="Node2D"]
+texture_filter = 4
+script = ExtResource("1_desk")
+
+[node name="Background" type="Sprite2D" parent="."]
+texture = ExtResource("2_bg")
+centered = false
+
+[node name="CaseContainer" type="Sprite2D" parent="."]
+position = Vector2(1494, 414)
+texture = ExtResource("4_container")
+centered = false
+script = ExtResource("3_container_script")
+
+[node name="Clipboard" type="Sprite2D" parent="."]
+position = Vector2(901, 873)
+texture = ExtResource("6_clipboard")
+centered = false
+script = ExtResource("5_prop_script")

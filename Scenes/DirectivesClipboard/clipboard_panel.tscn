@@ -27,7 +27,17 @@ content_margin_bottom = 6.0
 layer = 5
 script = ExtResource("1_panel")
 
+[node name="Dim" type="ColorRect" parent="."]
+visible = false
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0, 0, 0, 0.45)
+
 [node name="Handle" type="Button" parent="."]
+visible = false
 offset_left = 16.0
 offset_top = 336.0
 offset_right = 152.0

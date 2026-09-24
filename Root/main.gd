@@ -40,6 +40,10 @@ const BOARD_PLAN := [
 
 const SLIP_PRINTER_SCENE := preload("res://Scenes/Slips/slip_printer.tscn")
 
+## Unscaled size of the desk file's paper (Scenes/file_entity.tscn). Kept here
+## so the paper pulled out of the case tray matches the file it turns into.
+const FILE_PAPER_SIZE := Vector2(171, 342)
+
 @export var shifts: Array[ShiftData] = []
 ## Random atmosphere sounds: each plays again after a random wait in its range.
 @export var knock_min_sec := 35.0
@@ -48,11 +52,16 @@ const SLIP_PRINTER_SCENE := preload("res://Scenes/Slips/slip_printer.tscn")
 @export var whisper_max_sec := 120.0
 ## Two random atmosphere sounds never play closer together than this.
 @export var ambient_min_gap_sec := 10.0
+## Files lying on the painted desk are drawn at this scale (1.0 would make the
+## placeholder paper almost as tall as the screen).
+@export var desk_file_scale := 0.4
 
 @onready var document_viewer: DocumentViewer = $DocumentViewer
 @onready var shift_screen: ShiftScreen = $ShiftScreen
 @onready var clipboard_panel: ClipboardPanel = $ClipboardPanel
 @onready var eyelids: EyelidOverlay = $EyelidOverlay
+@onready var case_container: CaseContainer = $Desk/CaseContainer
+@onready var desk_clipboard: DeskProp = $Desk/Clipboard
 var active_file: FileEntity
 var _printer: SlipPrinter
 var _shift_index := 0
@@ -76,6 +85,13 @@ func _ready() -> void:
 	add_child(_printer)
 	# The clipboard asks Main which board is live, so swaps stay Main's call.
 	clipboard_panel.board_source = get_active_board
+	# The desk art itself is the interface: cases are dragged out of the tray,
+	# and the rules are read by tapping the clipboard.
+	case_container.can_interact = _is_desk_free
+	case_container.pulled_paper_size = FILE_PAPER_SIZE * desk_file_scale
+	case_container.case_pulled.connect(_on_case_pulled)
+	desk_clipboard.can_interact = _is_desk_free
+	desk_clipboard.tapped.connect(clipboard_panel.open)
 	document_viewer.closed.connect(_on_document_closed)
 	shift_screen.begin_requested.connect(_begin_current_shift)
 	_show_current_shift()
@@ -125,15 +141,45 @@ func _spawn_next_case() -> void:
 	spawn_case(shift.cases[_case_index])
 
 
+## A new case lands in the tray. It only becomes a file on the desk once the
+## player drags it out (see _on_case_pulled).
 func spawn_case(case_data: CaseData) -> void:
+	case_container.load_case(case_data)
+	SFX.play(&"case_arrive")
+
+
+## The player dragged the case out of the tray and let go: lay it on the desk
+## where it was dropped and open the case preview straight away. From then on
+## it is an ordinary desk file — tap to reopen, hold and drag to a tray.
+func _on_case_pulled(case_data: CaseData, screen_position: Vector2) -> void:
 	var file: FileEntity = FILE_ENTITY_SCENE.instantiate()
 	file.case_data = case_data
-	file.position = get_viewport_rect().size * Vector2(0.34, 0.52)
+	file.scale = Vector2.ONE * desk_file_scale
+	file.position = _clamp_to_screen(screen_position, FILE_PAPER_SIZE * desk_file_scale)
 	file.set_interaction_enabled(_desk_input_enabled)
 	add_child(file)
 	file.filing_evaluated.connect(_on_file_filed.bind(case_data))
 	file.open_requested.connect(_open_document.bind(file))
-	SFX.play(&"case_arrive")
+	_open_document(file)
+
+
+## Keeps something of this size fully on screen when centred on point.
+func _clamp_to_screen(point: Vector2, size: Vector2) -> Vector2:
+	var view := get_viewport_rect().size
+	var half := size * 0.5
+	return Vector2(
+		clampf(point.x, half.x, view.x - half.x),
+		clampf(point.y, half.y, view.y - half.y)
+	)
+
+
+## Whether the desk props (case tray, clipboard) may be touched right now.
+func _is_desk_free() -> bool:
+	return _desk_input_enabled \
+		and active_file == null \
+		and not document_viewer.visible \
+		and not shift_screen.visible \
+		and not clipboard_panel.is_open()
 
 
 func _open_document(file: FileEntity) -> void:

@@ -80,19 +80,30 @@ func _input(event: InputEvent) -> void:
 	if not _interaction_enabled or _state == State.FILING:
 		return
 
+	# A gesture this paper owns is marked handled, so the desk props
+	# underneath it (the clipboard, the case tray) never react to the same
+	# touch.
 	var press: Variant = PointerInput.press_position(event)
 	if press != null:
 		_begin_touch(press as Vector2)
+		if _pending:
+			get_viewport().set_input_as_handled()
 		return
 
 	var drag: Variant = PointerInput.drag_position(event)
 	if drag != null:
+		var was_held := _state == State.HELD
 		_move_touch(drag as Vector2)
+		if was_held:
+			get_viewport().set_input_as_handled()
 		return
 
 	var release: Variant = PointerInput.release_position(event)
 	if release != null:
+		var owned := _pending or _state == State.HELD
 		_end_touch(release as Vector2)
+		if owned:
+			get_viewport().set_input_as_handled()
 
 
 func _begin_touch(screen_pos: Vector2) -> void:
