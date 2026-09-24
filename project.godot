@@ -12,7 +12,7 @@ config_version=5
 
 config/name="Archivist"
 run/main_scene="res://Scenes/MainMenu/main_menu.tscn"
-config/features=PackedStringArray("4.6", "Mobile")
+config/features=PackedStringArray("4.7", "Mobile")
 config/icon="res://Assets/Images/icon.svg"
 
 [autoload]
@@ -22,6 +22,7 @@ OutcomeRecord="*res://Scenes/outcome_record.gd"
 FilingLog="*uid://dy34rl0ma3h2l"
 SFX="*res://Scenes/AudioPlayer/sfx.gd"
 Music="*res://Scenes/AudioPlayer/music.gd"
+SlipDeck="*uid://dxvtmt1n4voyf"
 
 [display]
 

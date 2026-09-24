@@ -38,6 +38,7 @@ const BOARD_PLAN := [
 	[&"C", &"C2", 1],
 ]
 
+const SLIP_PRINTER_SCENE := preload("res://Scenes/Slips/slip_printer.tscn")
 
 @export var shifts: Array[ShiftData] = []
 ## Random atmosphere sounds: each plays again after a random wait in its range.
@@ -53,6 +54,7 @@ const BOARD_PLAN := [
 @onready var clipboard_panel: ClipboardPanel = $ClipboardPanel
 @onready var eyelids: EyelidOverlay = $EyelidOverlay
 var active_file: FileEntity
+var _printer: SlipPrinter
 var _shift_index := 0
 var _case_index := 0
 var _ambient_timers: Array[Timer] = []
@@ -69,6 +71,9 @@ func _ready() -> void:
 	_start_ambient(&"door_knock", knock_min_sec, knock_max_sec)
 	_start_ambient(&"whisper", whisper_min_sec, whisper_max_sec)
 	_spawn_trays()
+	_printer = SLIP_PRINTER_SCENE.instantiate()
+	_printer.position = get_viewport_rect().size * Vector2(0.82, 0.08)
+	add_child(_printer)
 	# The clipboard asks Main which board is live, so swaps stay Main's call.
 	clipboard_panel.board_source = get_active_board
 	document_viewer.closed.connect(_on_document_closed)
@@ -165,6 +170,7 @@ func _on_file_filed(tray_type: int, redaction_result: Dictionary, case_data: Cas
 	var redaction_passed: bool = bool(redaction_result.get("is_valid", false))
 	GameScore.register_case_result(case_data, tray_type, redaction_result)
 	FilingLog.record_filing(case_data, tray_type, redaction_result)
+	_print_slip_after_delay(tray_type)
 	print("Filed ", case_data.id, " | tray correct: ", correct_tray, " | redaction correct: ", redaction_passed,
 		" | ", redaction_result.get("reason", ""),
 		" (coverage %.0f%%, overspill %.0f%%)" % [float(redaction_result.get("coverage", 0.0)) * 100.0, float(redaction_result.get("overspill", 0.0)) * 100.0],
@@ -172,6 +178,15 @@ func _on_file_filed(tray_type: int, redaction_result: Dictionary, case_data: Cas
 	_case_index += 1
 	# The document finishes its filing tween before the next one is spawned.
 	call_deferred("_spawn_next_case")
+
+
+## The fax starts ~0.3 s after the drawer shuts (Build Guide 3.6) and the next
+## case is allowed to arrive meanwhile, so this deliberately does not block
+## the filing loop — it awaits internally, and _on_file_filed does not await it.
+func _print_slip_after_delay(tray_type: int) -> void:
+	await get_tree().create_timer(0.3).timeout
+	if is_instance_valid(_printer):
+		_printer.print_slip(SlipDeck.draw(tray_type))
 
 
 
