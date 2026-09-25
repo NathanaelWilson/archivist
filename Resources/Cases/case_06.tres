@@ -1,0 +1,12 @@
+[gd_resource type="Resource" script_class="CaseData" format=3 uid="uid://d053kcfov6hjo"]
+
+[ext_resource type="Texture2D" uid="uid://bi2yknvpfscym" path="res://Assets/Images/Cases/Case_6.png" id="1_art"]
+[ext_resource type="Script" uid="uid://dyxpn0feejs5a" path="res://Scenes/case_data.gd" id="2_case_data"]
+
+[resource]
+script = ExtResource("2_case_data")
+id = "CASE-06"
+anomaly_regions = Array[Rect2]([Rect2(0.076271184, 0.5068643, 0.5621469, 0.10330508)])
+overspill_regions = Array[Rect2]([Rect2(0.04519774, 0.43855932, 0.63559324, 0.21610172)])
+required_coverage = 0.9
+asset = ExtResource("1_art")

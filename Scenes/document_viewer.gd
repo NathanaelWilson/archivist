@@ -6,7 +6,8 @@ extends CanvasLayer
 
 ## ink_image is a copy of the ink on the page, so the file can keep it and
 ## hand it back the next time it is opened.
-signal closed(redaction_result: Dictionary, ink_image: Image)
+## bleed_image is how far that ink has bled (null unless the case bleeds).
+signal closed(redaction_result: Dictionary, ink_image: Image, bleed_image: Image)
 
 ## Space kept clear between the document and the screen edges, in viewport
 ## pixels. The document is also kept clear of the Close button on the left
@@ -30,7 +31,10 @@ func _ready() -> void:
 	visible = false
 
 
-func open(new_case_data: CaseData, saved_ink: Image = null) -> void:
+func open(new_case_data: CaseData, saved_ink: Image = null, saved_bleed: Image = null) -> void:
+	if new_case_data == null:
+		push_error("DocumentViewer.open() was called without a CaseData.")
+		return
 	case_data = new_case_data
 	var viewport_size := get_viewport().get_visible_rect().size
 	backdrop.size = viewport_size
@@ -39,7 +43,7 @@ func open(new_case_data: CaseData, saved_ink: Image = null) -> void:
 	_document_size = _fit_document(viewport_size)
 	paper.position = -_document_size * 0.5
 	paper.size = _document_size
-	redaction.set_case_data(case_data, Vector2i(_document_size), saved_ink)
+	redaction.set_case_data(case_data, Vector2i(_document_size), saved_ink, saved_bleed)
 	visible = true
 	SFX.play(&"doc_open")
 
@@ -71,42 +75,44 @@ func close() -> void:
 	SFX.stop_loop(&"marker_loop")
 	visible = false
 	SFX.play(&"doc_close")
-	closed.emit(redaction.evaluate_redaction(), redaction.get_ink_image())
+	closed.emit(redaction.evaluate_redaction(), redaction.get_ink_image(), redaction.get_bleed_image())
 
 
 func _unhandled_input(event: InputEvent) -> void:
 	if not visible:
 		return
-	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT:
-		if event.pressed and _contains_document(event.position):
-			_inking = true
-			SFX.play(&"marker_down")
-			SFX.start_loop(&"marker_loop")
-			redaction.begin_stroke(event.position)
+	# Touch drives the marker; the mouse is the desktop debug path. See
+	# PointerInput for why the phone's emulated mouse events are dropped.
+	var press: Variant = PointerInput.press_position(event)
+	if press != null:
+		if _contains_document(press as Vector2):
+			_begin_ink(press as Vector2)
 			get_viewport().set_input_as_handled()
-		elif not event.pressed and _inking:
-			_inking = false
-			SFX.stop_loop(&"marker_loop")
-			redaction.end_stroke()
-			get_viewport().set_input_as_handled()
-	elif event is InputEventMouseMotion and _inking and (event.button_mask & MOUSE_BUTTON_MASK_LEFT):
-		redaction.stroke_to(event.position)
+		return
+
+	var drag: Variant = PointerInput.drag_position(event)
+	if drag != null and _inking:
+		redaction.stroke_to(drag as Vector2)
 		get_viewport().set_input_as_handled()
-	elif event is InputEventScreenTouch:
-		if event.pressed and _contains_document(event.position):
-			_inking = true
-			SFX.play(&"marker_down")
-			SFX.start_loop(&"marker_loop")
-			redaction.begin_stroke(event.position)
-			get_viewport().set_input_as_handled()
-		elif not event.pressed and _inking:
-			_inking = false
-			SFX.stop_loop(&"marker_loop")
-			redaction.end_stroke()
-			get_viewport().set_input_as_handled()
-	elif event is InputEventScreenDrag and _inking:
-		redaction.stroke_to(event.position)
+		return
+
+	var release: Variant = PointerInput.release_position(event)
+	if release != null and _inking:
+		_end_ink()
 		get_viewport().set_input_as_handled()
+
+
+func _begin_ink(position: Vector2) -> void:
+	_inking = true
+	SFX.play(&"marker_down")
+	SFX.start_loop(&"marker_loop")
+	redaction.begin_stroke(position)
+
+
+func _end_ink() -> void:
+	_inking = false
+	SFX.stop_loop(&"marker_loop")
+	redaction.end_stroke()
 
 
 func _contains_document(screen_position: Vector2) -> bool:

@@ -39,10 +39,13 @@ var _pending: bool = false
 var _touch_start_pos: Vector2 = Vector2.ZERO
 var _hold_timer_id: int = 0
 var _interaction_enabled := true
+var _hover_tray: FilingTray
 var _redaction_result: Dictionary = {"is_valid": false, "reason": "Document has not been checked."}
 ## Ink the player has put on this document, kept while the viewer is closed.
 ## null until the document is opened and closed for the first time.
 var ink_image: Image
+## How far that ink has bled, for cases whose marker bleeds. Never scored.
+var bleed_image: Image
 
 
 func _ready() -> void:
@@ -67,34 +70,42 @@ func is_held() -> bool:
 
 
 # ---------------------------------------------------------------- Input --
-# NOTE: this handles a single pointer (mouse, or one finger via Godot's
-# "emulate touch from mouse" project setting). The GDD also calls for
-# two-finger pan and pinch-to-zoom on the document — those are a separate,
-# additive gesture layer (distinct touch indices via InputEventScreenDrag)
-# that should sit above this node rather than inside it; not implemented
-# here since it doesn't interact with filing.
+# One finger: tap the paper to open it, or press and drag it to a tray.
+# PointerInput turns touch (the real control) and a debug mouse into the same
+# three gestures, and drops the mouse events a phone emulates from the touch
+# so a single tap is never handled twice. The GDD also calls for two-finger
+# pan and pinch-to-zoom on the document — a separate gesture layer above this
+# node, using the other touch indices; not implemented here since it doesn't
+# interact with filing.
 
 func _input(event: InputEvent) -> void:
 	if not _interaction_enabled or _state == State.FILING:
 		return
 
-	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT:
-		if event.pressed and not event.is_echo():
-			_begin_touch(event.position)
-		elif not event.pressed:
-			_end_touch(event.position)
+	# A gesture this paper owns is marked handled, so the desk props
+	# underneath it (the clipboard, the case tray) never react to the same
+	# touch.
+	var press: Variant = PointerInput.press_position(event)
+	if press != null:
+		_begin_touch(press as Vector2)
+		if _pending:
+			get_viewport().set_input_as_handled()
+		return
 
-	elif event is InputEventMouseMotion and (event.button_mask & MOUSE_BUTTON_MASK_LEFT):
-		_move_touch(event.position)
+	var drag: Variant = PointerInput.drag_position(event)
+	if drag != null:
+		var was_held := _state == State.HELD
+		_move_touch(drag as Vector2)
+		if was_held:
+			get_viewport().set_input_as_handled()
+		return
 
-	elif event is InputEventScreenTouch:
-		if event.pressed:
-			_begin_touch(event.position)
-		else:
-			_end_touch(event.position)
-
-	elif event is InputEventScreenDrag:
-		_move_touch(event.position)
+	var release: Variant = PointerInput.release_position(event)
+	if release != null:
+		var owned := _pending or _state == State.HELD
+		_end_touch(release as Vector2)
+		if owned:
+			get_viewport().set_input_as_handled()
 
 
 func _begin_touch(screen_pos: Vector2) -> void:
@@ -118,16 +129,21 @@ func _on_hold_elapsed(timer_id: int) -> void:
 func _move_touch(screen_pos: Vector2) -> void:
 	if _state == State.HELD:
 		_drag_to(screen_pos)
+		_set_hover_tray(_tray_at(screen_pos))
 
 
 func _end_touch(screen_pos: Vector2) -> void:
+	var was_tap_on_paper := _pending and _contains_point(screen_pos)
 	_pending = false
 	_hold_timer_id += 1 # invalidate any pending hold timer
 	match _state:
 		State.HELD:
 			_try_drop(screen_pos)
 		State.RESTING:
-			open_requested.emit()
+			# Only a tap that both started and ended on the paper opens it —
+			# a tap anywhere else on the desk is not meant for this document.
+			if was_tap_on_paper:
+				open_requested.emit()
 
 
 func _contains_point(screen_pos: Vector2) -> bool:
@@ -160,19 +176,38 @@ func _drag_to(screen_pos: Vector2) -> void:
 	rotation = deg_to_rad(max_tilt_deg) * tilt_t
 
 
-func _try_drop(_screen_pos: Vector2) -> void:
-	var tray := _first_overlapping_tray()
+func _try_drop(screen_pos: Vector2) -> void:
+	_set_hover_tray(null)
+	var tray := _tray_at(screen_pos)
 	if tray:
 		_commit_to_tray(tray)
 	else:
 		_return_to_desk()
 
 
-func _first_overlapping_tray() -> FilingTray:
+## The tray the player is pointing at. The paper is taller than the gap
+## between trays, so it usually overlaps all three at once — the overlap list
+## alone would pick an arbitrary one. The pointer is what decides.
+func _tray_at(screen_pos: Vector2) -> FilingTray:
+	var best: FilingTray = null
+	var best_distance := INF
 	for area in get_overlapping_areas():
 		if area is FilingTray:
-			return area
-	return null
+			var distance: float = area.global_position.distance_to(screen_pos)
+			if distance < best_distance:
+				best_distance = distance
+				best = area
+	return best
+
+
+func _set_hover_tray(tray: FilingTray) -> void:
+	if tray == _hover_tray:
+		return
+	if is_instance_valid(_hover_tray):
+		_hover_tray.set_hovered(false)
+	_hover_tray = tray
+	if is_instance_valid(_hover_tray):
+		_hover_tray.set_hovered(true)
 
 
 func _commit_to_tray(tray: FilingTray) -> void:
@@ -202,6 +237,7 @@ func _filing_sound(tray_type: int) -> StringName:
 
 
 func _return_to_desk() -> void:
+	_set_hover_tray(null)
 	_state = State.RESTING
 	SFX.play(&"file_return")
 	z_index = 0

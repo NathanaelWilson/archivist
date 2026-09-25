@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="CaseData" format=3]
+
+[ext_resource type="Texture2D" uid="uid://cnc4d21q5q2vv" path="res://Assets/Images/Cases/Case_12.png" id="1_art"]
+[ext_resource type="Script" uid="uid://dyxpn0feejs5a" path="res://Scenes/case_data.gd" id="2_case_data"]
+
+[resource]
+script = ExtResource("2_case_data")
+id = "CASE-12"
+level = 0
+correct_tray = 3
+asset = ExtResource("1_art")

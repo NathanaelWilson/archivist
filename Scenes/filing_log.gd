@@ -29,6 +29,7 @@ var tray_incorrect: int = 0
 ##   tray_chosen        int             the FilingTray.TrayType actually used
 ##   tray_expected      int             case_data.correct_tray
 ##   tray_correct       bool
+##   tray_wildcard      bool            true when any tray was acceptable
 ##   redaction_result   Dictionary      the full result dict from RedactionLayer
 ##   redaction_correct  bool
 var entries: Array[Dictionary] = []
@@ -46,7 +47,9 @@ func reset() -> void:
 ## Called once per filed case from main.gd::_on_file_filed(), alongside —
 ## not instead of — GameScore.register_case_result().
 func record_filing(case_data: CaseData, tray_type: int, redaction_result: Dictionary) -> void:
-	var tray_is_correct: bool = tray_type == case_data.correct_tray
+	# A wildcard case (correct_tray = ANY) can never be filed wrongly.
+	var tray_is_wildcard: bool = FilingTray.is_wildcard(case_data.correct_tray)
+	var tray_is_correct: bool = tray_is_wildcard or tray_type == case_data.correct_tray
 	var redaction_is_correct: bool = bool(redaction_result.get("is_valid", false))
 
 	total_filed += 1
@@ -65,6 +68,7 @@ func record_filing(case_data: CaseData, tray_type: int, redaction_result: Dictio
 		"tray_chosen": tray_type,
 		"tray_expected": case_data.correct_tray,
 		"tray_correct": tray_is_correct,
+		"tray_wildcard": tray_is_wildcard,
 		"redaction_result": redaction_result,
 		"redaction_correct": redaction_is_correct,
 	})

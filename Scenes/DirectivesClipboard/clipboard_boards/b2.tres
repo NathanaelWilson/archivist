@@ -1,0 +1,12 @@
+[gd_resource type="Resource" script_class="ClipboardBoard" format=3 uid="uid://d1qo3lponmt7b"]
+
+[ext_resource type="Script" uid="uid://b15dnmj1xcu7s" path="res://Scenes/DirectivesClipboard/clipboard_board.gd" id="1_i4wry"]
+
+[resource]
+script = ExtResource("1_i4wry")
+id = &"B2"
+notice_text = "READ THIS BOARD BEFORE EVERY FILE.
+IT DOES NOT ALWAYS SAY THE SAME THING."
+cover_lines = Array[String](["Cover any face with more than two eyes.", "DO NOT cover a face that has no eyes. They need to see.", "Cover any smile that does not fit the face.", "Cover any line that talks to you.", "The man in the coat was never approved. Cover him everywhere."])
+file_lines = Array[String](["PUBLIC ARCHIVE                    Clean work, and work you have covered.", "DEPARTMENT OF TRUTH         What cannot be covered is not yours to judge.", "INCINERATOR                         What is dangerous to look at. Do not study it."])
+metadata/_custom_type_script = "uid://b15dnmj1xcu7s"

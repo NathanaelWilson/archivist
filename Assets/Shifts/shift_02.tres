@@ -1,9 +1,13 @@
-[gd_resource type="Resource" script_class="ShiftData" load_steps=3 format=3]
+[gd_resource type="Resource" script_class="ShiftData" format=3 uid="uid://bdrved0k1cpsq"]
 
-[ext_resource type="Script" path="res://Scenes/shift_data.gd" id="1_shift_data"]
-[ext_resource type="Resource" path="res://Assets/Cases/case_01_debug.tres" id="2_case"]
+[ext_resource type="Script" uid="uid://dyxpn0feejs5a" path="res://Scenes/case_data.gd" id="1_case_data"]
+[ext_resource type="Script" uid="uid://cvc4kljkh5fmu" path="res://Scenes/Shifts/shift_data.gd" id="1_shift_data"]
+[ext_resource type="Resource" uid="uid://d053kcfov6hjo" path="res://Resources/Cases/case_06.tres" id="2_case_06"]
+[ext_resource type="Resource" uid="uid://86wpeo76geq6" path="res://Resources/Cases/case_07.tres" id="3_case_07"]
+[ext_resource type="Resource" uid="uid://bl068v0mgjggp" path="res://Resources/Cases/case_08.tres" id="4_case_08"]
+[ext_resource type="Resource" uid="uid://rwyvdlcxh2l2" path="res://Resources/Cases/case_09.tres" id="5_case_09"]
 
 [resource]
 script = ExtResource("1_shift_data")
 display_name = "Afternoon Intake"
-cases = Array[Resource]([ExtResource("2_case")])
+cases = Array[ExtResource("1_case_data")]([ExtResource("2_case_06"), ExtResource("3_case_07"), ExtResource("4_case_08"), ExtResource("5_case_09")])

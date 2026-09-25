@@ -1,0 +1,7 @@
+[gd_scene format=3 uid="uid://dlr0is0q7nxms"]
+
+[ext_resource type="Script" uid="uid://dkyg3yoqb2ayp" path="res://Scenes/Slips/slip_printer.gd" id="1_uh4cq"]
+
+[node name="SlipPrinter" type="Node2D" unique_id=691011152]
+script = ExtResource("1_uh4cq")
+metadata/_custom_type_script = "uid://dkyg3yoqb2ayp"

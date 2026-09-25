@@ -1,17 +1,26 @@
 [gd_scene format=3 uid="uid://dkmnbuc0ob0ua"]
 
 [ext_resource type="Script" uid="uid://dcw036o4m46ju" path="res://Root/main.gd" id="1_main"]
-[ext_resource type="Script" uid="uid://cvc4kljkh5fmu" path="res://Scenes/shift_data.gd" id="2_ro5j4"]
+[ext_resource type="Script" uid="uid://cvc4kljkh5fmu" path="res://Scenes/Shifts/shift_data.gd" id="2_ro5j4"]
 [ext_resource type="Resource" uid="uid://cm0difdnr8uen" path="res://Assets/Shifts/shift_01.tres" id="2_shift_01"]
-[ext_resource type="Resource" path="res://Assets/Shifts/shift_02.tres" id="3_shift_02"]
-[ext_resource type="Resource" path="res://Assets/Shifts/shift_03.tres" id="4_shift_03"]
-[ext_resource type="PackedScene" path="res://Scenes/document_viewer.tscn" id="5_document_viewer"]
-[ext_resource type="PackedScene" uid="uid://citvx2uyr8itb" path="res://Scenes/shift_screen.tscn" id="6_shift_screen"]
+[ext_resource type="Resource" uid="uid://bdrved0k1cpsq" path="res://Assets/Shifts/shift_02.tres" id="3_shift_02"]
+[ext_resource type="Resource" uid="uid://d0lral630pgr8" path="res://Assets/Shifts/shift_03.tres" id="4_shift_03"]
+[ext_resource type="PackedScene" uid="uid://b8ceoj0rvef7n" path="res://Scenes/document_viewer.tscn" id="5_document_viewer"]
+[ext_resource type="PackedScene" uid="uid://citvx2uyr8itb" path="res://Scenes/Shifts/shift_screen.tscn" id="6_shift_screen"]
+[ext_resource type="PackedScene" path="res://Scenes/DirectivesClipboard/clipboard_panel.tscn" id="7_clipboard"]
+[ext_resource type="PackedScene" path="res://Scenes/Eyelids/eyelid_overlay.tscn" id="8_eyelids"]
+[ext_resource type="PackedScene" path="res://Scenes/Desk/desk.tscn" id="9_desk"]
 
 [node name="Main" type="Node2D" unique_id=1907770346]
 script = ExtResource("1_main")
 shifts = Array[ExtResource("2_ro5j4")]([ExtResource("2_shift_01"), ExtResource("3_shift_02"), ExtResource("4_shift_03")])
 
+[node name="Desk" parent="." instance=ExtResource("9_desk")]
+
 [node name="DocumentViewer" parent="." unique_id=866617788 instance=ExtResource("5_document_viewer")]
 
 [node name="ShiftScreen" parent="." unique_id=1104705691 instance=ExtResource("6_shift_screen")]
+
+[node name="ClipboardPanel" parent="." unique_id=733570815 instance=ExtResource("7_clipboard")]
+
+[node name="EyelidOverlay" parent="." unique_id=1648783443 instance=ExtResource("8_eyelids")]

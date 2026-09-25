@@ -22,6 +22,13 @@ enum RegionKind { ANOMALY, SAFE_ZONE }
 
 @onready var collision: CollisionShape2D = $CollisionShape2D
 
+## Godot does not know an external resource has changed when a tool script
+## edits it, so moving a box would otherwise be lost on save. The write is
+## debounced: the .tres is saved once the drag has settled, not every frame.
+const SAVE_DELAY_SEC := 0.4
+
+var _unsaved_changes := false
+var _save_countdown := 0.0
 var _last_position := Vector2.INF
 var _last_shape_position := Vector2.INF
 var _last_size := Vector2.INF
@@ -46,6 +53,28 @@ func _process(_delta: float) -> void:
 		_write_to_case()
 		_remember_state(shape)
 		queue_redraw()
+		_unsaved_changes = true
+		_save_countdown = SAVE_DELAY_SEC
+	elif _unsaved_changes:
+		_save_countdown -= _delta
+		if _save_countdown <= 0.0:
+			_save_case_to_disk()
+
+
+## Writes the linked CaseData back to its .tres. Without this the regions live
+## only in memory and vanish when the editor reloads.
+func _save_case_to_disk() -> void:
+	_unsaved_changes = false
+	if case_data == null or case_data.resource_path.is_empty():
+		return
+	if not case_data.has_method("requires_redaction"):
+		# A placeholder instance: the script is not loaded in tool mode, so
+		# saving now would write back an incomplete resource.
+		push_warning("RedactionBox: '%s' is not fully loaded, so the box was not saved. Reload the project and move the box again." % case_data.resource_path)
+		return
+	var error := ResourceSaver.save(case_data, case_data.resource_path)
+	if error != OK:
+		push_warning("RedactionBox: could not save %s (error %d)." % [case_data.resource_path, error])
 
 
 ## The box in document pixels (the parent's space), wherever the editor has
@@ -62,6 +91,15 @@ func _remember_state(shape: RectangleShape2D) -> void:
 	_last_size = shape.size
 
 
+## Reads level as a plain property instead of calling
+## CaseData.requires_redaction(): in the editor the linked resource can be a
+## placeholder instance, which holds exported values but has no methods.
+func _case_requires_redaction() -> bool:
+	if case_data == null:
+		return true
+	return int(case_data.level) == int(CaseData.Level.WRONG)
+
+
 ## The CaseData list this box edits (returned by reference, so writes stick).
 func _regions() -> Array[Rect2]:
 	if region_kind == RegionKind.SAFE_ZONE:
@@ -70,10 +108,13 @@ func _regions() -> Array[Rect2]:
 
 
 func _load_from_case() -> void:
-	if case_data == null or region_index >= _regions().size():
+	if case_data == null or region_index < 0 or region_index >= _regions().size():
+		return
+	var shape := collision.shape as RectangleShape2D
+	if shape == null:
+		push_warning("RedactionBox '%s' has no RectangleShape2D to author with." % name)
 		return
 	var region := _regions()[region_index]
-	var shape := collision.shape as RectangleShape2D
 	shape.size = region.size * document_size
 	collision.position = Vector2.ZERO
 	collision.scale = Vector2.ONE
@@ -84,6 +125,10 @@ func _load_from_case() -> void:
 
 func _write_to_case() -> void:
 	if case_data == null or document_size.x <= 0.0 or document_size.y <= 0.0:
+		return
+	if not _case_requires_redaction():
+		return # Public Archive cases carry no regions
+	if region_index < 0:
 		return
 	var regions := _regions()
 	while regions.size() <= region_index:
@@ -102,7 +147,11 @@ func _draw() -> void:
 	# Draw exactly where the collision shape is, in this node's local space.
 	var size := shape.size * collision.scale.abs()
 	var rect := Rect2(collision.position - size * 0.5, size)
-	if region_kind == RegionKind.SAFE_ZONE:
+	if case_data != null and not _case_requires_redaction():
+		# CLEAN case: nothing to redact here, so the box is inert.
+		draw_rect(rect, Color(0.5, 0.5, 0.5, 0.12), true)
+		draw_rect(rect, Color(0.6, 0.6, 0.6, 0.8), false, 3.0)
+	elif region_kind == RegionKind.SAFE_ZONE:
 		draw_rect(rect, Color(0.2, 0.55, 1.0, 0.15), true)
 		draw_rect(rect, Color(0.2, 0.55, 1.0, 1.0), false, 3.0)
 	else:

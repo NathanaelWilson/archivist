@@ -11,8 +11,8 @@ config_version=5
 [application]
 
 config/name="Archivist"
-run/main_scene="res://Scenes/main_menu.tscn"
-config/features=PackedStringArray("4.7", "Mobile")
+run/main_scene="res://Scenes/MainMenu/main_menu.tscn"
+config/features=PackedStringArray("4.6", "Mobile")
 config/icon="res://Assets/Images/icon.svg"
 
 [autoload]
@@ -20,8 +20,9 @@ config/icon="res://Assets/Images/icon.svg"
 GameScore="*res://Scenes/game_score.gd"
 OutcomeRecord="*res://Scenes/outcome_record.gd"
 FilingLog="*uid://dy34rl0ma3h2l"
-SFX="*res://Scenes/sfx.gd"
-Music="*res://Scenes/music.gd"
+SFX="*res://Scenes/AudioPlayer/sfx.gd"
+Music="*res://Scenes/AudioPlayer/music.gd"
+SlipDeck="*uid://dxvtmt1n4voyf"
 
 [display]
 
@@ -35,7 +36,7 @@ window/handheld/orientation="landscape"
 [file_customization]
 
 folder_colors={
-"res://Assets/Cases/": "red"
+"res://Resources/Cases/": "red"
 }
 
 [input]

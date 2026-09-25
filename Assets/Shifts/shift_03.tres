@@ -1,9 +1,11 @@
-[gd_resource type="Resource" script_class="ShiftData" load_steps=3 format=3]
+[gd_resource type="Resource" script_class="ShiftData" format=3 uid="uid://d0lral630pgr8"]
 
-[ext_resource type="Script" path="res://Scenes/shift_data.gd" id="1_shift_data"]
-[ext_resource type="Resource" path="res://Assets/Cases/case_01_debug.tres" id="2_case"]
+[ext_resource type="Script" uid="uid://dyxpn0feejs5a" path="res://Scenes/case_data.gd" id="1_case_data"]
+[ext_resource type="Script" uid="uid://cvc4kljkh5fmu" path="res://Scenes/Shifts/shift_data.gd" id="1_shift_data"]
+[ext_resource type="Resource" path="res://Resources/Cases/case_10.tres" id="2_case_10"]
+[ext_resource type="Resource" path="res://Resources/Cases/case_12.tres" id="3_case_12"]
 
 [resource]
 script = ExtResource("1_shift_data")
 display_name = "Night Intake"
-cases = Array[Resource]([ExtResource("2_case")])
+cases = Array[ExtResource("1_case_data")]([ExtResource("2_case_10"), ExtResource("3_case_12")])
