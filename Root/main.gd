@@ -4,7 +4,6 @@ extends Node2D
 ## one shift; the same CaseData can intentionally be reused across shifts.
 
 const FILE_ENTITY_SCENE := preload("res://Scenes/file_entity.tscn")
-const FILING_TRAY_SCENE := preload("res://Scenes/filing_tray.tscn")
 
 ## One scene per Record-of-Outcomes ending (Scenes/Endings/). Keyed by the
 ## same StringName ids GameScore.evaluate_ending() returns.
@@ -67,6 +66,7 @@ const FILE_PAPER_SIZE := Vector2(171, 342)
 @onready var eyelids: EyelidOverlay = $EyelidOverlay
 @onready var case_container: CaseContainer = $Desk/CaseContainer
 @onready var desk_clipboard: DeskProp = $Desk/Clipboard
+@onready var cabinet: FilingCabinet = $Desk/Cabinet
 var active_file: FileEntity
 var _printer: SlipPrinter
 var _shift_index := 0
@@ -84,7 +84,6 @@ func _ready() -> void:
 	SFX.start_loop(&"ambience_crickets")
 	_start_ambient(&"door_knock", knock_min_sec, knock_max_sec)
 	_start_ambient(&"whisper", whisper_min_sec, whisper_max_sec)
-	_spawn_trays()
 	_printer = SLIP_PRINTER_SCENE.instantiate()
 	_printer.position = get_viewport_rect().size * Vector2(0.82, 0.08)
 	add_child(_printer)
@@ -96,6 +95,8 @@ func _ready() -> void:
 	case_container.case_pulled.connect(_on_case_pulled)
 	desk_clipboard.can_interact = _is_desk_free
 	desk_clipboard.tapped.connect(clipboard_panel.open)
+	# Drawers slide open under a hovering mouse only while the desk is free.
+	cabinet.can_interact = _is_desk_free
 	document_viewer.closed.connect(_on_document_closed)
 	shift_screen.begin_requested.connect(_begin_current_shift)
 	# The game opens with the eyes shut: the first shift card is read in the
@@ -193,7 +194,17 @@ func _is_desk_free() -> bool:
 		and active_file == null \
 		and not document_viewer.visible \
 		and not shift_screen.visible \
-		and not clipboard_panel.is_open()
+		and not clipboard_panel.is_open() \
+		and not _is_file_held()
+
+
+## True while the player is carrying a desk file towards the cabinet, so the
+## props it passes over don't light up underneath it.
+func _is_file_held() -> bool:
+	for child in get_children():
+		if child is FileEntity and child.is_held():
+			return true
+	return false
 
 
 func _open_document(file: FileEntity) -> void:
@@ -212,18 +223,6 @@ func _on_document_closed(redaction_result: Dictionary, ink_image: Image, bleed_i
 		active_file.set_redaction_result(redaction_result)
 		active_file.set_interaction_enabled(_desk_input_enabled)
 	active_file = null
-
-
-func _spawn_trays() -> void:
-	var viewport_size := get_viewport_rect().size
-	var tray_x := viewport_size.x * 0.82
-	# ANY is a case-side marker, not a drawer, so it is not spawned here.
-	for index in FilingTray.SPAWNED_TRAY_TYPES.size():
-		var type: int = FilingTray.SPAWNED_TRAY_TYPES[index]
-		var tray: FilingTray = FILING_TRAY_SCENE.instantiate()
-		tray.tray_type = type
-		tray.position = Vector2(tray_x, viewport_size.y * (0.25 + 0.25 * index))
-		add_child(tray)
 
 
 func _on_file_filed(tray_type: int, redaction_result: Dictionary, case_data: CaseData) -> void:

@@ -192,19 +192,11 @@ func _try_drop(screen_pos: Vector2) -> void:
 		_return_to_desk()
 
 
-## The tray the player is pointing at. The paper is taller than the gap
-## between trays, so it usually overlaps all three at once — the overlap list
-## alone would pick an arbitrary one. The pointer is what decides.
+## The drawer the player is pointing at. The trays are the filing cabinet's
+## drawers, traced to the drawer art, so the pointer alone decides: letting
+## go anywhere off a drawer front puts the paper back on the desk.
 func _tray_at(screen_pos: Vector2) -> FilingTray:
-	var best: FilingTray = null
-	var best_distance := INF
-	for area in get_overlapping_areas():
-		if area is FilingTray:
-			var distance: float = area.global_position.distance_to(screen_pos)
-			if distance < best_distance:
-				best_distance = distance
-				best = area
-	return best
+	return FilingTray.tray_at(get_tree(), screen_pos)
 
 
 func _set_hover_tray(tray: FilingTray) -> void:
@@ -223,7 +215,7 @@ func _commit_to_tray(tray: FilingTray) -> void:
 	var tray_type: int = tray.tray_type
 	SFX.play(_filing_sound(tray_type))
 	var tw := create_tween()
-	tw.tween_property(self, "global_position", tray.global_position, file_time_sec) \
+	tw.tween_property(self, "global_position", tray.get_drop_point(), file_time_sec) \
 		.set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
 	tw.parallel().tween_property(self, "scale", scale * 0.55, file_time_sec)
 	tw.parallel().tween_property(self, "modulate:a", 0.0, file_time_sec)
