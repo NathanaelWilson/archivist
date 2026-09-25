@@ -3,3 +3,6 @@
 /android/
 .DS_Store
 **/.DS_Store
+
+# Screenshots/previews saved by Claude
+Claude outputs/
