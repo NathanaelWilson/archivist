@@ -37,4 +37,4 @@ Atur volume/variasi pitch per suara di `Scenes/sfx.gd` → `SOUNDS`.
 Belum dipakai: thunder.mp3.
 
 ## Music (`Scenes/music.gd`)
-menu → (main menu) The Lobotomy · ingame → (ingame) Art Of A Dead Man · ending → (ending 1) MELANCHOLIA (sementara untuk keempat ending). Pindah lagu otomatis dengan crossfade.
+menu → (main menu) The Lobotomy · ingame → (ingame) Art Of A Dead Man · ending → masing-masing: loyalist_ending / liability_ending / paranoid_ending / zealot_ending. Pindah lagu otomatis dengan crossfade.

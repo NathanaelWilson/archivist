@@ -32,7 +32,7 @@ func _ready() -> void:
 
 func present() -> void:
 	visible = true
-	Music.play(&"ending")
+	Music.play(StringName("ending_%s" % ending_id)) # e.g. ending_zealot
 	# Per-ending stinger (ending_<id>) if it exists, otherwise the shared one.
 	if not SFX.play(StringName("ending_%s" % ending_id)):
 		SFX.play(&"ending_reveal")
