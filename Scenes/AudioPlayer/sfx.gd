@@ -22,6 +22,7 @@ const SOUNDS := {
 	&"file_pickup": {"pitch_var": 0.08},          # paper lifted off the desk
 	&"file_return": {"pitch_var": 0.08},          # dropped outside a tray, slides back
 	&"tray_hover": {"volume_db": -8.0},           # held file enters a tray
+	&"cabinet_open": {"volume_db": -10, "pitch_var": 0.05, "path": "res://Assets/SFX/cabinet-open.mp3"}, # a cabinet drawer slides out (filing_cabinet.gd)
 	&"file_archive": {},                          # filed into Public Archive
 	&"file_truth": {},                            # filed into Department of Truth
 	&"file_incinerate": {},                       # filed into Incinerator
@@ -52,7 +53,7 @@ const SOUNDS := {
 	&"ui_hover": {"volume_db": -10.0, "pitch_var": 0.05},
 	&"ui_click": {},
 	&"page_flip": {"path": "res://Assets/SFX/FlippingPages.ogg"},
-	&"slot_select": {},
+	&"slot_select": {"path": "res://Assets/SFX/click.mp3"}, # clicked a filed (unlocked) outcome
 	&"slot_locked": {"volume_db": -4.0, "path": "res://Assets/SFX/error-sound.mp3"}, # clicked a not-yet-filed outcome
 }
 

@@ -196,11 +196,7 @@ func _try_drop(screen_pos: Vector2) -> void:
 ## drawers, traced to the drawer art, so the pointer alone decides: letting
 ## go anywhere off a drawer front puts the paper back on the desk.
 func _tray_at(screen_pos: Vector2) -> FilingTray:
-	for node in get_tree().get_nodes_in_group(FilingTray.GROUP):
-		var tray := node as FilingTray
-		if tray != null and tray.contains_point(screen_pos):
-			return tray
-	return null
+	return FilingTray.tray_at(get_tree(), screen_pos)
 
 
 func _set_hover_tray(tray: FilingTray) -> void:
@@ -219,7 +215,7 @@ func _commit_to_tray(tray: FilingTray) -> void:
 	var tray_type: int = tray.tray_type
 	SFX.play(_filing_sound(tray_type))
 	var tw := create_tween()
-	tw.tween_property(self, "global_position", tray.global_position, file_time_sec) \
+	tw.tween_property(self, "global_position", tray.get_drop_point(), file_time_sec) \
 		.set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
 	tw.parallel().tween_property(self, "scale", scale * 0.55, file_time_sec)
 	tw.parallel().tween_property(self, "modulate:a", 0.0, file_time_sec)

@@ -66,6 +66,7 @@ const FILE_PAPER_SIZE := Vector2(171, 342)
 @onready var eyelids: EyelidOverlay = $EyelidOverlay
 @onready var case_container: CaseContainer = $Desk/CaseContainer
 @onready var desk_clipboard: DeskProp = $Desk/Clipboard
+@onready var cabinet: FilingCabinet = $Desk/Cabinet
 var active_file: FileEntity
 var _printer: SlipPrinter
 var _shift_index := 0
@@ -94,6 +95,8 @@ func _ready() -> void:
 	case_container.case_pulled.connect(_on_case_pulled)
 	desk_clipboard.can_interact = _is_desk_free
 	desk_clipboard.tapped.connect(clipboard_panel.open)
+	# Drawers slide open under a hovering mouse only while the desk is free.
+	cabinet.can_interact = _is_desk_free
 	document_viewer.closed.connect(_on_document_closed)
 	shift_screen.begin_requested.connect(_begin_current_shift)
 	# The game opens with the eyes shut: the first shift card is read in the

@@ -14,21 +14,30 @@ shader_type canvas_item;
 //      object touches the edge of its own slice.
 //
 // DeskProp builds its touch mask from the same cut-off, so what you see
-// outlined is exactly what you can touch.
+// outlined is exactly what you can touch. InteractableOutline uses this same
+// shader for the main-menu buttons, so every outline in the game matches.
 
 uniform float alpha_floor : hint_range(0.0, 1.0) = 0.55;
 uniform float alpha_ceiling : hint_range(0.0, 1.0) = 0.8;
-uniform vec4 outline_color : source_color = vec4(0.96, 0.93, 0.82, 1.0);
+uniform vec4 outline_color : source_color = vec4(1.0, 1.0, 1.0, 1.0);
 uniform float outline_width = 10.0; // in source-art pixels
 uniform bool outline_enabled = false;
+// How far the quad is grown, and how much UV one unit of VERTEX covers. Left
+// at 0 for a Sprite2D, where one local unit IS one texel. A Control draws its
+// texture at whatever size it is laid out at, so InteractableOutline sets
+// these from the drawn rect.
+uniform float grow_units = 0.0;
+uniform vec2 uv_per_unit = vec2(0.0);
 
 varying vec4 v_modulate;
 
 void vertex() {
 	v_modulate = COLOR;
-	vec2 grow = sign(UV - 0.5) * (outline_width + 2.0);
+	vec2 per_unit = uv_per_unit.x > 0.0 ? uv_per_unit : TEXTURE_PIXEL_SIZE;
+	float amount = grow_units > 0.0 ? grow_units : outline_width + 2.0;
+	vec2 grow = sign(UV - 0.5) * amount;
 	VERTEX += grow;
-	UV += grow * TEXTURE_PIXEL_SIZE;
+	UV += grow * per_unit;
 }
 
 float inside(vec2 uv) {

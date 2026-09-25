@@ -1,35 +1,72 @@
 [gd_scene format=3]
 
 [ext_resource type="Script" path="res://Scenes/Desk/desk.gd" id="1_desk"]
-[ext_resource type="Texture2D" uid="uid://dkm04004dq7ju" path="res://Assets/Images/Background/menu-bg.jpg" id="2_bg"]
+[ext_resource type="Texture2D" uid="uid://drwdodifju043" path="res://Assets/Images/Background/background_layer1.jpg" id="2_layer1"]
 [ext_resource type="Script" path="res://Scenes/Desk/case_container.gd" id="3_container_script"]
 [ext_resource type="Texture2D" uid="uid://bnri5t4cj61fk" path="res://Assets/Objects/container_on.png" id="4_container"]
 [ext_resource type="Script" path="res://Scenes/Desk/desk_prop.gd" id="5_prop_script"]
 [ext_resource type="Texture2D" uid="uid://drku8yx1vp3rg" path="res://Assets/Objects/clipboard_on.png" id="6_clipboard"]
 [ext_resource type="PackedScene" path="res://Scenes/filing_tray.tscn" id="7_tray"]
+[ext_resource type="Texture2D" uid="uid://dmjh2f4pqqq04" path="res://Assets/Images/Background/background_on_layer2.png" id="8_layer2"]
+[ext_resource type="Script" path="res://Scenes/Desk/filing_cabinet.gd" id="9_cabinet_script"]
+[ext_resource type="Texture2D" uid="uid://bjyhpe82dae4p" path="res://Assets/Objects/cabinet_on_closed.png" id="10_cab_closed"]
+[ext_resource type="Texture2D" uid="uid://bxq5uyiiutn2y" path="res://Assets/Objects/cabinet_on_open1.png" id="11_cab_open1"]
+[ext_resource type="Texture2D" uid="uid://b6u48y3w01p8f" path="res://Assets/Objects/cabinet_on_open2.png" id="12_cab_open2"]
+[ext_resource type="Texture2D" uid="uid://ciu6p342bajq6" path="res://Assets/Objects/cabinet_on_open3.png" id="13_cab_open3"]
 
 [node name="Desk" type="Node2D"]
 texture_filter = 4
 script = ExtResource("1_desk")
 
 [node name="Background" type="Sprite2D" parent="."]
-texture = ExtResource("2_bg")
+texture = ExtResource("2_layer1")
 centered = false
 
-[node name="PublicArchive" parent="." instance=ExtResource("7_tray")]
-position = Vector2(3720, 427)
+[node name="RoomGrade" type="Sprite2D" parent="."]
+texture = ExtResource("8_layer2")
+centered = false
+
+[node name="Cabinet" type="Sprite2D" parent="."]
+position = Vector2(2936, 0)
+texture = ExtResource("10_cab_closed")
+centered = false
+script = ExtResource("9_cabinet_script")
+interactive = false
+closed_texture = ExtResource("10_cab_closed")
+open_textures = Array[Texture2D]([ExtResource("11_cab_open1"), ExtResource("12_cab_open2"), ExtResource("13_cab_open3")])
+
+[node name="PublicArchive" parent="Cabinet" instance=ExtResource("7_tray")]
 tray_type = 0
-drawer_polygon = PackedVector2Array(-310, -221, 363, -221, 314, 221, -364, 221)
 
-[node name="DepartmentOfTruth" parent="." instance=ExtResource("7_tray")]
-position = Vector2(3646, 892)
+[node name="ClosedArea" parent="Cabinet/PublicArchive" index="0"]
+polygon = PackedVector2Array(472, 220, 1144, 220, 1060, 656, 406, 656)
+
+[node name="OpenArea" parent="Cabinet/PublicArchive" index="1"]
+polygon = PackedVector2Array(440, 216, 1147, 216, 1147, 640, 1096, 798, 444, 798, 398, 720, 410, 330)
+
+[node name="DepartmentOfTruth" parent="Cabinet" instance=ExtResource("7_tray")]
 tray_type = 1
-drawer_polygon = PackedVector2Array(-302, -218, 365, -218, 323, 212, -366, 218)
 
-[node name="Incinerator" parent="." instance=ExtResource("7_tray")]
-position = Vector2(3576, 1343)
+[node name="ClosedArea" parent="Cabinet/DepartmentOfTruth" index="0"]
+polygon = PackedVector2Array(384, 684, 1050, 684, 994, 1096, 314, 1096)
+
+[node name="OpenArea" parent="Cabinet/DepartmentOfTruth" index="1"]
+polygon = PackedVector2Array(380, 680, 1050, 680, 1086, 822, 990, 1240, 360, 1240, 314, 1096, 330, 880)
+
+[node name="Incinerator" parent="Cabinet" instance=ExtResource("7_tray")]
 tray_type = 2
-drawer_polygon = PackedVector2Array(-312, -213, 325, -213, 289, 213, -260, 213, -280, 97, -324, -63)
+
+[node name="ClosedArea" parent="Cabinet/Incinerator" index="0"]
+polygon = PackedVector2Array(306, 1126, 936, 1126, 848, 1520, 244, 1520)
+
+[node name="OpenArea" parent="Cabinet/Incinerator" index="1"]
+polygon = PackedVector2Array(306, 1122, 936, 1122, 972, 1256, 882, 1656, 280, 1656, 244, 1520, 262, 1300)
+
+[node name="DeskFront" type="Sprite2D" parent="."]
+texture = ExtResource("8_layer2")
+centered = false
+script = ExtResource("5_prop_script")
+interactive = false
 
 [node name="CaseContainer" type="Sprite2D" parent="."]
 position = Vector2(1494, 414)
@@ -42,3 +79,7 @@ position = Vector2(901, 873)
 texture = ExtResource("6_clipboard")
 centered = false
 script = ExtResource("5_prop_script")
+
+[editable path="Cabinet/PublicArchive"]
+[editable path="Cabinet/DepartmentOfTruth"]
+[editable path="Cabinet/Incinerator"]

@@ -20,7 +20,6 @@ Atur volume/variasi pitch per suara di `Scenes/sfx.gd` → `SOUNDS`.
 | ending_loyalist / _liability / _paranoid / _zealot | Stinger khusus per ending (opsional) |
 | clock_out | Tombol CLOCK OUT |
 | ui_hover / ui_click | Hover / klik tombol main menu |
-| slot_select | Klik slot di Record of Outcomes |
 | page_flip | Buka/tutup Records (memakai FlippingPages.ogg) |
 
 ## Sudah tersambung ke file yang ada
@@ -33,6 +32,8 @@ Atur volume/variasi pitch per suara di `Scenes/sfx.gd` → `SOUNDS`.
 | case_arrive | paper-slide.mp3 | Case baru muncul di meja |
 | slot_locked | error-sound.mp3 | Klik outcome yang belum unlock di Record of Outcomes |
 | printer | printer.mp3 | Belum dipakai: panggil `SFX.play(&"printer")` saat mesin cetak dibuat |
+| cabinet_open | cabinet-open.mp3 | Laci cabinet terbuka (setiap gambar berganti ke laci terbuka) |
+| slot_select | click.mp3 | Klik slot yang sudah terbuka (unlocked) di Record of Outcomes |
 
 Belum dipakai: thunder.mp3.
 

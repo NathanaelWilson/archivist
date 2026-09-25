@@ -21,12 +21,16 @@ signal tapped
 
 @export var alpha_floor := 0.55
 @export var alpha_ceiling := 0.8
-@export var outline_color := Color(0.96, 0.93, 0.82, 1.0)
+@export var outline_color := Color(1, 1, 1, 1)
 ## In source-art pixels. The desk is drawn at roughly 0.23x, so 10 is about
 ## two screen pixels.
 @export var outline_width := 10.0
 ## A touch that wanders further than this (viewport pixels) is not a tap.
 @export var tap_slop := 12.0
+## Off for art that is only drawn with the cut-off (the desk front, the
+## cabinet): it never outlines or reacts, but contains_point() still works,
+## e.g. to tell whether the desk is covering something behind it.
+@export var interactive := true
 
 const SHADER := preload("res://Shaders/desk_prop.gdshader")
 
@@ -123,7 +127,7 @@ func _unhandled_input(event: InputEvent) -> void:
 
 ## False while this prop has nothing to offer (e.g. an empty case tray).
 func _accepts_input() -> bool:
-	return true
+	return interactive
 
 
 func _on_press(_screen_position: Vector2) -> void:
