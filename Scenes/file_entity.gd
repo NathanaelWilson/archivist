@@ -44,6 +44,8 @@ var _redaction_result: Dictionary = {"is_valid": false, "reason": "Document has 
 ## Ink the player has put on this document, kept while the viewer is closed.
 ## null until the document is opened and closed for the first time.
 var ink_image: Image
+## How far that ink has bled, for cases whose marker bleeds. Never scored.
+var bleed_image: Image
 
 
 func _ready() -> void:
@@ -51,6 +53,13 @@ func _ready() -> void:
 	_rest_rotation = rotation
 	monitoring = true
 	monitorable = true
+
+
+## Moves the file and makes that its resting spot, so a drop outside every
+## tray slides it back here rather than to where it was spawned.
+func place_at(point: Vector2) -> void:
+	position = point
+	_rest_position = point
 
 
 func set_interaction_enabled(enabled: bool) -> void:

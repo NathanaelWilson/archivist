@@ -15,8 +15,11 @@ const SILENT_DB := -40.0
 const TRACKS := {
 	&"menu": {"path": "res://Assets/Music/(main menu) The Lobotomy.mp3", "volume_db": -6.0},
 	&"ingame": {"path": "res://Assets/Music/(ingame) Art Of A Dead Man ( Dark, Suspenseful, Tension, Music, Choir, Gothic ).mp3", "volume_db": -10.0},
-	# One ending track for all four endings for now.
-	&"ending": {"path": "res://Assets/Music/(ending 1) MELANCHOLIA Music Box Sad, creepy song.mp3", "volume_db": -6.0},
+	# One track per Record-of-Outcomes ending; keys are "ending_<ending_id>".
+	&"ending_loyalist": {"path": "res://Assets/Music/loyalist_ending.mp3", "volume_db": -6.0},
+	&"ending_liability": {"path": "res://Assets/Music/liability_ending.mp3", "volume_db": -6.0},
+	&"ending_paranoid": {"path": "res://Assets/Music/paranoid_ending.mp3", "volume_db": -6.0},
+	&"ending_zealot": {"path": "res://Assets/Music/zealot_ending.mp3", "volume_db": -6.0},
 }
 
 var _players: Array[AudioStreamPlayer] = []

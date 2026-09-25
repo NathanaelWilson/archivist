@@ -9,4 +9,5 @@ id = "CASE-07"
 anomaly_regions = Array[Rect2]([Rect2(0.42379183, 0.41449812, 0.16109046, 0.05297397)])
 overspill_regions = Array[Rect2]([Rect2(0.38289964, 0.4070632, 0.23667906, 0.091078065)])
 required_coverage = 0.9
+ink_bleeds = true
 asset = ExtResource("1_art")
