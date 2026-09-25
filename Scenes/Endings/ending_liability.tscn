@@ -2,23 +2,10 @@
 
 [ext_resource type="Script" path="res://Scenes/Endings/ending_screen.gd" id="1_ending_screen"]
 
-[sub_resource type="StyleBoxFlat" id="StyleBox_panel"]
-bg_color = Color(0.12, 0.105, 0.085, 0.98)
-border_width_left = 2
-border_width_top = 2
-border_width_right = 2
-border_width_bottom = 2
-border_color = Color(0.62, 0.55, 0.42, 1)
-corner_radius_top_left = 6
-corner_radius_top_right = 6
-corner_radius_bottom_right = 6
-corner_radius_bottom_left = 6
-
 [node name="EndingLiability" type="CanvasLayer"]
 layer = 30
 script = ExtResource("1_ending_screen")
 ending_id = &"liability"
-body_text = "What you let through is real now. One of those things is in the room."
 
 [node name="Overlay" type="Control" parent="."]
 layout_mode = 3
@@ -46,39 +33,20 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="Panel" type="PanelContainer" parent="Overlay/Center"]
-custom_minimum_size = Vector2(520, 320)
+[node name="Content" type="VBoxContainer" parent="Overlay/Center"]
 layout_mode = 2
-theme_override_styles/panel = SubResource("StyleBox_panel")
+theme_override_constants/separation = 10
 
-[node name="Margin" type="MarginContainer" parent="Overlay/Center/Panel"]
+[node name="Notice" type="TextureRect" parent="Overlay/Center/Content"]
+custom_minimum_size = Vector2(248, 330)
 layout_mode = 2
-theme_override_constants/margin_left = 36
-theme_override_constants/margin_top = 32
-theme_override_constants/margin_right = 36
-theme_override_constants/margin_bottom = 32
+mouse_filter = 2
+expand_mode = 1
+stretch_mode = 5
 
-[node name="Content" type="VBoxContainer" parent="Overlay/Center/Panel/Margin"]
+[node name="ClockOutButton" type="Button" parent="Overlay/Center/Content"]
+custom_minimum_size = Vector2(200, 40)
 layout_mode = 2
-theme_override_constants/separation = 20
-
-[node name="Title" type="Label" parent="Overlay/Center/Panel/Margin/Content"]
-layout_mode = 2
-theme_override_colors/font_color = Color(0.9, 0.82, 0.62, 1)
-theme_override_font_sizes/font_size = 42
-text = "The Liability"
-horizontal_alignment = 1
-
-[node name="Body" type="Label" parent="Overlay/Center/Panel/Margin/Content"]
-layout_mode = 2
-theme_override_colors/font_color = Color(0.78, 0.73, 0.64, 1)
+size_flags_horizontal = 4
 theme_override_font_sizes/font_size = 18
-autowrap_mode = 2
-horizontal_alignment = 1
-text = "What you let through is real now. One of those things is in the room."
-
-[node name="ClockOutButton" type="Button" parent="Overlay/Center/Panel/Margin/Content"]
-custom_minimum_size = Vector2(0, 54)
-layout_mode = 2
-theme_override_font_sizes/font_size = 20
 text = "CLOCK OUT"

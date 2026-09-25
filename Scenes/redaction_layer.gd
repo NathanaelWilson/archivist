@@ -260,6 +260,8 @@ func evaluate_redaction() -> Dictionary:
 					clean_ink_pixels += 1
 		var clean_result := {
 			"is_valid": clean_ink_pixels == 0,
+			# Nothing on this page needs covering, so any stroke is on clean paper.
+			"stray_stroke": clean_ink_pixels > 0,
 			"reason": "OK" if clean_ink_pixels == 0 else "This document needs no redaction — remove the ink.",
 			"coverage": 1.0,
 			"overspill": 0.0 if clean_ink_pixels == 0 else 1.0,
@@ -300,6 +302,7 @@ func evaluate_redaction() -> Dictionary:
 		reason = "Too much ink outside the anomaly (%.0f%% of ink, max %.0f%%)." % [overspill * 100.0, case_data.maximum_overspill * 100.0]
 	var result := {
 		"is_valid": is_valid,
+		"stray_stroke": _has_stray_stroke(),
 		"reason": reason,
 		"coverage": coverage,
 		"overspill": overspill,
@@ -311,6 +314,45 @@ func evaluate_redaction() -> Dictionary:
 	_update_debug_overlay(covered_enough, clean_enough)
 	redaction_evaluated.emit(result)
 	return result
+
+
+## True if any mark on the page sits entirely on clean paper — touching
+## neither the anomaly nor its safe zone. Works from the ink itself rather
+## than a stroke history, so it survives closing and reopening the file:
+## each separate blob of ink is traced, and a blob that never reaches an
+## allowed pixel is a stroke made at nothing. Strokes that overlap a valid
+## one merge with it and are not counted, since they were aimed at the
+## anomaly.
+func _has_stray_stroke() -> bool:
+	var width := ink_image.get_width()
+	var height := ink_image.get_height()
+	var visited := PackedByteArray()
+	visited.resize(width * height)
+	for start_y in height:
+		for start_x in width:
+			var start_index := start_y * width + start_x
+			if visited[start_index] != 0 or ink_image.get_pixel(start_x, start_y).a <= 0.5:
+				continue
+			# Flood the whole blob, noting whether any of it is allowed ink.
+			var touches_allowed := false
+			var stack: Array[Vector2i] = [Vector2i(start_x, start_y)]
+			visited[start_index] = 1
+			while not stack.is_empty():
+				var p: Vector2i = stack.pop_back()
+				if anomaly_mask.get_pixel(p.x, p.y).r > 0.25:
+					touches_allowed = true
+				for offset in [Vector2i.LEFT, Vector2i.RIGHT, Vector2i.UP, Vector2i.DOWN]:
+					var n: Vector2i = p + offset
+					if n.x < 0 or n.y < 0 or n.x >= width or n.y >= height:
+						continue
+					var n_index := n.y * width + n.x
+					if visited[n_index] != 0 or ink_image.get_pixel(n.x, n.y).a <= 0.5:
+						continue
+					visited[n_index] = 1
+					stack.append(n)
+			if not touches_allowed:
+				return true
+	return false
 
 
 func _create_canvases(image_size: Vector2i) -> void:

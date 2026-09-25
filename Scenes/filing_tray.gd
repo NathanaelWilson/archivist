@@ -26,6 +26,11 @@ static func is_wildcard(tray_type: int) -> bool:
 @export var tray_type: TrayType = TrayType.PUBLIC_ARCHIVE
 @export var brighten_color: Color = Color(1.25, 1.22, 1.1)
 @export var brighten_speed: float = 8.0
+## A light tick in the hand when a held file moves over this tray, so the
+## player can feel which drawer they are on without looking. Kept short and
+## weak on purpose — a hint, not a buzz.
+@export var hover_haptic_ms: int = 18
+@export_range(0.0, 1.0, 0.05) var hover_haptic_strength: float = 0.25
 
 @onready var visual: CanvasItem = $Visual
 @onready var label: Label = $Label
@@ -49,6 +54,8 @@ func set_hovered(value: bool) -> void:
 	_hovered = value
 	if _hovered:
 		SFX.play(&"tray_hover")
+		# Phones only; a desktop debug session has nothing to vibrate.
+		Input.vibrate_handheld(hover_haptic_ms, hover_haptic_strength)
 
 
 func _process(delta: float) -> void:

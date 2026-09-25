@@ -55,6 +55,13 @@ func _ready() -> void:
 	monitorable = true
 
 
+## Moves the file and makes that its resting spot, so a drop outside every
+## tray slides it back here rather than to where it was spawned.
+func place_at(point: Vector2) -> void:
+	position = point
+	_rest_position = point
+
+
 func set_interaction_enabled(enabled: bool) -> void:
 	_interaction_enabled = enabled
 	_pending = false

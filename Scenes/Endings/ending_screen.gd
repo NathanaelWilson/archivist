@@ -3,22 +3,22 @@ extends CanvasLayer
 
 ## Shared behaviour for the four Record-of-Outcomes ending screens — one
 ## scene per ending (ending_loyalist / ending_liability / ending_paranoid /
-## ending_zealot.tscn). Each scene sets its own `ending_id` and `body_text`
-## in the Inspector; Main picks which scene to instantiate from
-## GameScore.evaluate_ending() and calls present() on it.
+## ending_zealot.tscn). Each scene only sets its `ending_id`; Main picks which
+## scene to instantiate from GameScore.evaluate_ending() and calls present().
 ##
-## This is a placeholder presentation (title + one GDD line + a CLOCK OUT
-## button) — the full notice art / body-horror beat from the GDD's "How all
-## four are delivered" section isn't built yet.
+## The ending itself is the notice art in Assets/Endings/. Each file is named
+## after its ending (Loyalist.png, Liability.png, Paranoid.png, Zealot.png),
+## so the notice is found from ending_id alone — adding a fifth ending is a
+## new id plus a matching image, nothing else.
 
 signal clocked_out
 
-@export var ending_id: StringName = &""
-@export_multiline var body_text: String = ""
+const NOTICE_PATH_FORMAT := "res://Assets/Endings/%s.png"
 
-@onready var title_label: Label = $Overlay/Center/Panel/Margin/Content/Title
-@onready var body_label: Label = $Overlay/Center/Panel/Margin/Content/Body
-@onready var clock_out_button: Button = $Overlay/Center/Panel/Margin/Content/ClockOutButton
+@export var ending_id: StringName = &""
+
+@onready var notice: TextureRect = $Overlay/Center/Content/Notice
+@onready var clock_out_button: Button = $Overlay/Center/Content/ClockOutButton
 
 
 func _ready() -> void:
@@ -27,8 +27,7 @@ func _ready() -> void:
 		SFX.play(&"clock_out")
 		clocked_out.emit()
 	)
-	title_label.text = GameScore.get_display_name(ending_id)
-	body_label.text = body_text
+	notice.texture = _load_notice()
 
 
 func present() -> void:
@@ -37,3 +36,12 @@ func present() -> void:
 	# Per-ending stinger (ending_<id>) if it exists, otherwise the shared one.
 	if not SFX.play(StringName("ending_%s" % ending_id)):
 		SFX.play(&"ending_reveal")
+
+
+## "loyalist" -> res://Assets/Endings/Loyalist.png
+func _load_notice() -> Texture2D:
+	var path := NOTICE_PATH_FORMAT % String(ending_id).capitalize()
+	if not ResourceLoader.exists(path):
+		push_warning("EndingScreen: no notice art for '%s' at %s." % [ending_id, path])
+		return null
+	return load(path) as Texture2D

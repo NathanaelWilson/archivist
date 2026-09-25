@@ -5,11 +5,11 @@
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_eyelid"]
 shader = ExtResource("2_shader")
-shader_parameter/darkness = 0.0
+shader_parameter/openness = 1.0
 shader_parameter/blur = 0.0
 
 [node name="EyelidOverlay" type="CanvasLayer"]
-layer = 100
+layer = 15
 script = ExtResource("1_overlay")
 
 [node name="Eyelid" type="ColorRect" parent="."]

@@ -55,6 +55,11 @@ const FILE_PAPER_SIZE := Vector2(171, 342)
 ## Files lying on the painted desk are drawn at this scale (1.0 would make the
 ## placeholder paper almost as tall as the screen).
 @export var desk_file_scale := 0.4
+## Where a case pulled from the tray is laid down, as a fraction of the
+## screen. The trays and printer sit on the right, so the middle of the
+## free desk is a little left of the screen's centre.
+@export var desk_center := Vector2(0.45, 0.55)
+@export var case_slide_sec := 0.18
 
 @onready var document_viewer: DocumentViewer = $DocumentViewer
 @onready var shift_screen: ShiftScreen = $ShiftScreen
@@ -85,21 +90,21 @@ func _ready() -> void:
 	add_child(_printer)
 	# The clipboard asks Main which board is live, so swaps stay Main's call.
 	clipboard_panel.board_source = get_active_board
-	# The desk art itself is the interface: cases are dragged out of the tray,
-	# and the rules are read by tapping the clipboard.
+	# The desk art itself is the interface: pressing the tray lays the case in
+	# the middle of the desk, and the rules are read by tapping the clipboard.
 	case_container.can_interact = _is_desk_free
-	case_container.pulled_paper_size = FILE_PAPER_SIZE * desk_file_scale
 	case_container.case_pulled.connect(_on_case_pulled)
 	desk_clipboard.can_interact = _is_desk_free
 	desk_clipboard.tapped.connect(clipboard_panel.open)
 	document_viewer.closed.connect(_on_document_closed)
 	shift_screen.begin_requested.connect(_begin_current_shift)
+	# The game opens with the eyes shut: the first shift card is read in the
+	# dark, and pressing BEGIN opens them onto the desk.
+	eyelids.close_now()
 	_show_current_shift()
 
 
 func _show_current_shift() -> void:
-	# The eyes only blink while there is work in front of them.
-	eyelids.stop_blinking()
 	if _shift_index >= shifts.size():
 		_present_ending()
 		return
@@ -122,15 +127,15 @@ func _begin_current_shift() -> void:
 	shift_screen.dismiss()
 	_case_index = 0
 	_spawn_next_case()
-	# The very first shift is the archivist waking up at the desk; later
-	# shifts just carry on blinking.
+	# Every shift starts with the eyes opening onto the desk, and nothing can
+	# be touched until they have. On the very first shift the rules board is
+	# the first thing in front of them, so the player reads the rules before
+	# touching a single file.
+	_set_desk_input_enabled(false)
+	await eyelids.play_wake()
+	_set_desk_input_enabled(true)
 	if _shift_index == 0:
-		# Nothing can be touched until the eyes have finished opening.
-		_set_desk_input_enabled(false)
-		await eyelids.play_wake()
-		_set_desk_input_enabled(true)
-	else:
-		eyelids.start_blinking()
+		clipboard_panel.open()
 
 
 func _spawn_next_case() -> void:
@@ -142,24 +147,33 @@ func _spawn_next_case() -> void:
 
 
 ## A new case lands in the tray. It only becomes a file on the desk once the
-## player drags it out (see _on_case_pulled).
+## player presses the tray (see _on_case_pulled).
 func spawn_case(case_data: CaseData) -> void:
 	case_container.load_case(case_data)
 	SFX.play(&"case_arrive")
 
 
-## The player dragged the case out of the tray and let go: lay it on the desk
-## where it was dropped and open the case preview straight away. From then on
-## it is an ordinary desk file — tap to reopen, hold and drag to a tray.
-func _on_case_pulled(case_data: CaseData, screen_position: Vector2) -> void:
+## The player pressed the tray: the case slides out to the middle of the desk
+## and the case preview opens as soon as it lands. From then on it is an
+## ordinary desk file — tap to reopen, hold and drag to a tray.
+func _on_case_pulled(case_data: CaseData, from_position: Vector2) -> void:
 	var file: FileEntity = FILE_ENTITY_SCENE.instantiate()
 	file.case_data = case_data
 	file.scale = Vector2.ONE * desk_file_scale
-	file.position = _clamp_to_screen(screen_position, FILE_PAPER_SIZE * desk_file_scale)
-	file.set_interaction_enabled(_desk_input_enabled)
 	add_child(file)
 	file.filing_evaluated.connect(_on_file_filed.bind(case_data))
 	file.open_requested.connect(_open_document.bind(file))
+	var target := _clamp_to_screen(get_viewport_rect().size * desk_center, FILE_PAPER_SIZE * desk_file_scale)
+	# Untouchable while it is still moving; it becomes a normal file on landing.
+	file.set_interaction_enabled(false)
+	file.place_at(from_position)
+	var slide := create_tween()
+	slide.tween_method(file.place_at, from_position, target, case_slide_sec) \
+		.set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+	await slide.finished
+	if not is_instance_valid(file):
+		return
+	file.set_interaction_enabled(_desk_input_enabled)
 	_open_document(file)
 
 
@@ -282,7 +296,11 @@ func _exit_tree() -> void:
 	_stop_atmosphere()
 
 
+## Every shift ends with the eyes closing; the next shift card (or the ending)
+## is then read over closed eyes.
 func _finish_current_shift() -> void:
+	_set_desk_input_enabled(false)
+	await eyelids.play_sleep()
 	_shift_index += 1
 	_show_current_shift()
 
@@ -291,10 +309,8 @@ func _finish_current_shift() -> void:
 ## scene, and shows it in place of the old generic "SHIFT COMPLETE" screen.
 func _present_ending() -> void:
 	shift_screen.dismiss()
-	# After the last shift the eyes close for good, and the verdict fades up
-	# out of that darkness.
-	_set_desk_input_enabled(false)
-	await eyelids.play_sleep()
+	# The eyes already closed at the end of the last shift; the verdict is
+	# read in that darkness.
 	_stop_atmosphere()
 	var ending_id := GameScore.evaluate_ending()
 	OutcomeRecord.file_ending(ending_id)
@@ -307,4 +323,3 @@ func _present_ending() -> void:
 	add_child(ending)
 	ending.clocked_out.connect(func(): get_tree().change_scene_to_file(MAIN_MENU_SCENE_PATH))
 	ending.present()
-	eyelids.reveal()

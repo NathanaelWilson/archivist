@@ -12,16 +12,10 @@ extends Node
 
 signal score_changed(accuracy: int, paranoia: int)
 
-## --- Placeholder thresholds -------------------------------------------------
-## The GDD's real numbers ("The Four Endings > Scoring") are tuned for the
-## full 12-case game: Accuracy >= 10, Paranoia >= 6. Only case_01 + case_02
-## exist right now (Shift 1), so those numbers can never be reached — these
-## two are a stand-in scaled for testing with just that shift.
-## TODO(design/tech): replace with 10 / 6 once all 12 cases are wired into
-## shifts, or move to a formula that scales with cases-played if partial
-## testing still needs to work after that.
-@export var accuracy_threshold: int = 3
-@export var paranoia_threshold: int = 2
+## --- Thresholds (GDD "The Four Endings > Scoring") ----------------------
+## Accuracy is out of 15 across the full run; Paranoia has no cap.
+@export var accuracy_threshold: int = 10
+@export var paranoia_threshold: int = 6
 
 var accuracy: int = 0
 var paranoia: int = 0
@@ -55,30 +49,46 @@ func add_paranoia(amount: int = 1) -> void:
 	score_changed.emit(accuracy, paranoia)
 
 
-## Call once per filed case (main.gd does this from _on_file_filed, right
-## where it already has tray_type + redaction_result). Mirrors the GDD's
-## scoring rules 1:1 so the numbers stay meaningful as more cases come online:
-##   Accuracy — +1 for the right drawer, +1 more for correctly covering an
-##              actual anomaly (a clean case only ever earns the drawer point).
-##   Paranoia — +1 per case where any ink landed outside the anomaly/safe
-##              zones, +2 extra for incinerating a case that was clean all along.
+## Call once per filed case (main.gd does this from _on_file_filed). The GDD's
+## scoring, rule for rule:
+##
+##   ACCURACY — out of 15.
+##     Level-1 cases (1, 2, 6, 7, 8): +1 for covering the anomaly, +1 for the
+##       right drawer = 10. The drawer point needs the cover too: filing an
+##       uncovered anomaly in the right drawer is still passing it on
+##       unhandled. Without this, a player who never touches the paper would
+##       file everything "correctly" and reach exactly 10 — The Loyalist — and
+##       doing nothing must not score well.
+##     Clean cases (3, 4, 10): +1 for the right drawer = 3.
+##     Case 5 (Department of Truth), Case 9 (Incinerator): +1 each = 2.
+##     Case 12 (ANY): no drawer is right or wrong — worth nothing either way.
+##
+##   PARANOIA — no cap.
+##     +1 if any stroke on this case landed entirely on clean paper (a stroke
+##       touching neither the anomaly nor its safe zone). Counted once per
+##       case, however many such strokes, so a scribbler cannot run it up.
+##     +2 for burning something harmless: incinerating a document that
+##       belongs in the Public Archive.
 func register_case_result(case_data: CaseData, tray_type: int, redaction_result: Dictionary) -> void:
-	# A case whose correct_tray is ANY has no right or wrong drawer: the tray
-	# the player picked earns no Accuracy and costs no Paranoia either way.
-	# Its redaction is still scored like any other case.
 	var tray_matters: bool = not FilingTray.is_wildcard(case_data.correct_tray)
-	var correct_tray: bool = tray_matters and tray_type == case_data.correct_tray
-	var redaction_passed: bool = bool(redaction_result.get("is_valid", false))
-	var overspill: float = float(redaction_result.get("overspill", 0.0))
+	var right_drawer: bool = tray_matters and tray_type == case_data.correct_tray
+	var needs_cover: bool = case_data.level == CaseData.Level.WRONG
+	var covered: bool = needs_cover and bool(redaction_result.get("is_valid", false))
 
-	if correct_tray:
-		add_accuracy(1)
-	if case_data.level == CaseData.Level.WRONG and redaction_passed:
+	# --- Accuracy
+	if needs_cover:
+		if covered:
+			add_accuracy(1)
+			if right_drawer:
+				add_accuracy(1)
+	elif right_drawer:
 		add_accuracy(1)
 
-	if overspill > 0.0:
+	# --- Paranoia
+	if bool(redaction_result.get("stray_stroke", false)):
 		add_paranoia(1)
-	if tray_matters and case_data.level == CaseData.Level.CLEAN and tray_type == FilingTray.TrayType.INCINERATOR:
+	var harmless: bool = case_data.correct_tray == FilingTray.TrayType.PUBLIC_ARCHIVE
+	if harmless and tray_type == FilingTray.TrayType.INCINERATOR:
 		add_paranoia(2)
 
 
