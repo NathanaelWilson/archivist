@@ -2,16 +2,24 @@
 
 [ext_resource type="Script" uid="uid://crf05ya6i0cdp" path="res://Scenes/document_viewer.gd" id="1_viewer"]
 [ext_resource type="Script" uid="uid://dsme712y8c4gh" path="res://Scenes/redaction_layer.gd" id="2_redaction"]
+[ext_resource type="Shader" path="res://Shaders/backdrop_blur.gdshader" id="3_backdrop_blur"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_backdrop"]
+shader = ExtResource("3_backdrop_blur")
+shader_parameter/blur = 3.0
+shader_parameter/dim = 0.45
+shader_parameter/tint = Color(0.04, 0.035, 0.03, 1)
+shader_parameter/tint_strength = 0.25
 
 [node name="DocumentViewer" type="CanvasLayer" unique_id=32328139]
 layer = 10
 script = ExtResource("1_viewer")
 
 [node name="Backdrop" type="ColorRect" parent="." unique_id=932153457]
+material = SubResource("ShaderMaterial_backdrop")
 offset_right = 874.0
 offset_bottom = 402.0
 mouse_filter = 2
-color = Color(0.04, 0.035, 0.03, 0.94)
 
 [node name="Document" type="Node2D" parent="." unique_id=1986786357]
 

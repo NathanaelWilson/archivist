@@ -1,13 +1,17 @@
-[gd_scene format=3]
+[gd_scene format=3 uid="uid://bvmgjlyrss2ip"]
 
-[ext_resource type="Script" path="res://Scenes/Endings/ending_screen.gd" id="1_ending_screen"]
+[ext_resource type="Script" uid="uid://wd52c7dw6e42" path="res://Scenes/Endings/ending_screen.gd" id="1_ending_screen"]
+[ext_resource type="Texture2D" uid="uid://cventjiq6ku4j" path="res://Assets/Blood/Blood.png" id="2_blood_a"]
+[ext_resource type="Texture2D" uid="uid://wkjq6luwvii3" path="res://Assets/Blood/Blood (1).png" id="3_blood_b"]
+[ext_resource type="Texture2D" uid="uid://ucdle64bf845" path="res://Assets/Blood/Blood (2).png" id="4_blood_c"]
+[ext_resource type="Texture2D" uid="uid://csnnyeosj57e0" path="res://Assets/Endings/Liability.png" id="9_notice"]
 
-[node name="EndingLiability" type="CanvasLayer"]
+[node name="EndingLiability" type="CanvasLayer" unique_id=1134133489]
 layer = 30
 script = ExtResource("1_ending_screen")
 ending_id = &"liability"
 
-[node name="Overlay" type="Control" parent="."]
+[node name="Overlay" type="Control" parent="." unique_id=1626015336]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -15,7 +19,7 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="Backdrop" type="ColorRect" parent="Overlay"]
+[node name="Backdrop" type="ColorRect" parent="Overlay" unique_id=1921990599]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -25,7 +29,7 @@ grow_vertical = 2
 mouse_filter = 2
 color = Color(0.025, 0.02, 0.015, 0.92)
 
-[node name="Center" type="CenterContainer" parent="Overlay"]
+[node name="Center" type="CenterContainer" parent="Overlay" unique_id=813977975]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -33,18 +37,66 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="Content" type="VBoxContainer" parent="Overlay/Center"]
+[node name="Content" type="VBoxContainer" parent="Overlay/Center" unique_id=1818338985]
 layout_mode = 2
 theme_override_constants/separation = 10
 
-[node name="Notice" type="TextureRect" parent="Overlay/Center/Content"]
+[node name="Notice" type="TextureRect" parent="Overlay/Center/Content" unique_id=1160528808]
 custom_minimum_size = Vector2(248, 330)
 layout_mode = 2
 mouse_filter = 2
+texture = ExtResource("9_notice")
 expand_mode = 1
 stretch_mode = 5
 
-[node name="ClockOutButton" type="Button" parent="Overlay/Center/Content"]
+[node name="Marks" type="Control" parent="Overlay/Center/Content/Notice" unique_id=955114505]
+texture_filter = 4
+clip_contents = true
+anchors_preset = 0
+offset_left = 0.25
+offset_right = 354.25
+offset_bottom = 472.0
+scale = Vector2(0.69915, 0.69915)
+mouse_filter = 2
+
+[node name="BloodTopRight" type="TextureRect" parent="Overlay/Center/Content/Notice/Marks" unique_id=429744713]
+layout_mode = 0
+offset_left = 205.0
+offset_top = -45.0
+offset_right = 429.57605
+offset_bottom = 165.4946
+rotation = 0.35
+pivot_offset = Vector2(95, 95)
+mouse_filter = 2
+texture = ExtResource("3_blood_b")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="BloodUnderText" type="TextureRect" parent="Overlay/Center/Content/Notice/Marks" unique_id=2018617609]
+layout_mode = 0
+offset_left = 110.0
+offset_top = 150.0
+offset_right = 290.0
+offset_bottom = 310.0
+mouse_filter = 2
+texture = ExtResource("4_blood_c")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="BloodBottomLeft" type="TextureRect" parent="Overlay/Center/Content/Notice/Marks" unique_id=1042003335]
+layout_mode = 0
+offset_left = -40.0
+offset_top = 290.0
+offset_right = 160.0
+offset_bottom = 490.0
+rotation = -0.2
+pivot_offset = Vector2(100, 100)
+mouse_filter = 2
+texture = ExtResource("2_blood_a")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="ClockOutButton" type="Button" parent="Overlay/Center/Content" unique_id=1337106721]
 custom_minimum_size = Vector2(200, 40)
 layout_mode = 2
 size_flags_horizontal = 4

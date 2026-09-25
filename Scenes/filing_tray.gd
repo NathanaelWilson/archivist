@@ -57,6 +57,11 @@ static func tray_at(tree: SceneTree, global_point: Vector2) -> FilingTray:
 
 
 @export var tray_type: TrayType = TrayType.PUBLIC_ARCHIVE
+## A light tick in the hand when a held file moves over this drawer, so the
+## player can feel which drawer they are on without looking. Kept short and
+## weak on purpose — a hint, not a buzz.
+@export var hover_haptic_ms: int = 18
+@export_range(0.0, 1.0, 0.05) var hover_haptic_strength: float = 0.25
 ## Shows the live touch area while playing (the shut shape, or the open
 ## shape while this drawer is out). Desk.debug_show_drawer_areas sets it on
 ## all three at once.
@@ -129,6 +134,8 @@ func set_hovered(value: bool) -> void:
 	_hovered = value
 	if _hovered:
 		SFX.play(&"tray_hover")
+		# Phones only; a desktop debug session has nothing to vibrate.
+		Input.vibrate_handheld(hover_haptic_ms, hover_haptic_strength)
 	hover_changed.emit(self, _hovered)
 
 

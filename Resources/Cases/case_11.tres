@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="CaseData" format=3]
+
+[ext_resource type="Texture2D" path="res://Assets/Images/Cases/Case_11.png" id="1_art"]
+[ext_resource type="Script" uid="uid://dyxpn0feejs5a" path="res://Scenes/case_data.gd" id="2_case_data"]
+
+[resource]
+script = ExtResource("2_case_data")
+id = "CASE-11"
+level = 1
+correct_tray = 1
+anomaly_regions = Array[Rect2]([Rect2(0.462963, 0.407407, 0.087963, 0.033333)])
+overspill_regions = Array[Rect2]([Rect2(0.435185, 0.355556, 0.138889, 0.100000)])
+required_coverage = 0.9
+cover_optional = true
+lights_flicker = true
+ink_bleeds = true
+asset = ExtResource("1_art")

@@ -1,6 +1,7 @@
 [gd_scene format=3]
 
 [ext_resource type="Script" path="res://Scenes/Endings/ending_screen.gd" id="1_ending_screen"]
+[ext_resource type="Texture2D" uid="uid://d04ewcnf80dla" path="res://Assets/Endings/Loyalist.png" id="9_notice"]
 
 [node name="EndingLoyalist" type="CanvasLayer"]
 layer = 30
@@ -41,6 +42,7 @@ theme_override_constants/separation = 10
 custom_minimum_size = Vector2(248, 330)
 layout_mode = 2
 mouse_filter = 2
+texture = ExtResource("9_notice")
 expand_mode = 1
 stretch_mode = 5
 

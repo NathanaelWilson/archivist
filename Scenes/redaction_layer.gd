@@ -36,7 +36,10 @@ const MAX_BLEED_SEEDS := 3000
 const DRIPS_PER_STROKE := Vector2i(1, 3)
 const DRIP_LENGTH := Vector2(18.0, 60.0)
 
-@export var show_debug_anomaly_regions := true
+## Draws the anomaly box (red / yellow / green) and safe zone (blue) over the
+## case while redacting. For tuning only — off for players. Tick it on the
+## RedactionLayer node in document_viewer.tscn to see the boxes again.
+@export var show_debug_anomaly_regions := false
 
 var case_data: CaseData
 var ink_image: Image

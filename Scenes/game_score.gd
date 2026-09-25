@@ -18,6 +18,13 @@ signal score_changed(accuracy: int, paranoia: int)
 @export var paranoia_threshold: int = 6
 
 var accuracy: int = 0
+## The Accuracy the cases filed so far could have earned, for judging how the
+## player is doing mid-run (see is_accuracy_low()). Case 11's optional cover
+## is not counted here — leaving it uncovered is a fair reading, not a miss.
+var accuracy_possible: int = 0
+## At a shift break, Accuracy below this share of what was possible counts as
+## the low-Accuracy path (storyboard p.9: the room starts to stain).
+@export_range(0.0, 1.0, 0.05) var low_accuracy_ratio: float = 0.5
 var paranoia: int = 0
 
 const ENDING_LOYALIST := &"loyalist"
@@ -35,6 +42,7 @@ const ENDING_DISPLAY_NAMES := {
 
 func reset() -> void:
 	accuracy = 0
+	accuracy_possible = 0
 	paranoia = 0
 	score_changed.emit(accuracy, paranoia)
 
@@ -52,7 +60,7 @@ func add_paranoia(amount: int = 1) -> void:
 ## Call once per filed case (main.gd does this from _on_file_filed). The GDD's
 ## scoring, rule for rule:
 ##
-##   ACCURACY — out of 15.
+##   ACCURACY — out of 17.
 ##     Level-1 cases (1, 2, 6, 7, 8): +1 for covering the anomaly, +1 for the
 ##       right drawer = 10. The drawer point needs the cover too: filing an
 ##       uncovered anomaly in the right drawer is still passing it on
@@ -61,6 +69,9 @@ func add_paranoia(amount: int = 1) -> void:
 ##       doing nothing must not score well.
 ##     Clean cases (3, 4, 10): +1 for the right drawer = 3.
 ##     Case 5 (Department of Truth), Case 9 (Incinerator): +1 each = 2.
+##     Case 11 (cover_optional, Department of Truth): +1 for the drawer, +1
+##       more if the smile was covered — covering is right, not covering is
+##       not wrong. Never adds Paranoia.
 ##     Case 12 (ANY): no drawer is right or wrong — worth nothing either way.
 ##
 ##   PARANOIA — no cap.
@@ -74,6 +85,22 @@ func register_case_result(case_data: CaseData, tray_type: int, redaction_result:
 	var right_drawer: bool = tray_matters and tray_type == case_data.correct_tray
 	var needs_cover: bool = case_data.level == CaseData.Level.WRONG
 	var covered: bool = needs_cover and bool(redaction_result.get("is_valid", false))
+
+	if case_data.cover_optional:
+		accuracy_possible += 1 if tray_matters else 0
+	elif needs_cover:
+		accuracy_possible += 2
+	elif tray_matters:
+		accuracy_possible += 1
+
+	# Two rules that cancel out: each reading is defensible, so the cover is a
+	# bonus, the drawer stands alone, and no choice here reads as paranoid.
+	if case_data.cover_optional:
+		if right_drawer:
+			add_accuracy(1)
+		if covered:
+			add_accuracy(1)
+		return
 
 	# --- Accuracy
 	if needs_cover:
@@ -90,6 +117,14 @@ func register_case_result(case_data: CaseData, tray_type: int, redaction_result:
 	var harmless: bool = case_data.correct_tray == FilingTray.TrayType.PUBLIC_ARCHIVE
 	if harmless and tray_type == FilingTray.TrayType.INCINERATOR:
 		add_paranoia(2)
+
+
+## True if the player has earned less than low_accuracy_ratio of the
+## Accuracy that was on offer so far. Checked by Main at each shift break.
+func is_accuracy_low() -> bool:
+	if accuracy_possible <= 0:
+		return false
+	return float(accuracy) / float(accuracy_possible) < low_accuracy_ratio
 
 
 ## Reads top-to-bottom exactly like the GDD's table — Zealot is checked first

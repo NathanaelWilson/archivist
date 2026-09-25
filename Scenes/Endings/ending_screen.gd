@@ -6,10 +6,11 @@ extends CanvasLayer
 ## ending_zealot.tscn). Each scene only sets its `ending_id`; Main picks which
 ## scene to instantiate from GameScore.evaluate_ending() and calls present().
 ##
-## The ending itself is the notice art in Assets/Endings/. Each file is named
-## after its ending (Loyalist.png, Liability.png, Paranoid.png, Zealot.png),
-## so the notice is found from ending_id alone — adding a fifth ending is a
-## new id plus a matching image, nothing else.
+## The ending itself is the notice art in Assets/Endings/. Each scene sets it
+## on its Notice node, so the art is visible in the editor while the marks
+## over it (blood, redaction bars) are placed. If a scene is left without one,
+## it is found by name instead — each file is named after its ending
+## (Loyalist.png, Liability.png, Paranoid.png, Zealot.png).
 
 signal clocked_out
 
@@ -27,7 +28,8 @@ func _ready() -> void:
 		SFX.play(&"clock_out")
 		clocked_out.emit()
 	)
-	notice.texture = _load_notice()
+	if notice.texture == null:
+		notice.texture = _load_notice()
 
 
 func present() -> void:

@@ -1,0 +1,47 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://Scenes/SplashScreen/splash_screen.gd" id="1_splash"]
+[ext_resource type="Shader" path="res://Shaders/backdrop_blur.gdshader" id="2_blur"]
+[ext_resource type="Texture2D" path="res://Assets/Images/SplashScreen/Photo.png" id="3_photo"]
+[ext_resource type="Texture2D" path="res://Assets/Images/Title.png" id="4_title"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_blur"]
+shader = ExtResource("2_blur")
+shader_parameter/blur = 3.0
+shader_parameter/dim = 0.3
+shader_parameter/tint = Color(0.04, 0.035, 0.03, 1)
+shader_parameter/tint_strength = 0.15
+
+[node name="SplashScreen" type="CanvasLayer"]
+layer = 12
+script = ExtResource("1_splash")
+
+[node name="Root" type="Control" parent="."]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="BlurredDesk" type="ColorRect" parent="Root"]
+material = SubResource("ShaderMaterial_blur")
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+
+[node name="Art" type="Node2D" parent="."]
+texture_filter = 4
+
+[node name="Photo" type="Sprite2D" parent="Art"]
+texture = ExtResource("3_photo")
+centered = false
+
+[node name="Title" type="Sprite2D" parent="Art"]
+texture = ExtResource("4_title")
+centered = false

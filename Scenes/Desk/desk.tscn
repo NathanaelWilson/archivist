@@ -13,10 +13,50 @@
 [ext_resource type="Texture2D" uid="uid://bxq5uyiiutn2y" path="res://Assets/Objects/cabinet_on_open1.png" id="11_cab_open1"]
 [ext_resource type="Texture2D" uid="uid://b6u48y3w01p8f" path="res://Assets/Objects/cabinet_on_open2.png" id="12_cab_open2"]
 [ext_resource type="Texture2D" uid="uid://ciu6p342bajq6" path="res://Assets/Objects/cabinet_on_open3.png" id="13_cab_open3"]
+[ext_resource type="Texture2D" uid="uid://b6yp868x76cq1" path="res://Assets/Images/Background/background_on.jpg" id="20_bg_on"]
+[ext_resource type="Texture2D" uid="uid://cdccay7g7mn0v" path="res://Assets/Images/Background/background_off.jpg" id="20_bg_off"]
+[ext_resource type="Texture2D" uid="uid://bjrvt0w0623f3" path="res://Assets/Images/Background/background_on_blood.jpg" id="20_bg_on_blood"]
+[ext_resource type="Texture2D" uid="uid://dx1rtawr0gyqo" path="res://Assets/Images/Background/background_off_blood.jpg" id="20_bg_off_blood"]
+[ext_resource type="Texture2D" uid="uid://cr2shjk5waaud" path="res://Assets/Objects/lamp_on.png" id="21_lamp_on"]
+[ext_resource type="Texture2D" uid="uid://djlm0f2uixp0o" path="res://Assets/Objects/lamp_off.png" id="21_lamp_off"]
+[ext_resource type="Texture2D" uid="uid://dpowi3rydkhpn" path="res://Assets/Objects/cabinet_on.png" id="22_cab_on"]
+[ext_resource type="Texture2D" uid="uid://cpffprmd2ek4j" path="res://Assets/Objects/cabinet_off.png" id="22_cab_off"]
+[ext_resource type="Texture2D" uid="uid://cofpd8sr17536" path="res://Assets/Objects/cabinet_on_blood.png" id="22_cab_on_blood"]
+[ext_resource type="Texture2D" uid="uid://cc4i38tgd1ktg" path="res://Assets/Objects/cabinet_off_blood.png" id="22_cab_off_blood"]
+[ext_resource type="Texture2D" uid="uid://cppc10w08ogi" path="res://Assets/Objects/container_off.png" id="23_container_off"]
+[ext_resource type="Texture2D" uid="uid://cgowcmd0vqp6h" path="res://Assets/Objects/clipboard_off.png" id="24_clipboard_off"]
+[ext_resource type="Texture2D" path="res://Assets/Objects/fax_on.png" id="25_fax_on"]
+[ext_resource type="Texture2D" path="res://Assets/Objects/fax_off.png" id="25_fax_off"]
+[ext_resource type="Shader" path="res://Shaders/desk_prop.gdshader" id="26_prop_shader"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_lamp"]
+shader = ExtResource("26_prop_shader")
+shader_parameter/alpha_floor = 0.55
+shader_parameter/alpha_ceiling = 0.8
+shader_parameter/outline_width = 0.0
 
 [node name="Desk" type="Node2D"]
 texture_filter = 4
 script = ExtResource("1_desk")
+layer1 = ExtResource("2_layer1")
+layer2 = ExtResource("8_layer2")
+background_on = ExtResource("20_bg_on")
+background_off = ExtResource("20_bg_off")
+background_on_blood = ExtResource("20_bg_on_blood")
+background_off_blood = ExtResource("20_bg_off_blood")
+lamp_on = ExtResource("21_lamp_on")
+lamp_off = ExtResource("21_lamp_off")
+cabinet_closed = ExtResource("10_cab_closed")
+cabinet_on = ExtResource("22_cab_on")
+cabinet_off = ExtResource("22_cab_off")
+cabinet_on_blood = ExtResource("22_cab_on_blood")
+cabinet_off_blood = ExtResource("22_cab_off_blood")
+container_on = ExtResource("4_container")
+container_off = ExtResource("23_container_off")
+clipboard_on = ExtResource("6_clipboard")
+clipboard_off = ExtResource("24_clipboard_off")
+fax_on = ExtResource("25_fax_on")
+fax_off = ExtResource("25_fax_off")
 
 [node name="Background" type="Sprite2D" parent="."]
 texture = ExtResource("2_layer1")
@@ -67,6 +107,19 @@ texture = ExtResource("8_layer2")
 centered = false
 script = ExtResource("5_prop_script")
 interactive = false
+
+[node name="Fax" type="Sprite2D" parent="."]
+visible = false
+position = Vector2(2013, 173)
+texture = ExtResource("25_fax_on")
+centered = false
+
+[node name="Lamp" type="Sprite2D" parent="."]
+visible = false
+material = SubResource("ShaderMaterial_lamp")
+position = Vector2(704, 59)
+texture = ExtResource("21_lamp_on")
+centered = false
 
 [node name="CaseContainer" type="Sprite2D" parent="."]
 position = Vector2(1494, 414)

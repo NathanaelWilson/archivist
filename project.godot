@@ -40,6 +40,12 @@ folder_colors={
 "res://Resources/Cases/": "red"
 }
 
+[input_devices]
+
+; The desk leans with the phone (Scenes/Desk/desk_parallax.gd reads gravity).
+sensors/enable_gravity=true
+sensors/enable_accelerometer=true
+
 [input]
 
 tap={

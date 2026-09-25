@@ -23,6 +23,9 @@ extends DeskProp
 @export var close_delay_sec := 0.15
 
 var _trays: Array[FilingTray] = []
+## Silhouette for the shut picture when Desk swaps in a nearly opaque dark
+## slice (Desk calls set_closed_art); open-drawer pictures never use it.
+var _closed_silhouette: Texture2D
 var _mouse_tray: FilingTray
 var _open_tray: FilingTray
 var _close_timer := 0.0
@@ -81,5 +84,27 @@ func _show_open(tray: FilingTray) -> void:
 		art = open_textures[tray.tray_type]
 	if art != null:
 		texture = art
+	_apply_silhouette(tray == null)
 	for each in _trays:
 		each.set_open(each == tray)
+
+
+## Desk swaps the shut-cabinet picture for the dark and bloody rooms. The
+## open-drawer pictures only exist lit, so they are left as they are.
+func set_closed_art(art: Texture2D, silhouette: Texture2D) -> void:
+	if art == null:
+		return
+	closed_texture = art
+	_closed_silhouette = silhouette
+	if _open_tray == null:
+		texture = art
+		_apply_silhouette(true)
+
+
+func _apply_silhouette(showing_closed: bool) -> void:
+	var shader_material := material as ShaderMaterial
+	if shader_material == null:
+		return
+	var use := showing_closed and _closed_silhouette != null
+	shader_material.set_shader_parameter("use_mask", use)
+	shader_material.set_shader_parameter("mask_texture", _closed_silhouette if use else null)

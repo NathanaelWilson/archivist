@@ -39,9 +39,9 @@ const BOARD_PLAN := [
 
 const SLIP_PRINTER_SCENE := preload("res://Scenes/Slips/slip_printer.tscn")
 
-## Unscaled size of the desk file's paper (Scenes/file_entity.tscn). Kept here
-## so the paper pulled out of the case tray matches the file it turns into.
-const FILE_PAPER_SIZE := Vector2(171, 342)
+## Unscaled size of the desk file — the envelope in Scenes/file_entity.tscn,
+## matching its CollisionShape2D. Used to keep the file fully on screen.
+const FILE_PAPER_SIZE := Vector2(207, 246)
 
 @export var shifts: Array[ShiftData] = []
 ## Random atmosphere sounds: each plays again after a random wait in its range.
@@ -55,15 +55,17 @@ const FILE_PAPER_SIZE := Vector2(171, 342)
 ## placeholder paper almost as tall as the screen).
 @export var desk_file_scale := 0.4
 ## Where a case pulled from the tray is laid down, as a fraction of the
-## screen. The trays and printer sit on the right, so the middle of the
-## free desk is a little left of the screen's centre.
-@export var desk_center := Vector2(0.45, 0.55)
+## screen. A little left of centre (the trays and printer sit on the right)
+## and low, near the player's side of the desk.
+@export var desk_center := Vector2(0.45, 0.66)
 @export var case_slide_sec := 0.18
 
 @onready var document_viewer: DocumentViewer = $DocumentViewer
 @onready var shift_screen: ShiftScreen = $ShiftScreen
 @onready var clipboard_panel: ClipboardPanel = $ClipboardPanel
 @onready var eyelids: EyelidOverlay = $EyelidOverlay
+@onready var splash_screen: SplashScreen = $SplashScreen
+@onready var desk: Desk = $Desk
 @onready var case_container: CaseContainer = $Desk/CaseContainer
 @onready var desk_clipboard: DeskProp = $Desk/Clipboard
 @onready var cabinet: FilingCabinet = $Desk/Cabinet
@@ -72,6 +74,10 @@ var _printer: SlipPrinter
 var _shift_index := 0
 var _case_index := 0
 var _ambient_timers: Array[Timer] = []
+## The case whose arrival set the lights flickering (CaseData.lights_flicker),
+## and the timer that makes them flicker again until it is filed.
+var _flicker_case: CaseData
+var _flicker_timer: Timer
 ## False while the eyes are opening or closing — the desk is visible but must
 ## not be touched, so no file can be picked up, opened or filed.
 var _desk_input_enabled := true
@@ -109,6 +115,11 @@ func _show_current_shift() -> void:
 	if _shift_index >= shifts.size():
 		_present_ending()
 		return
+	# Shift 1 has no card: the game opens straight onto the eyes opening and
+	# the title card (see _begin_current_shift). Later shifts still get theirs.
+	if _shift_index == 0:
+		_begin_current_shift()
+		return
 	shift_screen.present_shift(shifts[_shift_index], _shift_index + 1, shifts.size())
 	
 	
@@ -129,11 +140,13 @@ func _begin_current_shift() -> void:
 	_case_index = 0
 	_spawn_next_case()
 	# Every shift starts with the eyes opening onto the desk, and nothing can
-	# be touched until they have. On the very first shift the rules board is
-	# the first thing in front of them, so the player reads the rules before
-	# touching a single file.
+	# be touched until they have. On the very first shift the title card comes
+	# up over the blurred desk next, and once it is tapped away the rules
+	# board is put in front of the player before they touch a single file.
 	_set_desk_input_enabled(false)
 	await eyelids.play_wake()
+	if _shift_index == 0:
+		await splash_screen.play()
 	_set_desk_input_enabled(true)
 	if _shift_index == 0:
 		clipboard_panel.open()
@@ -152,6 +165,8 @@ func _spawn_next_case() -> void:
 func spawn_case(case_data: CaseData) -> void:
 	case_container.load_case(case_data)
 	SFX.play(&"case_arrive")
+	if case_data.lights_flicker:
+		_start_flickering(case_data)
 
 
 ## The player pressed the tray: the case slides out to the middle of the desk
@@ -167,9 +182,12 @@ func _on_case_pulled(case_data: CaseData, from_position: Vector2) -> void:
 	var target := _clamp_to_screen(get_viewport_rect().size * desk_center, FILE_PAPER_SIZE * desk_file_scale)
 	# Untouchable while it is still moving; it becomes a normal file on landing.
 	file.set_interaction_enabled(false)
-	file.place_at(from_position)
+	# The tray reports a global point; files are placed in Main's own space,
+	# which DeskParallax may be shifting.
+	var from_local := to_local(from_position)
+	file.place_at(from_local)
 	var slide := create_tween()
-	slide.tween_method(file.place_at, from_position, target, case_slide_sec) \
+	slide.tween_method(file.place_at, from_local, target, case_slide_sec) \
 		.set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
 	await slide.finished
 	if not is_instance_valid(file):
@@ -228,6 +246,8 @@ func _on_document_closed(redaction_result: Dictionary, ink_image: Image, bleed_i
 func _on_file_filed(tray_type: int, redaction_result: Dictionary, case_data: CaseData) -> void:
 	var correct_tray: bool = FilingTray.is_wildcard(case_data.correct_tray) or tray_type == case_data.correct_tray
 	var redaction_passed: bool = bool(redaction_result.get("is_valid", false))
+	if case_data == _flicker_case:
+		_stop_flickering()
 	GameScore.register_case_result(case_data, tray_type, redaction_result)
 	FilingLog.record_filing(case_data, tray_type, redaction_result)
 	_print_slip_after_delay(tray_type)
@@ -260,6 +280,58 @@ func _set_desk_input_enabled(enabled: bool) -> void:
 		if child is FileEntity:
 			child.set_interaction_enabled(enabled)
 	clipboard_panel.set_interactive(enabled)
+
+
+# ------------------------------------------------------------ Flicker --
+
+## [lights on?, seconds] — a failing fluorescent: a few quick stutters, one
+## long dropout, a last blink, then it catches.
+const FLICKER_PATTERN := [
+	[false, 0.07], [true, 0.05], [false, 0.12], [true, 0.08],
+	[false, 0.04], [true, 0.18], [false, 0.45], [true, 0.06],
+	[false, 0.08],
+]
+@export var flicker_repeat_sec := Vector2(7.0, 12.0)
+
+
+func _start_flickering(case_data: CaseData) -> void:
+	_flicker_case = case_data
+	if _flicker_timer == null:
+		_flicker_timer = Timer.new()
+		_flicker_timer.one_shot = true
+		_flicker_timer.timeout.connect(_on_flicker_timeout)
+		add_child(_flicker_timer)
+	_flicker_lights()
+	_flicker_timer.start(randf_range(flicker_repeat_sec.x, flicker_repeat_sec.y))
+
+
+func _stop_flickering() -> void:
+	_flicker_case = null
+	if _flicker_timer != null:
+		_flicker_timer.stop()
+	_set_lights(true)
+
+
+func _on_flicker_timeout() -> void:
+	if _flicker_case == null:
+		return
+	_flicker_lights()
+	_flicker_timer.start(randf_range(flicker_repeat_sec.x, flicker_repeat_sec.y))
+
+
+func _flicker_lights() -> void:
+	for step: Array in FLICKER_PATTERN:
+		_set_lights(bool(step[0]))
+		await get_tree().create_timer(float(step[1])).timeout
+		if _flicker_case == null:
+			break # filed mid-flicker: _stop_flickering already put them back on
+	_set_lights(true)
+
+
+## The flicker is nothing but the art swap: every desk slice goes to its
+## dark-room *_off version and back (see Desk.set_lights).
+func _set_lights(on: bool) -> void:
+	desk.set_lights(on)
 
 
 func _start_ambient(id: StringName, min_sec: float, max_sec: float) -> void:
@@ -301,6 +373,12 @@ func _finish_current_shift() -> void:
 	_set_desk_input_enabled(false)
 	await eyelids.play_sleep()
 	_shift_index += 1
+	# Storyboard p.9: the player leaves at the shift card and comes back to a
+	# desk that is not quite the same. On the low-Accuracy path the room is
+	# bloody when the eyes open again — swapped while they are shut, so the
+	# change is never seen happening. Once it has happened it stays.
+	if _shift_index < shifts.size() and not desk.bloody and GameScore.is_accuracy_low():
+		desk.set_bloody(true)
 	_show_current_shift()
 
 

@@ -9,13 +9,15 @@
 [ext_resource type="PackedScene" uid="uid://citvx2uyr8itb" path="res://Scenes/Shifts/shift_screen.tscn" id="6_shift_screen"]
 [ext_resource type="PackedScene" path="res://Scenes/DirectivesClipboard/clipboard_panel.tscn" id="7_clipboard"]
 [ext_resource type="PackedScene" path="res://Scenes/Eyelids/eyelid_overlay.tscn" id="8_eyelids"]
+[ext_resource type="PackedScene" path="res://Scenes/SplashScreen/splash_screen.tscn" id="10_splash"]
+[ext_resource type="Script" path="res://Scenes/Desk/desk_parallax.gd" id="11_parallax"]
 [ext_resource type="PackedScene" path="res://Scenes/Desk/desk.tscn" id="9_desk"]
 
 [node name="Main" type="Node2D" unique_id=1907770346]
 script = ExtResource("1_main")
 shifts = Array[ExtResource("2_ro5j4")]([ExtResource("2_shift_01"), ExtResource("3_shift_02"), ExtResource("4_shift_03")])
 
-[node name="Desk" parent="." instance=ExtResource("9_desk")]
+[node name="Desk" parent="." unique_id=1971239594 instance=ExtResource("9_desk")]
 
 [node name="DocumentViewer" parent="." unique_id=866617788 instance=ExtResource("5_document_viewer")]
 
@@ -24,3 +26,10 @@ shifts = Array[ExtResource("2_ro5j4")]([ExtResource("2_shift_01"), ExtResource("
 [node name="ClipboardPanel" parent="." unique_id=733570815 instance=ExtResource("7_clipboard")]
 
 [node name="EyelidOverlay" parent="." unique_id=1648783443 instance=ExtResource("8_eyelids")]
+
+[node name="SplashScreen" parent="." instance=ExtResource("10_splash")]
+
+[node name="DeskParallax" type="Node" parent="." node_paths=PackedStringArray("target", "desk")]
+script = ExtResource("11_parallax")
+target = NodePath("..")
+desk = NodePath("../Desk")

@@ -175,10 +175,11 @@ func _begin_pickup() -> void:
 
 func _drag_to(screen_pos: Vector2) -> void:
 	var target := screen_pos + _drag_offset
-	position = target
+	# Global, not local: the desk (Main) may be shifted/zoomed by DeskParallax.
+	global_position = target
 	# "Picked up and tilted under the finger" — tilt reads off how far the
 	# drag has moved from rest, capped at max_tilt_deg either way.
-	var delta_x := target.x - _rest_position.x
+	var delta_x := position.x - _rest_position.x
 	var tilt_t: float = clamp(delta_x / 300.0, -1.0, 1.0)
 	rotation = deg_to_rad(max_tilt_deg) * tilt_t
 

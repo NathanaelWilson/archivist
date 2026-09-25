@@ -1,13 +1,14 @@
-[gd_scene format=3]
+[gd_scene format=3 uid="uid://da88r4sba4sa3"]
 
-[ext_resource type="Script" path="res://Scenes/Endings/ending_screen.gd" id="1_ending_screen"]
+[ext_resource type="Script" uid="uid://wd52c7dw6e42" path="res://Scenes/Endings/ending_screen.gd" id="1_ending_screen"]
+[ext_resource type="Texture2D" uid="uid://f6cnn43h31fr" path="res://Assets/Endings/Paranoid.png" id="9_notice"]
 
-[node name="EndingParanoid" type="CanvasLayer"]
+[node name="EndingParanoid" type="CanvasLayer" unique_id=831964666]
 layer = 30
 script = ExtResource("1_ending_screen")
 ending_id = &"paranoid"
 
-[node name="Overlay" type="Control" parent="."]
+[node name="Overlay" type="Control" parent="." unique_id=16560570]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -15,7 +16,7 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="Backdrop" type="ColorRect" parent="Overlay"]
+[node name="Backdrop" type="ColorRect" parent="Overlay" unique_id=166211186]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -25,7 +26,7 @@ grow_vertical = 2
 mouse_filter = 2
 color = Color(0.025, 0.02, 0.015, 0.92)
 
-[node name="Center" type="CenterContainer" parent="Overlay"]
+[node name="Center" type="CenterContainer" parent="Overlay" unique_id=146097948]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -33,18 +34,118 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="Content" type="VBoxContainer" parent="Overlay/Center"]
+[node name="Content" type="VBoxContainer" parent="Overlay/Center" unique_id=665329286]
 layout_mode = 2
 theme_override_constants/separation = 10
 
-[node name="Notice" type="TextureRect" parent="Overlay/Center/Content"]
+[node name="Notice" type="TextureRect" parent="Overlay/Center/Content" unique_id=2087107222]
 custom_minimum_size = Vector2(248, 330)
 layout_mode = 2
 mouse_filter = 2
+texture = ExtResource("9_notice")
 expand_mode = 1
 stretch_mode = 5
 
-[node name="ClockOutButton" type="Button" parent="Overlay/Center/Content"]
+[node name="Marks" type="Control" parent="Overlay/Center/Content/Notice" unique_id=337833354]
+clip_contents = true
+anchors_preset = 0
+offset_left = 0.25
+offset_right = 354.25
+offset_bottom = 472.0
+scale = Vector2(0.69915, 0.69915)
+mouse_filter = 2
+
+[node name="Bar01" type="ColorRect" parent="Overlay/Center/Content/Notice/Marks" unique_id=1955251808]
+layout_mode = 0
+offset_left = 255.66759
+offset_top = 67.22449
+offset_right = 301.43744
+offset_bottom = 85.22449
+mouse_filter = 2
+color = Color(0.035, 0.03, 0.03, 1)
+
+[node name="Bar02" type="ColorRect" parent="Overlay/Center/Content/Notice/Marks" unique_id=936871321]
+layout_mode = 0
+offset_left = 78.309395
+offset_top = 104.4125
+offset_right = 145.53387
+offset_bottom = 122.4125
+mouse_filter = 2
+color = Color(0.035, 0.03, 0.03, 1)
+
+[node name="Bar03" type="ColorRect" parent="Overlay/Center/Content/Notice/Marks" unique_id=1136047120]
+layout_mode = 0
+offset_left = 228.49173
+offset_top = 184.50977
+offset_right = 237.61307
+offset_bottom = 202.50977
+mouse_filter = 2
+color = Color(0.035, 0.03, 0.03, 1)
+
+[node name="Bar04" type="ColorRect" parent="Overlay/Center/Content/Notice/Marks" unique_id=1800088552]
+layout_mode = 0
+offset_left = 262.8191
+offset_top = 146.0
+offset_right = 321.2
+offset_bottom = 164.0
+mouse_filter = 2
+color = Color(0.035, 0.03, 0.03, 1)
+
+[node name="Bar05" type="ColorRect" parent="Overlay/Center/Content/Notice/Marks" unique_id=939517010]
+layout_mode = 0
+offset_left = 162.69756
+offset_top = 248.87363
+offset_right = 292.59753
+offset_bottom = 266.87363
+mouse_filter = 2
+color = Color(0.035, 0.03, 0.03, 1)
+
+[node name="Bar06" type="ColorRect" parent="Overlay/Center/Content/Notice/Marks" unique_id=1348659492]
+layout_mode = 0
+offset_left = 69.727554
+offset_top = 124.436806
+offset_right = 125.96318
+offset_bottom = 142.4368
+mouse_filter = 2
+color = Color(0.035, 0.03, 0.03, 1)
+
+[node name="Bar07" type="ColorRect" parent="Overlay/Center/Content/Notice/Marks" unique_id=896897876]
+layout_mode = 0
+offset_left = 68.297195
+offset_top = 207.39468
+offset_right = 102.62462
+offset_bottom = 213.11592
+mouse_filter = 2
+color = Color(0.035, 0.03, 0.03, 1)
+
+[node name="Bar08" type="ColorRect" parent="Overlay/Center/Content/Notice/Marks" unique_id=2105331782]
+layout_mode = 0
+offset_left = 36.830444
+offset_top = 296.0738
+offset_right = 272.93045
+offset_bottom = 314.0738
+mouse_filter = 2
+color = Color(0.035, 0.03, 0.03, 1)
+
+[node name="Bar09" type="ColorRect" parent="Overlay/Center/Content/Notice/Marks" unique_id=1594631434]
+layout_mode = 0
+offset_left = 42.55169
+offset_top = 379.03168
+offset_right = 259.95853
+offset_bottom = 387.61353
+mouse_filter = 2
+color = Color(0.035, 0.03, 0.03, 1)
+
+[node name="Bar10" type="ColorRect" parent="Overlay/Center/Content/Notice/Marks" unique_id=1993185162]
+layout_mode = 0
+offset_left = 32.0
+offset_top = 416.0
+offset_right = 285.8
+offset_bottom = 434.0
+mouse_filter = 2
+color = Color(0.035, 0.03, 0.03, 1)
+
+[node name="ClockOutButton" type="Button" parent="Overlay/Center/Content" unique_id=1345812847]
 custom_minimum_size = Vector2(200, 40)
 layout_mode = 2
 size_flags_horizontal = 4

@@ -35,6 +35,18 @@ enum Level { CLEAN, WRONG } ## CLEAN = nothing to cover; WRONG = has an anomaly 
 ## safe zone. More than this fails the redaction.
 @export_range(0.0, 1.0, 0.01) var maximum_overspill: float = 0.05
 
+## Two rules on the board cancel out on this document, on purpose (Case 11:
+## a staff card — staff are not to be covered — whose photo has the smile
+## that must be covered). Either reading holds up:
+##   * covering the anomaly earns its Accuracy point; leaving it costs nothing,
+##   * the right drawer earns its point whether or not it was covered,
+##   * nothing done to this document adds Paranoia.
+@export var cover_optional: bool = false
+
+## The room lights flicker while this document is on the desk: once as it
+## arrives, then again every so often until it is filed. Purely atmosphere.
+@export var lights_flicker: bool = false
+
 ## The marker bleeds on this document: after each stroke the ink keeps
 ## creeping into the paper and drips down the page. Purely visual — the bleed
 ## is never scored, so it cannot fail a redaction the player did correctly.

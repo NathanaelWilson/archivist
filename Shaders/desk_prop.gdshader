@@ -16,6 +16,12 @@ shader_type canvas_item;
 // DeskProp builds its touch mask from the same cut-off, so what you see
 // outlined is exactly what you can touch. InteractableOutline uses this same
 // shader for the main-menu buttons, so every outline in the game matches.
+//
+// The dark-room (*_off) slices are worse: their padding is ~85-90% opaque,
+// so no alpha cut can find the object in them. When use_mask is on, the
+// silhouette is taken from mask_texture instead — the lit (*_on) slice of the
+// same object, which has the same size and position — and only the colour
+// comes from the dark slice.
 
 uniform float alpha_floor : hint_range(0.0, 1.0) = 0.55;
 uniform float alpha_ceiling : hint_range(0.0, 1.0) = 0.8;
@@ -28,6 +34,8 @@ uniform bool outline_enabled = false;
 // these from the drawn rect.
 uniform float grow_units = 0.0;
 uniform vec2 uv_per_unit = vec2(0.0);
+uniform bool use_mask = false;
+uniform sampler2D mask_texture : filter_linear_mipmap;
 
 varying vec4 v_modulate;
 
@@ -48,9 +56,14 @@ float cut(float a) {
 	return smoothstep(alpha_floor, alpha_ceiling, a);
 }
 
+// The alpha that decides the silhouette at uv.
+float shape_alpha(sampler2D own, vec2 uv) {
+	return use_mask ? texture(mask_texture, uv).a : texture(own, uv).a;
+}
+
 void fragment() {
 	vec4 tex = texture(TEXTURE, UV);
-	float a = cut(tex.a) * inside(UV);
+	float a = cut(shape_alpha(TEXTURE, UV)) * inside(UV);
 	vec4 result = vec4(tex.rgb, a);
 
 	if (outline_enabled) {
@@ -60,8 +73,8 @@ void fragment() {
 			vec2 dir = vec2(cos(angle), sin(angle)) * TEXTURE_PIXEL_SIZE;
 			vec2 far_uv = UV + dir * outline_width;
 			vec2 near_uv = UV + dir * outline_width * 0.5;
-			ring = max(ring, cut(texture(TEXTURE, far_uv).a) * inside(far_uv));
-			ring = max(ring, cut(texture(TEXTURE, near_uv).a) * inside(near_uv));
+			ring = max(ring, cut(shape_alpha(TEXTURE, far_uv)) * inside(far_uv));
+			ring = max(ring, cut(shape_alpha(TEXTURE, near_uv)) * inside(near_uv));
 		}
 		float ring_a = outline_color.a * ring;
 		// The object sits on top of its own ring.

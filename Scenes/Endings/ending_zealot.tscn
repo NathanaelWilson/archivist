@@ -1,6 +1,7 @@
 [gd_scene format=3]
 
 [ext_resource type="Script" path="res://Scenes/Endings/ending_screen.gd" id="1_ending_screen"]
+[ext_resource type="Texture2D" uid="uid://jmvmym1ujcit" path="res://Assets/Endings/Zealot.png" id="9_notice"]
 
 [node name="EndingZealot" type="CanvasLayer"]
 layer = 30
@@ -41,8 +42,63 @@ theme_override_constants/separation = 10
 custom_minimum_size = Vector2(248, 330)
 layout_mode = 2
 mouse_filter = 2
+texture = ExtResource("9_notice")
 expand_mode = 1
 stretch_mode = 5
+
+[node name="Marks" type="Control" parent="Overlay/Center/Content/Notice"]
+clip_contents = true
+layout_mode = 0
+offset_left = 0.250
+offset_right = 354.250
+offset_bottom = 472.0
+scale = Vector2(0.69915, 0.69915)
+mouse_filter = 2
+
+[node name="Bar01" type="ColorRect" parent="Overlay/Center/Content/Notice/Marks"]
+layout_mode = 0
+offset_left = 102.8
+offset_top = 106.0
+offset_right = 153.1
+offset_bottom = 124.0
+mouse_filter = 2
+color = Color(0.035, 0.03, 0.03, 1)
+
+[node name="Bar02" type="ColorRect" parent="Overlay/Center/Content/Notice/Marks"]
+layout_mode = 0
+offset_left = 102.8
+offset_top = 126.0
+offset_right = 188.4
+offset_bottom = 144.0
+mouse_filter = 2
+color = Color(0.035, 0.03, 0.03, 1)
+
+[node name="Bar03" type="ColorRect" parent="Overlay/Center/Content/Notice/Marks"]
+layout_mode = 0
+offset_left = 129.3
+offset_top = 146.0
+offset_right = 223.8
+offset_bottom = 164.0
+mouse_filter = 2
+color = Color(0.035, 0.03, 0.03, 1)
+
+[node name="Bar04" type="ColorRect" parent="Overlay/Center/Content/Notice/Marks"]
+layout_mode = 0
+offset_left = 32.0
+offset_top = 166.0
+offset_right = 91.1
+offset_bottom = 184.0
+mouse_filter = 2
+color = Color(0.035, 0.03, 0.03, 1)
+
+[node name="Bar05" type="ColorRect" parent="Overlay/Center/Content/Notice/Marks"]
+layout_mode = 0
+offset_left = 67.4
+offset_top = 206.0
+offset_right = 135.3
+offset_bottom = 224.0
+mouse_filter = 2
+color = Color(0.035, 0.03, 0.03, 1)
 
 [node name="ClockOutButton" type="Button" parent="Overlay/Center/Content"]
 custom_minimum_size = Vector2(200, 40)
