@@ -183,19 +183,15 @@ func _try_drop(screen_pos: Vector2) -> void:
 		_return_to_desk()
 
 
-## The tray the player is pointing at. The paper is taller than the gap
-## between trays, so it usually overlaps all three at once — the overlap list
-## alone would pick an arbitrary one. The pointer is what decides.
+## The drawer the player is pointing at. The trays are the filing cabinet's
+## drawers, traced to the drawer art, so the pointer alone decides: letting
+## go anywhere off a drawer front puts the paper back on the desk.
 func _tray_at(screen_pos: Vector2) -> FilingTray:
-	var best: FilingTray = null
-	var best_distance := INF
-	for area in get_overlapping_areas():
-		if area is FilingTray:
-			var distance: float = area.global_position.distance_to(screen_pos)
-			if distance < best_distance:
-				best_distance = distance
-				best = area
-	return best
+	for node in get_tree().get_nodes_in_group(FilingTray.GROUP):
+		var tray := node as FilingTray
+		if tray != null and tray.contains_point(screen_pos):
+			return tray
+	return null
 
 
 func _set_hover_tray(tray: FilingTray) -> void:

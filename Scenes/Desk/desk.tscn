@@ -6,6 +6,7 @@
 [ext_resource type="Texture2D" uid="uid://bnri5t4cj61fk" path="res://Assets/Objects/container_on.png" id="4_container"]
 [ext_resource type="Script" path="res://Scenes/Desk/desk_prop.gd" id="5_prop_script"]
 [ext_resource type="Texture2D" uid="uid://drku8yx1vp3rg" path="res://Assets/Objects/clipboard_on.png" id="6_clipboard"]
+[ext_resource type="PackedScene" path="res://Scenes/filing_tray.tscn" id="7_tray"]
 
 [node name="Desk" type="Node2D"]
 texture_filter = 4
@@ -14,6 +15,21 @@ script = ExtResource("1_desk")
 [node name="Background" type="Sprite2D" parent="."]
 texture = ExtResource("2_bg")
 centered = false
+
+[node name="PublicArchive" parent="." instance=ExtResource("7_tray")]
+position = Vector2(3720, 427)
+tray_type = 0
+drawer_polygon = PackedVector2Array(-310, -221, 363, -221, 314, 221, -364, 221)
+
+[node name="DepartmentOfTruth" parent="." instance=ExtResource("7_tray")]
+position = Vector2(3646, 892)
+tray_type = 1
+drawer_polygon = PackedVector2Array(-302, -218, 365, -218, 323, 212, -366, 218)
+
+[node name="Incinerator" parent="." instance=ExtResource("7_tray")]
+position = Vector2(3576, 1343)
+tray_type = 2
+drawer_polygon = PackedVector2Array(-312, -213, 325, -213, 289, 213, -260, 213, -280, 97, -324, -63)
 
 [node name="CaseContainer" type="Sprite2D" parent="."]
 position = Vector2(1494, 414)
