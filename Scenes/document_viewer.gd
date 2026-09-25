@@ -6,7 +6,8 @@ extends CanvasLayer
 
 ## ink_image is a copy of the ink on the page, so the file can keep it and
 ## hand it back the next time it is opened.
-signal closed(redaction_result: Dictionary, ink_image: Image)
+## bleed_image is how far that ink has bled (null unless the case bleeds).
+signal closed(redaction_result: Dictionary, ink_image: Image, bleed_image: Image)
 
 ## Space kept clear between the document and the screen edges, in viewport
 ## pixels. The document is also kept clear of the Close button on the left
@@ -30,7 +31,7 @@ func _ready() -> void:
 	visible = false
 
 
-func open(new_case_data: CaseData, saved_ink: Image = null) -> void:
+func open(new_case_data: CaseData, saved_ink: Image = null, saved_bleed: Image = null) -> void:
 	if new_case_data == null:
 		push_error("DocumentViewer.open() was called without a CaseData.")
 		return
@@ -42,7 +43,7 @@ func open(new_case_data: CaseData, saved_ink: Image = null) -> void:
 	_document_size = _fit_document(viewport_size)
 	paper.position = -_document_size * 0.5
 	paper.size = _document_size
-	redaction.set_case_data(case_data, Vector2i(_document_size), saved_ink)
+	redaction.set_case_data(case_data, Vector2i(_document_size), saved_ink, saved_bleed)
 	visible = true
 	SFX.play(&"doc_open")
 
@@ -74,7 +75,7 @@ func close() -> void:
 	SFX.stop_loop(&"marker_loop")
 	visible = false
 	SFX.play(&"doc_close")
-	closed.emit(redaction.evaluate_redaction(), redaction.get_ink_image())
+	closed.emit(redaction.evaluate_redaction(), redaction.get_ink_image(), redaction.get_bleed_image())
 
 
 func _unhandled_input(event: InputEvent) -> void:

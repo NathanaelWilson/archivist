@@ -44,6 +44,8 @@ var _redaction_result: Dictionary = {"is_valid": false, "reason": "Document has 
 ## Ink the player has put on this document, kept while the viewer is closed.
 ## null until the document is opened and closed for the first time.
 var ink_image: Image
+## How far that ink has bled, for cases whose marker bleeds. Never scored.
+var bleed_image: Image
 
 
 func _ready() -> void:

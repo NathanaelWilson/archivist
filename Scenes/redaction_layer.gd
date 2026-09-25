@@ -17,13 +17,41 @@ const DEBUG_SAFE_ZONE := Color(0.2, 0.55, 1.0, 0.22)
 ## Mask values: required anomaly pixels are white, safe-zone pixels grey.
 const MASK_SAFE_ZONE := Color(0.5, 0.5, 0.5)
 
+## --- Bleeding ink (CaseData.ink_bleeds) ---------------------------------
+## The bleed lives on its own layer, drawn under the ink, and is never read by
+## evaluate_redaction(): it is something the paper does, not something the
+## player did. It is strongest straight after a stroke and settles over
+## BLEED_SETTLE_SEC, the way wet ink stops spreading once it soaks in.
+const BLEED_TICK_SEC := 0.06
+const BLEED_SETTLE_SEC := 8.0
+## Blood, not ink: bright and thin where it has only just reached the paper,
+## dark and clotted where it has pooled. The colour is picked per pixel from
+## how much has built up there.
+const BLEED_COLOR_THIN := Color(0.62, 0.03, 0.04)  # fresh, arterial
+const BLEED_COLOR_THICK := Color(0.26, 0.0, 0.02)  # pooled, drying
+const BLEED_MAX_ALPHA := 0.9
+const BLEED_FEATHER_PER_TICK := 12
+const BLEED_FEATHER_RADIUS := Vector2(2.0, 7.0)
+const MAX_BLEED_SEEDS := 3000
+const DRIPS_PER_STROKE := Vector2i(1, 3)
+const DRIP_LENGTH := Vector2(18.0, 60.0)
+
 @export var show_debug_anomaly_regions := true
 
 var case_data: CaseData
 var ink_image: Image
 var anomaly_mask: Image
 var debug_image: Image
+var bleed_image: Image
 var _last_image_position := Vector2.ZERO
+
+var _bleeding := false
+var _bleed_sprite: Sprite2D
+var _bleed_seeds := PackedVector2Array() ## every point the marker has touched
+var _stroke_points := PackedVector2Array() ## just this stroke, for its drips
+var _drips: Array[Dictionary] = []
+var _bleed_activity := 0.0 ## 1 right after a stroke, decays to 0 as it settles
+var _bleed_clock := 0.0
 
 @onready var debug_overlay: Sprite2D = $"../DebugAnomalyOverlay"
 
@@ -31,14 +59,21 @@ signal redaction_evaluated(result: Dictionary)
 
 
 func _ready() -> void:
+	# Drawn behind this sprite, so the solid ink always sits on top of its
+	# own halo.
+	_bleed_sprite = Sprite2D.new()
+	_bleed_sprite.show_behind_parent = true
+	add_child(_bleed_sprite)
 	_create_canvases(IMG_SIZE)
 
 
 ## canvas_size is the document's on-screen size; DocumentViewer passes the
 ## size it fitted the case art to so ink, anomaly mask and art stay aligned.
 ## saved_ink restores ink the player already put on this document.
-func set_case_data(new_case_data: CaseData, canvas_size: Vector2i = IMG_SIZE, saved_ink: Image = null) -> void:
+## saved_bleed restores how far that ink had already bled.
+func set_case_data(new_case_data: CaseData, canvas_size: Vector2i = IMG_SIZE, saved_ink: Image = null, saved_bleed: Image = null) -> void:
 	case_data = new_case_data
+	_bleeding = case_data != null and case_data.ink_bleeds
 	_create_canvases(canvas_size)
 	if saved_ink != null and not saved_ink.is_empty() and saved_ink.get_format() == Image.FORMAT_RGBA8:
 		# duplicate() is typed Resource, so the cast is needed to assign it.
@@ -47,6 +82,20 @@ func set_case_data(new_case_data: CaseData, canvas_size: Vector2i = IMG_SIZE, sa
 			ink_image.resize(canvas_size.x, canvas_size.y, Image.INTERPOLATE_NEAREST)
 		(texture as ImageTexture).set_image(ink_image)
 		evaluate_redaction() # refresh the debug colour for the restored ink
+		if _bleeding:
+			_reseed_bleed_from_ink()
+	if _bleeding and saved_bleed != null and not saved_bleed.is_empty() \
+			and saved_bleed.get_format() == Image.FORMAT_RGBA8 and saved_bleed.get_size() == canvas_size:
+		bleed_image = saved_bleed.duplicate() as Image
+		(_bleed_sprite.texture as ImageTexture).set_image(bleed_image)
+
+
+## A copy of how far the ink has bled, kept with the document while closed.
+## null for documents whose ink does not bleed.
+func get_bleed_image() -> Image:
+	if not _bleeding or bleed_image == null:
+		return null
+	return bleed_image.duplicate() as Image
 
 
 ## A copy of the current ink, for the document to keep while it is closed.
@@ -63,6 +112,7 @@ func clear_ink() -> void:
 func begin_stroke(screen_position: Vector2) -> void:
 	_last_image_position = _to_image_position(screen_position)
 	_stamp(_last_image_position)
+	_record_bleed_point(_last_image_position)
 	(texture as ImageTexture).update(ink_image)
 
 
@@ -70,13 +120,131 @@ func stroke_to(screen_position: Vector2) -> void:
 	var target := _to_image_position(screen_position)
 	var distance := _last_image_position.distance_to(target)
 	for step in ceili(distance):
-		_stamp(_last_image_position.lerp(target, float(step) / maxf(distance, 1.0)))
+		var point := _last_image_position.lerp(target, float(step) / maxf(distance, 1.0))
+		_stamp(point)
+		_record_bleed_point(point)
 	_last_image_position = target
 	(texture as ImageTexture).update(ink_image)
 
 
 func end_stroke() -> Dictionary:
+	if _bleeding:
+		_spawn_drips()
+		_bleed_activity = 1.0
 	return evaluate_redaction()
+
+
+# ------------------------------------------------------------ Bleeding --
+
+func _process(delta: float) -> void:
+	if not _bleeding or not is_visible_in_tree():
+		return
+	if _bleed_activity <= 0.0 and _drips.is_empty():
+		return # fully settled: nothing moves, nothing to upload
+	_bleed_activity = maxf(0.0, _bleed_activity - delta / BLEED_SETTLE_SEC)
+	_bleed_clock += delta
+	var changed := false
+	while _bleed_clock >= BLEED_TICK_SEC:
+		_bleed_clock -= BLEED_TICK_SEC
+		changed = _bleed_step() or changed
+	if changed:
+		(_bleed_sprite.texture as ImageTexture).update(bleed_image)
+
+
+## One tick of spreading. Returns true if anything was drawn.
+func _bleed_step() -> bool:
+	var drew := false
+	# Feathering: the ink wicks outward along the paper fibres, a little
+	# further from the stroke each time, thinner the further it goes.
+	var feathers := roundi(BLEED_FEATHER_PER_TICK * _bleed_activity)
+	for i in feathers:
+		if _bleed_seeds.is_empty():
+			break
+		var origin: Vector2 = _bleed_seeds[randi() % _bleed_seeds.size()]
+		var angle := randf() * TAU
+		var reach := randf_range(BLEED_FEATHER_RADIUS.x, BLEED_FEATHER_RADIUS.y)
+		_deposit_bleed(origin + Vector2(cos(angle), sin(angle)) * reach, randf_range(0.04, 0.14), 1)
+		drew = true
+	# Drips: heavy ink runs down the page, wavering, thinning as it goes, and
+	# pooling into a bead where it stops.
+	for i in range(_drips.size() - 1, -1, -1):
+		var drip: Dictionary = _drips[i]
+		var pos: Vector2 = drip["pos"]
+		pos.y += randf_range(0.6, 1.2)
+		pos.x += randf_range(-0.35, 0.35)
+		drip["pos"] = pos
+		var left: float = float(drip["left"]) - 1.0
+		drip["left"] = left
+		var width: int = int(drip["width"])
+		var strength := clampf(left / float(drip["length"]), 0.25, 1.0)
+		_deposit_bleed(pos, 0.5 * strength, width)
+		drew = true
+		if left <= 0.0 or pos.y >= bleed_image.get_height() - 1:
+			_deposit_bleed(pos, 0.55, width + 1) # the bead at the end
+			_drips.remove_at(i)
+	return drew
+
+
+func _record_bleed_point(image_position: Vector2) -> void:
+	if not _bleeding:
+		return
+	_stroke_points.append(image_position)
+	if _bleed_seeds.size() < MAX_BLEED_SEEDS:
+		_bleed_seeds.append(image_position)
+	else:
+		_bleed_seeds[randi() % MAX_BLEED_SEEDS] = image_position
+
+
+## Each stroke leaves one to three drips, starting from the underside of the
+## marker at random points along the stroke.
+func _spawn_drips() -> void:
+	if _stroke_points.is_empty():
+		return
+	var count := randi_range(DRIPS_PER_STROKE.x, DRIPS_PER_STROKE.y)
+	for i in count:
+		var start: Vector2 = _stroke_points[randi() % _stroke_points.size()]
+		var length := randf_range(DRIP_LENGTH.x, DRIP_LENGTH.y)
+		_drips.append({
+			"pos": start + Vector2(randf_range(-3.0, 3.0), MARKER_SIZE.y * 0.5),
+			"left": length,
+			"length": length,
+			"width": randi_range(0, 1),
+		})
+	_stroke_points.clear()
+
+
+## Reopening a bled document: its old strokes keep creeping a little, from
+## where the saved ink actually is.
+func _reseed_bleed_from_ink() -> void:
+	_bleed_seeds.clear()
+	for y in range(0, ink_image.get_height(), 2):
+		for x in range(0, ink_image.get_width(), 2):
+			if ink_image.get_pixel(x, y).a > 0.5 and _bleed_seeds.size() < MAX_BLEED_SEEDS:
+				_bleed_seeds.append(Vector2(x, y))
+	if not _bleed_seeds.is_empty():
+		_bleed_activity = 0.35
+
+
+## Adds blood around a point, soft at the edge. The more that collects on a
+## pixel, the more opaque and the darker it gets, so thin wicking stays a
+## bright red stain while drips and beads read as thick and wet.
+func _deposit_bleed(center: Vector2, amount: float, radius: int) -> void:
+	var cx := roundi(center.x)
+	var cy := roundi(center.y)
+	for y in range(cy - radius, cy + radius + 1):
+		if y < 0 or y >= bleed_image.get_height():
+			continue
+		for x in range(cx - radius, cx + radius + 1):
+			if x < 0 or x >= bleed_image.get_width():
+				continue
+			var falloff := 1.0 - Vector2(x - center.x, y - center.y).length() / float(radius + 1)
+			if falloff <= 0.0:
+				continue
+			var existing := bleed_image.get_pixel(x, y).a
+			var alpha := minf(existing + amount * falloff, BLEED_MAX_ALPHA)
+			var thickness := alpha / BLEED_MAX_ALPHA
+			var colour := BLEED_COLOR_THIN.lerp(BLEED_COLOR_THICK, thickness * thickness)
+			bleed_image.set_pixel(x, y, Color(colour, alpha))
 
 
 func evaluate_redaction() -> Dictionary:
@@ -149,6 +317,14 @@ func _create_canvases(image_size: Vector2i) -> void:
 	ink_image = Image.create_empty(image_size.x, image_size.y, false, Image.FORMAT_RGBA8)
 	ink_image.fill(Color.TRANSPARENT)
 	texture = ImageTexture.create_from_image(ink_image)
+	bleed_image = Image.create_empty(image_size.x, image_size.y, false, Image.FORMAT_RGBA8)
+	bleed_image.fill(Color.TRANSPARENT)
+	if _bleed_sprite != null:
+		_bleed_sprite.texture = ImageTexture.create_from_image(bleed_image)
+	_bleed_seeds.clear()
+	_stroke_points.clear()
+	_drips.clear()
+	_bleed_activity = 0.0
 	anomaly_mask = Image.create_empty(image_size.x, image_size.y, false, Image.FORMAT_L8)
 	anomaly_mask.fill(Color.BLACK)
 	debug_image = Image.create_empty(image_size.x, image_size.y, false, Image.FORMAT_RGBA8)

@@ -35,6 +35,11 @@ enum Level { CLEAN, WRONG } ## CLEAN = nothing to cover; WRONG = has an anomaly 
 ## safe zone. More than this fails the redaction.
 @export_range(0.0, 1.0, 0.01) var maximum_overspill: float = 0.05
 
+## The marker bleeds on this document: after each stroke the ink keeps
+## creeping into the paper and drips down the page. Purely visual — the bleed
+## is never scored, so it cannot fail a redaction the player did correctly.
+@export var ink_bleeds: bool = false
+
 @export var asset: Texture2D
 ## Optional "settled" swap texture — the slide-in/settle dread beat.
 @export var settle_asset: Texture2D

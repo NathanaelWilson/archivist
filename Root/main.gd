@@ -188,12 +188,13 @@ func _open_document(file: FileEntity) -> void:
 	clipboard_panel.close()
 	active_file = file
 	file.set_interaction_enabled(false)
-	document_viewer.open(file.case_data, file.ink_image)
+	document_viewer.open(file.case_data, file.ink_image, file.bleed_image)
 
 
-func _on_document_closed(redaction_result: Dictionary, ink_image: Image) -> void:
+func _on_document_closed(redaction_result: Dictionary, ink_image: Image, bleed_image: Image) -> void:
 	if is_instance_valid(active_file):
 		active_file.ink_image = ink_image
+		active_file.bleed_image = bleed_image
 		active_file.set_redaction_result(redaction_result)
 		active_file.set_interaction_enabled(_desk_input_enabled)
 	active_file = null
