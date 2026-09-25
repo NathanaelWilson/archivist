@@ -13,6 +13,7 @@
 [ext_resource type="Texture2D" uid="uid://dn1w7ipuwfkya" path="res://Assets/GUI/exitRight.png" id="15"]
 [ext_resource type="Script" uid="uid://cclbq85god4ll" path="res://Scenes/records_screen.gd" id="16"]
 [ext_resource type="PackedScene" path="res://Scenes/Records/outcome_slot.tscn" id="17"]
+[ext_resource type="PackedScene" path="res://Scenes/Settings/audio_settings_panel.tscn" id="audio_settings_panel"]
 
 [sub_resource type="StyleBoxEmpty" id="StyleBox_transparent"]
 
@@ -273,6 +274,9 @@ grow_vertical = 2
 texture = ExtResource("7")
 expand_mode = 1
 stretch_mode = 5
+
+[node name="AudioSettingsPanel" parent="JournalScreen" instance=ExtResource("audio_settings_panel")]
+layout_mode = 1
 
 [node name="CloseButton" type="Button" parent="JournalScreen" unique_id=1673655109]
 layout_mode = 1

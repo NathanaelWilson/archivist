@@ -22,6 +22,7 @@ OutcomeRecord="*res://Scenes/outcome_record.gd"
 FilingLog="*uid://dy34rl0ma3h2l"
 SFX="*res://Scenes/AudioPlayer/sfx.gd"
 Music="*res://Scenes/AudioPlayer/music.gd"
+AudioSettings="*res://Scenes/AudioPlayer/audio_settings.gd"
 SlipDeck="*uid://dxvtmt1n4voyf"
 
 [display]

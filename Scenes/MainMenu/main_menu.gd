@@ -67,7 +67,8 @@ func _on_records_close_pressed() -> void:
 
 
 func _on_settings_pressed() -> void:
-	# TODO: placeholder screen/template for the real settings panel
+	# Settings screen: the journal window, currently holding the Audio Setting
+	# panel (Scenes/Settings/audio_settings_panel.tscn).
 	SFX.play(&"ui_click")
 	journal_screen.visible = true
 

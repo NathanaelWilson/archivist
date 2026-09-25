@@ -1,18 +1,9 @@
 [gd_scene format=3 uid="uid://citvx2uyr8itb"]
 
 [ext_resource type="Script" uid="uid://bgtssy0ujx6sv" path="res://Scenes/Shifts/shift_screen.gd" id="1_shift_screen"]
+[ext_resource type="Theme" path="res://Assets/Fonts/main_menu_theme.tres" id="2_theme"]
 
-[sub_resource type="StyleBoxFlat" id="StyleBox_panel"]
-bg_color = Color(0.12, 0.105, 0.085, 0.98)
-border_width_left = 2
-border_width_top = 2
-border_width_right = 2
-border_width_bottom = 2
-border_color = Color(0.62, 0.55, 0.42, 1)
-corner_radius_top_left = 6
-corner_radius_top_right = 6
-corner_radius_bottom_right = 6
-corner_radius_bottom_left = 6
+[sub_resource type="StyleBoxEmpty" id="StyleBox_panel"]
 
 [node name="ShiftScreen" type="CanvasLayer" unique_id=1724317528]
 layer = 20
@@ -25,6 +16,7 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+theme = ExtResource("2_theme")
 
 [node name="Backdrop" type="ColorRect" parent="Overlay" unique_id=2071432663]
 layout_mode = 1
@@ -45,30 +37,39 @@ grow_horizontal = 2
 grow_vertical = 2
 
 [node name="Panel" type="PanelContainer" parent="Overlay/Center" unique_id=2057236973]
-custom_minimum_size = Vector2(460, 260)
 layout_mode = 2
+mouse_default_cursor_shape = 2
 theme_override_styles/panel = SubResource("StyleBox_panel")
 
 [node name="Margin" type="MarginContainer" parent="Overlay/Center/Panel" unique_id=1743278070]
 layout_mode = 2
-theme_override_constants/margin_left = 32
-theme_override_constants/margin_top = 28
-theme_override_constants/margin_right = 32
-theme_override_constants/margin_bottom = 28
+mouse_filter = 2
+theme_override_constants/margin_left = 80
+theme_override_constants/margin_top = 50
+theme_override_constants/margin_right = 80
+theme_override_constants/margin_bottom = 50
 
 [node name="Content" type="VBoxContainer" parent="Overlay/Center/Panel/Margin" unique_id=1003349682]
 layout_mode = 2
-theme_override_constants/separation = 20
+mouse_filter = 2
+theme_override_constants/separation = 14
+alignment = 1
 
 [node name="Title" type="Label" parent="Overlay/Center/Panel/Margin/Content" unique_id=790579239]
 layout_mode = 2
-theme_override_colors/font_color = Color(0.9, 0.82, 0.62, 1)
-theme_override_font_sizes/font_size = 42
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_font_sizes/font_size = 48
 text = "SHIFT 1"
 horizontal_alignment = 1
 
 [node name="BeginButton" type="Button" parent="Overlay/Center/Panel/Margin/Content" unique_id=1702489519]
-custom_minimum_size = Vector2(0, 54)
 layout_mode = 2
-theme_override_font_sizes/font_size = 20
+size_flags_horizontal = 4
+mouse_filter = 2
+focus_mode = 0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_hover_color = Color(1, 1, 1, 1)
+theme_override_colors/font_pressed_color = Color(0.8, 0.8, 0.8, 1)
+theme_override_font_sizes/font_size = 16
 text = "BEGIN SHIFT"
+flat = true
