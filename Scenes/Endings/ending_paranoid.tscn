@@ -144,10 +144,3 @@ offset_right = 285.8
 offset_bottom = 434.0
 mouse_filter = 2
 color = Color(0.035, 0.03, 0.03, 1)
-
-[node name="ClockOutButton" type="Button" parent="Overlay/Center/Content" unique_id=1345812847]
-custom_minimum_size = Vector2(200, 40)
-layout_mode = 2
-size_flags_horizontal = 4
-theme_override_font_sizes/font_size = 18
-text = "CLOCK OUT"

@@ -19,7 +19,8 @@ Atur volume/variasi pitch per suara di `Scenes/sfx.gd` → `SOUNDS`.
 | shift_begin | Tombol BEGIN SHIFT ditekan |
 | ending_reveal | Stinger ending (cadangan untuk semua ending) |
 | ending_loyalist / _liability / _paranoid / _zealot | Stinger khusus per ending (opsional) |
-| clock_out | Tombol CLOCK OUT |
+| ending_blood | Ending Liability: darah mulai turun (**bell-sound.mp3**) |
+| redact_stroke | Ending Paranoid: tiap redaksi muncul di layar (**highlighter.mp3**) |
 | ui_hover / ui_click | Hover / klik tombol main menu |
 | page_flip | Buka/tutup Records (memakai FlippingPages.ogg) |
 
