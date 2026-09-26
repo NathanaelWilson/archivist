@@ -16,16 +16,26 @@ extends DeskProp
 ## pixels. The cabinet itself is never tapped (interactive = false); it only
 ## uses DeskProp for its alpha cut-off, which strips the tinted padding the
 ## Affinity slice carries around the cabinet.
+##
+## Open-drawer pictures only exist lit (no separate dark set — a drawer slid
+## out in the dark shows lit for as long as it is out), but they DO come in
+## a bloody flavor: Desk calls set_bloody() whenever the room's blood state
+## changes, and open_textures_blood is used instead of open_textures for as
+## long as it is bloody.
 
 @export var closed_texture: Texture2D
 ## One per drawer, top to bottom — indexed by FilingTray.tray_type.
 @export var open_textures: Array[Texture2D] = []
+## Same, for the bloody room (storyboard p.9 onward). Falls back to
+## open_textures if left empty.
+@export var open_textures_blood: Array[Texture2D] = []
 @export var close_delay_sec := 0.15
 
 var _trays: Array[FilingTray] = []
 ## Silhouette for the shut picture when Desk swaps in a nearly opaque dark
 ## slice (Desk calls set_closed_art); open-drawer pictures never use it.
 var _closed_silhouette: Texture2D
+var _bloody := false
 var _mouse_tray: FilingTray
 var _open_tray: FilingTray
 var _close_timer := 0.0
@@ -80,8 +90,9 @@ func _show_open(tray: FilingTray) -> void:
 		SFX.play(&"cabinet_open")
 	_open_tray = tray
 	var art := closed_texture
-	if tray != null and tray.tray_type < open_textures.size() and open_textures[tray.tray_type] != null:
-		art = open_textures[tray.tray_type]
+	var textures := open_textures_blood if _bloody and not open_textures_blood.is_empty() else open_textures
+	if tray != null and tray.tray_type < textures.size() and textures[tray.tray_type] != null:
+		art = textures[tray.tray_type]
 	if art != null:
 		texture = art
 	_apply_silhouette(tray == null)
@@ -89,8 +100,7 @@ func _show_open(tray: FilingTray) -> void:
 		each.set_open(each == tray)
 
 
-## Desk swaps the shut-cabinet picture for the dark and bloody rooms. The
-## open-drawer pictures only exist lit, so they are left as they are.
+## Desk swaps the shut-cabinet picture for the dark and bloody rooms.
 func set_closed_art(art: Texture2D, silhouette: Texture2D) -> void:
 	if art == null:
 		return
@@ -99,6 +109,18 @@ func set_closed_art(art: Texture2D, silhouette: Texture2D) -> void:
 	if _open_tray == null:
 		texture = art
 		_apply_silhouette(true)
+
+
+## Desk calls this whenever the room's blood state changes (case 6 onward,
+## the low-Accuracy path), so a drawer already pulled out swaps immediately
+## instead of waiting for it to shut and reopen. Silent: this is a state
+## refresh, not a drawer sliding.
+func set_bloody(value: bool) -> void:
+	if value == _bloody:
+		return
+	_bloody = value
+	if _open_tray != null:
+		_show_open(_open_tray)
 
 
 func _apply_silhouette(showing_closed: bool) -> void:

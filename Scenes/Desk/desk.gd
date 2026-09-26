@@ -31,26 +31,37 @@ extends Node2D
 @onready var desk_front: DeskProp = $DeskFront
 
 ## --- Lights and blood -----------------------------------------------------
-## The layered room above is the normal, lit, clean desk. The other states
-## only exist as flat full-room paintings (background_off, background_*_blood,
-## 4083 x 1750 like the layers), so in those states:
+## Lit-and-clean and lit-and-bloody both stay in the layered room (Background
+## = layer1, RoomGrade = layer2 or layer2_blood, DeskFront cut from whichever
+## one is showing) — blood just swaps RoomGrade/DeskFront to the bloody grade.
+## layer1 (the wall/floor) never changes; the blood is all on the desk. Only
+## turning the lights OFF drops out of the layered room, into a flat
+## full-room painting instead (background_off / background_off_blood, 4083 x
+## 1750 like the layers), since there's no dark version of layer1. In that
+## dark state:
 ##   * Background shows the flat painting and RoomGrade is hidden;
-##   * DeskFront shows the SAME painting, cut to the desk by layer2's
-##     silhouette (desk_prop.gdshader's mask), so the desk still sits in
-##     front of the cabinet;
-##   * the flat paintings have no lamp, so the Lamp sprite is shown on top
-##     (lamp_on/off), and in the bloody ones the fax has blood painted over
+##   * DeskFront shows the SAME painting, cut to the desk by the current
+##     grade layer's silhouette (desk_prop.gdshader's mask), so the desk
+##     still sits in front of the cabinet;
+##   * the flat painting has no lamp, so the Lamp sprite is shown on top
+##     (lamp_on/off), and in the bloody one the fax has blood painted over
 ##     it, so a clean Fax (fax_on/off.png) is laid back on top — the blood is
 ##     on the desk, under the things standing on it;
-##   * the cabinet's shut picture swaps to cabinet_off / cabinet_*_blood.
-##     Its open-drawer pictures only exist lit, so a drawer slid out in the
-##     dark shows lit for as long as it is out.
+##   * the cabinet's shut picture swaps to cabinet_off / cabinet_*_blood, and
+##     an open drawer swaps to open_textures_blood while it's bloody (still
+##     lit — there's no dark set for an open drawer, so one slid out in the
+##     dark just shows lit, bloody or not, for as long as it is out).
 ## The case tray and clipboard swap to their *_off slices in the dark.
 @export_group("Lights and blood")
 @export var layer1: Texture2D
 @export var layer2: Texture2D
+## RoomGrade/DeskFront's texture once the room is bloody, used instead of
+## layer2. Falls back to layer2 if left empty.
+@export var layer2_blood: Texture2D
 @export var background_on: Texture2D
 @export var background_off: Texture2D
+## Unused now that lit-and-bloody stays layered with layer2_blood; kept in
+## case a flat lit-blood painting is wanted again.
 @export var background_on_blood: Texture2D
 @export var background_off_blood: Texture2D
 @export var lamp_on: Texture2D
@@ -107,18 +118,17 @@ func set_bloody(value: bool) -> void:
 
 func _apply_state() -> void:
 	var on := lights_on
-	var layered := on and not bloody
+	var layered := on
+	var grade: Texture2D = layer2_blood if bloody and layer2_blood != null else layer2
 	var room: Texture2D = layer1
 	if not layered:
-		if bloody:
-			room = background_on_blood if on else background_off_blood
-		else:
-			room = background_off
+		room = background_off_blood if bloody else background_off
 
 	$Background.texture = room
+	$RoomGrade.texture = grade
 	$RoomGrade.visible = layered
-	_set_mask(desk_front, not layered, layer2)
-	desk_front.texture = layer2 if layered else room
+	_set_mask(desk_front, not layered, grade)
+	desk_front.texture = grade if layered else room
 
 	$Lamp.visible = not layered
 	_set_art($Lamp, lamp_on if on else lamp_off, null if on else lamp_on)
@@ -131,6 +141,7 @@ func _apply_state() -> void:
 	elif not on:
 		shut = cabinet_off
 	cabinet.set_closed_art(shut, null if on else cabinet_on)
+	cabinet.set_bloody(bloody)
 
 	_set_art($CaseContainer, container_on if on else container_off, null if on else container_on)
 	_set_art($Clipboard, clipboard_on if on else clipboard_off, null if on else clipboard_on)
