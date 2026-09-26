@@ -10,7 +10,6 @@ level = 1
 correct_tray = 1
 anomaly_regions = Array[Rect2]([Rect2(0.462963, 0.407407, 0.087963, 0.033333)])
 overspill_regions = Array[Rect2]([Rect2(0.435185, 0.355556, 0.138889, 0.100000)])
-required_coverage = 0.9
 cover_optional = true
 lights_flicker = true
 ink_bleeds = true

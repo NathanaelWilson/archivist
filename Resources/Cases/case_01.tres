@@ -8,6 +8,5 @@ script = ExtResource("2_57w7v")
 id = "CASE-01"
 anomaly_regions = Array[Rect2]([Rect2(0.58360654, 0.3692225, 0.052459016, 0.018776901)])
 overspill_regions = Array[Rect2]([Rect2(0.5442623, 0.3540258, 0.12459018, 0.049170244)])
-required_coverage = 0.9
 show_tutorial = true
 asset = ExtResource("1_qxuvf")

@@ -8,5 +8,4 @@ script = ExtResource("2_0f4ip")
 id = "CASE-02"
 anomaly_regions = Array[Rect2]([Rect2(0.03923854, 0.4338578, 0.13131313, 0.09265734)])
 overspill_regions = Array[Rect2]([Rect2(0.017094016, 0.41958043, 0.18570319, 0.13286713)])
-required_coverage = 0.8
 asset = ExtResource("1_ssoeh")

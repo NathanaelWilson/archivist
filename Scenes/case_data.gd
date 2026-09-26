@@ -30,10 +30,10 @@ enum Level { CLEAN, WRONG } ## CLEAN = nothing to cover; WRONG = has an anomaly 
 ## "Safe zones" around the anomaly, normalized like anomaly_regions. Ink
 ## inside a safe zone never counts as overspill, however much there is.
 @export var overspill_regions: Array[Rect2] = []
-@export_range(0.0, 1.0, 0.01) var required_coverage: float = 0.95
+@export_range(0.0, 1.0, 0.01) var required_coverage: float = 0.8
 ## Share of the player's ink allowed outside the anomaly AND outside every
 ## safe zone. More than this fails the redaction.
-@export_range(0.0, 1.0, 0.01) var maximum_overspill: float = 0.05
+@export_range(0.0, 1.0, 0.01) var maximum_overspill: float = 0.1
 
 ## Two rules on the board cancel out on this document, on purpose (Case 11:
 ## a staff card — staff are not to be covered — whose photo has the smile

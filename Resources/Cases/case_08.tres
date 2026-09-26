@@ -8,6 +8,5 @@ script = ExtResource("2_case_data")
 id = "CASE-08"
 anomaly_regions = Array[Rect2]([Rect2(0.485, 0.028000003, 0.095, 0.082)])
 overspill_regions = Array[Rect2]([Rect2(0.45, 0.012000003, 0.17, 0.11999999)])
-required_coverage = 0.9
 lights_flicker = true
 asset = ExtResource("1_art")
