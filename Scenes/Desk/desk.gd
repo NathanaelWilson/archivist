@@ -47,10 +47,9 @@ extends Node2D
 ##     (lamp_on/off), and in the bloody one the fax has blood painted over
 ##     it, so a clean Fax (fax_on/off.png) is laid back on top — the blood is
 ##     on the desk, under the things standing on it;
-##   * the cabinet's shut picture swaps to cabinet_off / cabinet_*_blood, and
-##     an open drawer swaps to open_textures_blood while it's bloody (still
-##     lit — there's no dark set for an open drawer, so one slid out in the
-##     dark just shows lit, bloody or not, for as long as it is out).
+##   * the cabinet swaps its whole picture set (shut and every drawer out)
+##     to the matching cabinet_<state>_<closed|open1-3>.png — see
+##     FilingCabinet.set_room.
 ## The case tray and clipboard swap to their *_off slices in the dark.
 @export_group("Lights and blood")
 @export var layer1: Texture2D
@@ -66,13 +65,6 @@ extends Node2D
 @export var background_off_blood: Texture2D
 @export var lamp_on: Texture2D
 @export var lamp_off: Texture2D
-## The layered room's own cabinet picture (all drawers shut, lit, clean).
-@export var cabinet_closed: Texture2D
-## Silhouette source for the dark cabinet slices, which are nearly opaque.
-@export var cabinet_on: Texture2D
-@export var cabinet_off: Texture2D
-@export var cabinet_on_blood: Texture2D
-@export var cabinet_off_blood: Texture2D
 @export var container_on: Texture2D
 @export var container_off: Texture2D
 @export var clipboard_on: Texture2D
@@ -136,13 +128,7 @@ func _apply_state() -> void:
 	# filing reports, and in the bloody rooms it keeps the blood underneath.
 	_set_art($Fax, fax_on if on else fax_off, null)
 
-	var shut: Texture2D = cabinet_closed
-	if bloody:
-		shut = cabinet_on_blood if on else cabinet_off_blood
-	elif not on:
-		shut = cabinet_off
-	cabinet.set_closed_art(shut, null if on else cabinet_on)
-	cabinet.set_bloody(bloody)
+	cabinet.set_room(on, bloody)
 
 	_set_art($CaseContainer, container_on if on else container_off, null if on else container_on)
 	_set_art($Clipboard, clipboard_on if on else clipboard_off, null if on else clipboard_on)

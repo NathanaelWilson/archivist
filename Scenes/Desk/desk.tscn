@@ -2,6 +2,18 @@
 
 [ext_resource type="Script" path="res://Scenes/Desk/desk.gd" id="1_desk"]
 [ext_resource type="Script" path="res://Scenes/Fax/fax_machine.gd" id="27_fax_script"]
+[ext_resource type="Texture2D" path="res://Assets/Objects/cabinet_off_closed.png" id="28_cab_off_closed"]
+[ext_resource type="Texture2D" path="res://Assets/Objects/cabinet_off_open1.png" id="28_cab_off_open1"]
+[ext_resource type="Texture2D" path="res://Assets/Objects/cabinet_off_open2.png" id="28_cab_off_open2"]
+[ext_resource type="Texture2D" path="res://Assets/Objects/cabinet_off_open3.png" id="28_cab_off_open3"]
+[ext_resource type="Texture2D" path="res://Assets/Objects/cabinet_on_blood_closed.png" id="28_cab_on_blood_closed"]
+[ext_resource type="Texture2D" path="res://Assets/Objects/cabinet_on_blood_open1.png" id="28_cab_on_blood_open1"]
+[ext_resource type="Texture2D" path="res://Assets/Objects/cabinet_on_blood_open2.png" id="28_cab_on_blood_open2"]
+[ext_resource type="Texture2D" path="res://Assets/Objects/cabinet_on_blood_open3.png" id="28_cab_on_blood_open3"]
+[ext_resource type="Texture2D" path="res://Assets/Objects/cabinet_off_blood_closed.png" id="28_cab_off_blood_closed"]
+[ext_resource type="Texture2D" path="res://Assets/Objects/cabinet_off_blood_open1.png" id="28_cab_off_blood_open1"]
+[ext_resource type="Texture2D" path="res://Assets/Objects/cabinet_off_blood_open2.png" id="28_cab_off_blood_open2"]
+[ext_resource type="Texture2D" path="res://Assets/Objects/cabinet_off_blood_open3.png" id="28_cab_off_blood_open3"]
 [ext_resource type="Texture2D" uid="uid://drwdodifju043" path="res://Assets/Images/Background/background_layer1.jpg" id="2_layer1"]
 [ext_resource type="Script" path="res://Scenes/Desk/case_container.gd" id="3_container_script"]
 [ext_resource type="Texture2D" uid="uid://bnri5t4cj61fk" path="res://Assets/Objects/container_on.png" id="4_container"]
@@ -24,10 +36,6 @@
 [ext_resource type="Texture2D" uid="uid://dx1rtawr0gyqo" path="res://Assets/Images/Background/background_off_blood.jpg" id="20_bg_off_blood"]
 [ext_resource type="Texture2D" uid="uid://cr2shjk5waaud" path="res://Assets/Objects/lamp_on.png" id="21_lamp_on"]
 [ext_resource type="Texture2D" uid="uid://djlm0f2uixp0o" path="res://Assets/Objects/lamp_off.png" id="21_lamp_off"]
-[ext_resource type="Texture2D" uid="uid://dpowi3rydkhpn" path="res://Assets/Objects/cabinet_on.png" id="22_cab_on"]
-[ext_resource type="Texture2D" uid="uid://cpffprmd2ek4j" path="res://Assets/Objects/cabinet_off.png" id="22_cab_off"]
-[ext_resource type="Texture2D" uid="uid://t65xydhcqo3h" path="res://Assets/Objects/cabinet_on_blood_closed.png" id="22_cab_on_blood"]
-[ext_resource type="Texture2D" uid="uid://cc4i38tgd1ktg" path="res://Assets/Objects/cabinet_off_blood.png" id="22_cab_off_blood"]
 [ext_resource type="Texture2D" uid="uid://cppc10w08ogi" path="res://Assets/Objects/container_off.png" id="23_container_off"]
 [ext_resource type="Texture2D" uid="uid://cgowcmd0vqp6h" path="res://Assets/Objects/clipboard_off.png" id="24_clipboard_off"]
 [ext_resource type="Texture2D" path="res://Assets/Objects/fax_on.png" id="25_fax_on"]
@@ -52,11 +60,6 @@ background_on_blood = ExtResource("20_bg_on_blood")
 background_off_blood = ExtResource("20_bg_off_blood")
 lamp_on = ExtResource("21_lamp_on")
 lamp_off = ExtResource("21_lamp_off")
-cabinet_closed = ExtResource("10_cab_closed")
-cabinet_on = ExtResource("22_cab_on")
-cabinet_off = ExtResource("22_cab_off")
-cabinet_on_blood = ExtResource("22_cab_on_blood")
-cabinet_off_blood = ExtResource("22_cab_off_blood")
 container_on = ExtResource("4_container")
 container_off = ExtResource("23_container_off")
 clipboard_on = ExtResource("6_clipboard")
@@ -80,7 +83,9 @@ script = ExtResource("9_cabinet_script")
 interactive = false
 closed_texture = ExtResource("10_cab_closed")
 open_textures = Array[Texture2D]([ExtResource("11_cab_open1"), ExtResource("12_cab_open2"), ExtResource("13_cab_open3")])
-open_textures_blood = Array[Texture2D]([ExtResource("14_cab_blood_open1"), ExtResource("15_cab_blood_open2"), ExtResource("16_cab_blood_open3")])
+dark_art = Array[Texture2D]([ExtResource("28_cab_off_closed"), ExtResource("28_cab_off_open1"), ExtResource("28_cab_off_open2"), ExtResource("28_cab_off_open3")])
+bloody_art = Array[Texture2D]([ExtResource("28_cab_on_blood_closed"), ExtResource("28_cab_on_blood_open1"), ExtResource("28_cab_on_blood_open2"), ExtResource("28_cab_on_blood_open3")])
+bloody_dark_art = Array[Texture2D]([ExtResource("28_cab_off_blood_closed"), ExtResource("28_cab_off_blood_open1"), ExtResource("28_cab_off_blood_open2"), ExtResource("28_cab_off_blood_open3")])
 
 [node name="PublicArchive" parent="Cabinet" instance=ExtResource("7_tray")]
 tray_type = 0

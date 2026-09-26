@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://bbledkbkn0plc"
-path="res://.godot/imported/cabinet_on_blood_open2.png-e4a395dd984b2d7c86915618b23b1f4b.ctex"
+uid="uid://do2kevb2e7lj"
+path="res://.godot/imported/cabinet_off_blood_closed.png-3bb502e001757bf0e48c086b2de1cd05.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://Assets/Objects/cabinet_on_blood_open2.png"
-dest_files=["res://.godot/imported/cabinet_on_blood_open2.png-e4a395dd984b2d7c86915618b23b1f4b.ctex"]
+source_file="res://Assets/Objects/cabinet_off_blood_closed.png"
+dest_files=["res://.godot/imported/cabinet_off_blood_closed.png-3bb502e001757bf0e48c086b2de1cd05.ctex"]
 
 [params]
 

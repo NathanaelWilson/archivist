@@ -84,6 +84,11 @@ var _desk_input_enabled := true
 ## seen before the game moves on.
 var _awaiting_report := false
 var _last_ambient_msec := -100000
+## Filing reports on their way to the fax (sent, not yet received).
+var _fax_in_flight := 0
+## True from the last filing of a shift until the eyes have closed: the
+## report is still read, but putting it down does not hand the desk back.
+var _shift_ending := false
 
 
 func _ready() -> void:
@@ -138,14 +143,13 @@ func _begin_current_shift() -> void:
 	_case_index = 0
 	_spawn_next_case()
 	# Every shift starts with the eyes opening onto the desk, and nothing can
-	# be touched until they have. On the very first shift the title card comes
-	# up over the blurred desk next, and once it is tapped away the rules
-	# board is put in front of the player before they touch a single file.
+	# be touched until they have. Then the rules board is put in front of the
+	# player before they touch a single file — every shift, since the board
+	# may have changed while they were away.
 	_set_desk_input_enabled(false)
 	await eyelids.play_wake()
 	_set_desk_input_enabled(true)
-	if _shift_index == 0:
-		clipboard_panel.open()
+	clipboard_panel.open()
 
 
 func _spawn_next_case() -> void:
@@ -173,6 +177,7 @@ func _on_case_pulled(case_data: CaseData, from_position: Vector2) -> void:
 	file.case_data = case_data
 	file.scale = Vector2.ONE * desk_file_scale
 	add_child(file)
+	file.set_lights(desk.lights_on)
 	file.filing_evaluated.connect(_on_file_filed.bind(case_data))
 	file.open_requested.connect(_open_document.bind(file))
 	var target := _clamp_to_screen(get_viewport_rect().size * desk_center, FILE_PAPER_SIZE * desk_file_scale)
@@ -304,7 +309,9 @@ func _on_file_filed(tray_type: int, redaction_result: Dictionary, case_data: Cas
 ## case is allowed to arrive meanwhile, so this deliberately does not block
 ## the filing loop — it awaits internally, and _on_file_filed does not await it.
 func _send_fax_report_after_delay(case_data: CaseData, tray_type: int, redaction_result: Dictionary) -> void:
+	_fax_in_flight += 1
 	await get_tree().create_timer(0.3).timeout
+	_fax_in_flight -= 1
 	if is_instance_valid(fax):
 		fax.receive(_build_fax_report(case_data, tray_type, redaction_result))
 	else:
@@ -371,6 +378,7 @@ func _continue_after_report() -> void:
 		return
 	_awaiting_report = false
 	_spawn_next_case()
+	_set_desk_input_enabled(not _shift_ending)
 
 
 ## Turns the whole desk on or off: every paper on it, and the clipboard. Used
@@ -434,6 +442,9 @@ func _flicker_lights() -> void:
 ## dark-room *_off version and back (see Desk.set_lights).
 func _set_lights(on: bool) -> void:
 	desk.set_lights(on)
+	for child in get_children():
+		if child is FileEntity:
+			child.set_lights(on)
 
 
 func _start_ambient(id: StringName, min_sec: float, max_sec: float) -> void:
@@ -472,8 +483,14 @@ func _exit_tree() -> void:
 ## Every shift ends with the eyes closing; the next shift card (or the ending)
 ## is then read over closed eyes.
 func _finish_current_shift() -> void:
+	_shift_ending = true
+	# The last case's report comes out first (the desk stays free so the fax
+	# can show it); putting it down is what closes the eyes.
+	while _fax_in_flight > 0 or fax.has_report() or fax_report.visible:
+		await get_tree().process_frame
 	_set_desk_input_enabled(false)
 	await eyelids.play_sleep()
+	_shift_ending = false
 	_shift_index += 1
 	# Storyboard p.9: the player leaves at the shift card and comes back to a
 	# desk that is not quite the same. On the low-Accuracy path the room is

@@ -1,8 +1,9 @@
-[gd_scene load_steps=6 format=3]
+[gd_scene load_steps=7 format=3]
 
 [ext_resource type="Script" path="res://Scenes/file_entity.gd" id="1"]
 [ext_resource type="Texture2D" uid="uid://bi87t0qoqx8rp" path="res://Assets/Objects/Amplop.png" id="2_envelope"]
 [ext_resource type="Shader" path="res://Shaders/desk_object.gdshader" id="3_desk_object"]
+[ext_resource type="Texture2D" path="res://Assets/Objects/Amplop_off.png" id="4_envelope_off"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_shadow"]
 shader = ExtResource("3_desk_object")
@@ -25,6 +26,8 @@ size = Vector2(207, 246)
 
 [node name="FileEntity" type="Area2D"]
 script = ExtResource("1")
+envelope_on = ExtResource("2_envelope")
+envelope_off = ExtResource("4_envelope_off")
 
 [node name="Shadow" type="Sprite2D" parent="."]
 texture_filter = 4
