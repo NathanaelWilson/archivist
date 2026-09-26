@@ -1,0 +1,126 @@
+[gd_scene load_steps=6 format=3]
+
+[ext_resource type="Script" path="res://Scenes/Tutorial/redaction_tutorial.gd" id="1"]
+[ext_resource type="Theme" path="res://Assets/Fonts/main_menu_theme.tres" id="2"]
+
+[sub_resource type="StyleBoxFlat" id="HelpNormal"]
+bg_color = Color(0.12, 0.105, 0.085, 0.92)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.93, 0.89, 0.8, 1)
+corner_radius_top_left = 26
+corner_radius_top_right = 26
+corner_radius_bottom_right = 26
+corner_radius_bottom_left = 26
+
+[sub_resource type="StyleBoxFlat" id="HelpHover"]
+bg_color = Color(0.25, 0.21, 0.16, 0.95)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(1, 0.86, 0.35, 1)
+corner_radius_top_left = 26
+corner_radius_top_right = 26
+corner_radius_bottom_right = 26
+corner_radius_bottom_left = 26
+
+[sub_resource type="StyleBoxFlat" id="Paper"]
+content_margin_left = 0.0
+bg_color = Color(0.89, 0.86, 0.78, 0.97)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.24, 0.21, 0.18, 1)
+corner_radius_top_left = 3
+corner_radius_top_right = 3
+corner_radius_bottom_right = 3
+corner_radius_bottom_left = 3
+
+[node name="RedactionTutorial" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme = ExtResource("2")
+script = ExtResource("1")
+
+[node name="HelpButton" type="Button" parent="."]
+layout_mode = 1
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -76.0
+offset_top = 24.0
+offset_right = -24.0
+offset_bottom = 76.0
+grow_horizontal = 0
+focus_mode = 0
+mouse_default_cursor_shape = 2
+theme_override_colors/font_color = Color(0.93, 0.89, 0.8, 1)
+theme_override_colors/font_hover_color = Color(1, 0.86, 0.35, 1)
+theme_override_font_sizes/font_size = 28
+theme_override_styles/normal = SubResource("HelpNormal")
+theme_override_styles/hover = SubResource("HelpHover")
+theme_override_styles/pressed = SubResource("HelpHover")
+text = "?"
+
+[node name="HintPanel" type="PanelContainer" parent="."]
+layout_mode = 1
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -272.0
+offset_top = 86.0
+offset_right = -18.0
+offset_bottom = 86.0
+grow_horizontal = 0
+theme_override_styles/panel = SubResource("Paper")
+
+[node name="Margin" type="MarginContainer" parent="HintPanel"]
+layout_mode = 2
+theme_override_constants/margin_left = 16
+theme_override_constants/margin_top = 14
+theme_override_constants/margin_right = 16
+theme_override_constants/margin_bottom = 12
+
+[node name="Content" type="VBoxContainer" parent="HintPanel/Margin"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="Title" type="Label" parent="HintPanel/Margin/Content"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.45, 0.12, 0.08, 1)
+theme_override_font_sizes/font_size = 17
+text = "HOW TO REDACT"
+
+[node name="Body" type="Label" parent="HintPanel/Margin/Content"]
+custom_minimum_size = Vector2(220, 0)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.098, 0.082, 0.071, 1)
+theme_override_font_sizes/font_size = 12
+text = "Something on this document is wrong.
+
+Find it, then drag your finger across it until it is completely covered.
+
+Keep the ink on the anomaly. Marks on clean paper are noted.
+
+When you are done, close the file and drag the envelope into the correct drawer."
+autowrap_mode = 3
+
+[node name="GotItButton" type="Button" parent="HintPanel/Margin/Content"]
+layout_mode = 2
+size_flags_horizontal = 8
+focus_mode = 0
+mouse_default_cursor_shape = 2
+theme_override_colors/font_color = Color(0.45, 0.12, 0.08, 1)
+theme_override_colors/font_hover_color = Color(0.098, 0.082, 0.071, 1)
+theme_override_font_sizes/font_size = 14
+text = "GOT IT"
+flat = true

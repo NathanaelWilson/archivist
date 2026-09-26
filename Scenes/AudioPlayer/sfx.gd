@@ -42,6 +42,7 @@ const SOUNDS := {
 	&"case_arrive": {"pitch_var": 0.06, "path": "res://Assets/SFX/paper-slide.mp3"}, # new case lands on the desk
 	&"printer": {"path": "res://Assets/SFX/printer.mp3"}, # reserved: call when the printing machine is built
 	# --- Shift & ending (shift_screen.gd, ending_screen.gd)
+	&"shift_card": {"path": "res://Assets/SFX/bell-sound.mp3"}, # the "SHIFT N" card appears
 	&"shift_begin": {},                           # BEGIN SHIFT pressed
 	&"ending_reveal": {},                         # fallback stinger for any ending
 	&"ending_loyalist": {},                       # optional per-ending stingers;

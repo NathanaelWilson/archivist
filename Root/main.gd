@@ -114,11 +114,6 @@ func _show_current_shift() -> void:
 	if _shift_index >= shifts.size():
 		_present_ending()
 		return
-	# Shift 1 has no card: the game opens straight onto the eyes opening and
-	# the title card (see _begin_current_shift). Later shifts still get theirs.
-	if _shift_index == 0:
-		_begin_current_shift()
-		return
 	shift_screen.present_shift(shifts[_shift_index], _shift_index + 1, shifts.size())
 	
 	
@@ -194,6 +189,45 @@ func _on_case_pulled(case_data: CaseData, from_position: Vector2) -> void:
 
 
 ## Keeps something of this size fully on screen when centred on point.
+# ------------------------------------------------------- Tutorial hint --
+## Tutorial cases (CaseData.show_tutorial): once the page is closed, an arrow
+## shows the envelope being dragged into its drawer, until it is filed. It
+## hides while the envelope is carried and comes back if it is put down.
+
+const DRAG_HINT_SCRIPT := preload("res://Scenes/Tutorial/drag_hint.gd")
+var _drag_hint: DragHint
+
+
+func _show_drag_hint(file: FileEntity) -> void:
+	if not is_instance_valid(file) or file.case_data == null or not file.case_data.show_tutorial:
+		return
+	var tray := _tray_of_type(file.case_data.correct_tray)
+	if tray == null:
+		return
+	if _drag_hint == null:
+		_drag_hint = DRAG_HINT_SCRIPT.new()
+		add_child(_drag_hint)
+	var reach := FILE_PAPER_SIZE * file.scale * 0.5
+	_drag_hint.point(file, tray.get_drop_point(), Vector2(reach.x * 0.6, -reach.y * 0.6))
+	if not file.picked_up.is_connected(_hide_drag_hint):
+		file.picked_up.connect(_hide_drag_hint)
+		file.returned_to_desk.connect(_show_drag_hint.bind(file))
+		file.filed.connect(func(_tray: int): _hide_drag_hint())
+
+
+func _hide_drag_hint() -> void:
+	if _drag_hint != null:
+		_drag_hint.hide_hint()
+
+
+func _tray_of_type(tray_type: int) -> FilingTray:
+	for node in get_tree().get_nodes_in_group(FilingTray.GROUP):
+		var tray := node as FilingTray
+		if tray != null and tray.tray_type == tray_type:
+			return tray
+	return null
+
+
 func _clamp_to_screen(point: Vector2, size: Vector2) -> Vector2:
 	var view := get_viewport_rect().size
 	var half := size * 0.5
@@ -229,6 +263,7 @@ func _open_document(file: FileEntity) -> void:
 	clipboard_panel.close()
 	active_file = file
 	file.set_interaction_enabled(false)
+	_hide_drag_hint()
 	document_viewer.open(file.case_data, file.ink_image, file.bleed_image)
 
 
@@ -238,6 +273,7 @@ func _on_document_closed(redaction_result: Dictionary, ink_image: Image, bleed_i
 		active_file.bleed_image = bleed_image
 		active_file.set_redaction_result(redaction_result)
 		active_file.set_interaction_enabled(_desk_input_enabled)
+		_show_drag_hint(active_file)
 	active_file = null
 
 

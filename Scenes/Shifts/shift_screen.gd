@@ -35,6 +35,7 @@ func present_shift(shift_data: ShiftData, shift_number: int, shift_total: int) -
 	begin_button.text = "BEGIN SHIFT"
 	begin_button.visible = true
 	visible = true
+	SFX.play(&"shift_card") # the bell rings as "SHIFT N" comes up
 	_start_pulse()
 
 

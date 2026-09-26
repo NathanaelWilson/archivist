@@ -15,7 +15,8 @@ Atur volume/variasi pitch per suara di `Scenes/sfx.gd` → `SOUNDS`.
 | doc_open / doc_close | Dokumen dibuka / ditutup |
 | marker_down | Spidol menyentuh kertas |
 | marker_loop | Suara coretan, diulang selama menggambar (bergantian **highlighter** / **highlighter-2**) |
-| shift_begin | Tombol BEGIN SHIFT |
+| shift_card | Tulisan "SHIFT N" muncul (**bell-sound.mp3**) |
+| shift_begin | Tombol BEGIN SHIFT ditekan |
 | ending_reveal | Stinger ending (cadangan untuk semua ending) |
 | ending_loyalist / _liability / _paranoid / _zealot | Stinger khusus per ending (opsional) |
 | clock_out | Tombol CLOCK OUT |

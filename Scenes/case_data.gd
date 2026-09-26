@@ -46,6 +46,9 @@ enum Level { CLEAN, WRONG } ## CLEAN = nothing to cover; WRONG = has an anomaly 
 ## The room lights flicker while this document is on the desk: once as it
 ## arrives, then again every so often until it is filed. Purely atmosphere.
 @export var lights_flicker: bool = false
+## Case 1: a "?" in the document viewer that shows how to redact, and an
+## arrow from the closed envelope to its drawer until it is filed.
+@export var show_tutorial: bool = false
 
 ## The marker bleeds on this document: after each stroke the ink keeps
 ## creeping into the paper and drips down the page. Purely visual — the bleed

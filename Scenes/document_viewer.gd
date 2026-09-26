@@ -25,9 +25,15 @@ var _document_size := Vector2(RedactionLayer.IMG_SIZE)
 @onready var close_button: Button = $CloseButton
 @onready var backdrop: ColorRect = $Backdrop
 
+const TUTORIAL_SCENE := preload("res://Scenes/Tutorial/redaction_tutorial.tscn")
+## "?" help + marker demo; only shows itself for cases with show_tutorial.
+var _tutorial: RedactionTutorial
+
 
 func _ready() -> void:
 	close_button.pressed.connect(close)
+	_tutorial = TUTORIAL_SCENE.instantiate()
+	add_child(_tutorial)
 	visible = false
 
 
@@ -45,6 +51,7 @@ func open(new_case_data: CaseData, saved_ink: Image = null, saved_bleed: Image =
 	paper.size = _document_size
 	redaction.set_case_data(case_data, Vector2i(_document_size), saved_ink, saved_bleed)
 	visible = true
+	_tutorial.present(case_data, document, _document_size)
 	SFX.play(&"doc_open")
 
 
@@ -73,6 +80,7 @@ func close() -> void:
 		return
 	_inking = false
 	SFX.stop_loop(&"marker_loop")
+	_tutorial.dismiss()
 	visible = false
 	SFX.play(&"doc_close")
 	closed.emit(redaction.evaluate_redaction(), redaction.get_ink_image(), redaction.get_bleed_image())
@@ -104,6 +112,7 @@ func _unhandled_input(event: InputEvent) -> void:
 
 func _begin_ink(position: Vector2) -> void:
 	_inking = true
+	_tutorial.on_ink_started()
 	SFX.play(&"marker_down")
 	SFX.start_loop(&"marker_loop")
 	redaction.begin_stroke(position)
