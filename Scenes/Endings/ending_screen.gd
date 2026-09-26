@@ -13,7 +13,7 @@ extends CanvasLayer
 ## (Loyalist.png, Liability.png, Paranoid.png, Zealot.png).
 ##
 ## present() plays the whole ending with no input: the notice scrolls up like
-## credits (zoomed so only its top half is in frame), sits for HOLD_SEC, then
+## credits (zoomed so only its top NOTICE_VISIBLE_FRACTION is in frame), sits for HOLD_SEC, then
 ## each ending's own fade to dark plays, the screen stays dark, and `finished`
 ## is emitted under a black cover that fades out over the main menu.
 
@@ -29,12 +29,15 @@ const PARANOID_REDACT_COUNT := 14
 const SCROLL_SEC := 6.0
 ## Gap between the top of the screen and the top of the notice once it stops.
 const PAPER_TOP_GAP := 16.0
+## How much of the notice's height is in frame once it stops.
+const NOTICE_VISIBLE_FRACTION := 0.65
 const HOLD_SEC := 12.0
 const DARK_HOLD_SEC := 4.0
 const RETURN_FADE_SEC := 1.5
 const BLUR_SEC := 3.0
 const DARKEN_SEC := 2.5
 const BLEED_SEC := 6.0
+const BLEED_BELL_DELAY_SEC := 0.75
 ## The blood art (2000 px wide) is only solid between x 440 and 1560, and
 ## down to about 55% of its height; that part is stretched over the screen.
 const BLOOD_BAND := Vector2(440.0, 1560.0)
@@ -86,12 +89,12 @@ func present() -> void:
 
 
 ## Credits-style: the notice rises from below the screen and stops with its
-## top just under the top edge, zoomed so its bottom half stays cut off.
+## top just under the top edge, zoomed so the rest of its bottom stays cut off.
 func _scroll_notice_in() -> void:
 	await get_tree().process_frame # let the containers lay the notice out
 	var view := overlay.get_viewport_rect().size
 	var top := notice.global_position.y
-	var s := (view.y - PAPER_TOP_GAP) / (notice.size.y * 0.5)
+	var s := (view.y - PAPER_TOP_GAP) / (notice.size.y * NOTICE_VISIBLE_FRACTION)
 	center.pivot_offset = Vector2(center.size.x * 0.5, 0.0)
 	center.scale = Vector2(s, s)
 	center.position.y = view.y - s * top
@@ -132,7 +135,7 @@ func _bleed_out() -> void:
 	blood.position = Vector2(-view.x * BLOOD_BAND.x / band, -blood.size.y)
 	overlay.add_child(blood)
 	overlay.move_child(blood, _black.get_index())
-	SFX.play(&"ending_blood")
+	get_tree().create_timer(BLEED_BELL_DELAY_SEC).timeout.connect(SFX.play.bind(&"ending_blood"))
 	var tween := create_tween().set_parallel()
 	tween.tween_property(blood, "position:y", view.y - blood.size.y * BLOOD_SOLID_FRACTION, BLEED_SEC) \
 		.set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
