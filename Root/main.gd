@@ -37,8 +37,6 @@ const BOARD_PLAN := [
 	[&"C", &"C2", 1],
 ]
 
-const SLIP_PRINTER_SCENE := preload("res://Scenes/Slips/slip_printer.tscn")
-
 ## Unscaled size of the desk file — the envelope in Scenes/file_entity.tscn,
 ## matching its CollisionShape2D. Used to keep the file fully on screen.
 const FILE_PAPER_SIZE := Vector2(207, 246)
@@ -55,7 +53,7 @@ const FILE_PAPER_SIZE := Vector2(207, 246)
 ## placeholder paper almost as tall as the screen).
 @export var desk_file_scale := 0.4
 ## Where a case pulled from the tray is laid down, as a fraction of the
-## screen. A little left of centre (the trays and printer sit on the right)
+## screen. A little left of centre (the trays and fax sit on the right)
 ## and low, near the player's side of the desk.
 @export var desk_center := Vector2(0.45, 0.66)
 @export var case_slide_sec := 0.18
@@ -68,8 +66,9 @@ const FILE_PAPER_SIZE := Vector2(207, 246)
 @onready var case_container: CaseContainer = $Desk/CaseContainer
 @onready var desk_clipboard: DeskProp = $Desk/Clipboard
 @onready var cabinet: FilingCabinet = $Desk/Cabinet
+@onready var fax: FaxMachine = $Desk/Fax
+@onready var fax_report: FaxReport = $FaxReport
 var active_file: FileEntity
-var _printer: SlipPrinter
 var _shift_index := 0
 var _case_index := 0
 var _ambient_timers: Array[Timer] = []
@@ -89,9 +88,6 @@ func _ready() -> void:
 	SFX.start_loop(&"ambience_crickets")
 	_start_ambient(&"door_knock", knock_min_sec, knock_max_sec)
 	_start_ambient(&"whisper", whisper_min_sec, whisper_max_sec)
-	_printer = SLIP_PRINTER_SCENE.instantiate()
-	_printer.position = get_viewport_rect().size * Vector2(0.82, 0.08)
-	add_child(_printer)
 	# The clipboard asks Main which board is live, so swaps stay Main's call.
 	clipboard_panel.board_source = get_active_board
 	# The desk art itself is the interface: pressing the tray lays the case in
@@ -102,6 +98,10 @@ func _ready() -> void:
 	desk_clipboard.tapped.connect(clipboard_panel.open)
 	# Drawers slide open under a hovering mouse only while the desk is free.
 	cabinet.can_interact = _is_desk_free
+	# Every filing sends a report to the fax; it blinks until tapped.
+	fax.can_interact = _is_desk_free
+	fax.report_requested.connect(_on_fax_report_requested)
+	fax_report.closed.connect(_on_fax_report_closed)
 	document_viewer.closed.connect(_on_document_closed)
 	shift_screen.begin_requested.connect(_begin_current_shift)
 	# The game scene opens with the eyes shut; Shift 1 begins by opening them.
@@ -210,6 +210,7 @@ func _is_desk_free() -> bool:
 		and not document_viewer.visible \
 		and not shift_screen.visible \
 		and not clipboard_panel.is_open() \
+		and not fax_report.visible \
 		and not _is_file_held()
 
 
@@ -247,7 +248,7 @@ func _on_file_filed(tray_type: int, redaction_result: Dictionary, case_data: Cas
 		_stop_flickering()
 	GameScore.register_case_result(case_data, tray_type, redaction_result)
 	FilingLog.record_filing(case_data, tray_type, redaction_result)
-	_print_slip_after_delay(tray_type)
+	_send_fax_report_after_delay(case_data, tray_type, redaction_result)
 	print("Filed ", case_data.id, " | tray correct: ", correct_tray, " | redaction correct: ", redaction_passed,
 		" | ", redaction_result.get("reason", ""),
 		" (coverage %.0f%%, overspill %.0f%%)" % [float(redaction_result.get("coverage", 0.0)) * 100.0, float(redaction_result.get("overspill", 0.0)) * 100.0],
@@ -260,12 +261,62 @@ func _on_file_filed(tray_type: int, redaction_result: Dictionary, case_data: Cas
 ## The fax starts ~0.3 s after the drawer shuts (Build Guide 3.6) and the next
 ## case is allowed to arrive meanwhile, so this deliberately does not block
 ## the filing loop — it awaits internally, and _on_file_filed does not await it.
-func _print_slip_after_delay(tray_type: int) -> void:
+func _send_fax_report_after_delay(case_data: CaseData, tray_type: int, redaction_result: Dictionary) -> void:
 	await get_tree().create_timer(0.3).timeout
-	if is_instance_valid(_printer):
-		_printer.print_slip(SlipDeck.draw(tray_type))
+	if is_instance_valid(fax):
+		fax.receive(_build_fax_report(case_data, tray_type, redaction_result))
 
 
+## What the filing report says about one case: where it went, whether that
+## drawer was right, and how the redaction was judged.
+func _build_fax_report(case_data: CaseData, tray_type: int, redaction_result: Dictionary) -> Dictionary:
+	var sort_ok: bool = FilingTray.is_wildcard(case_data.correct_tray) or tray_type == case_data.correct_tray
+	var covered: bool = bool(redaction_result.get("is_valid", false))
+	var stray: bool = bool(redaction_result.get("stray_stroke", false))
+	var redaction_text := ""
+	if case_data.cover_optional:
+		redaction_text = "ACCEPTED" if covered else "NOT REQUIRED"
+	elif case_data.requires_redaction():
+		if covered:
+			redaction_text = "ACCEPTED"
+		else:
+			var coverage := float(redaction_result.get("coverage", 0.0))
+			if coverage < case_data.required_coverage:
+				redaction_text = "REJECTED\n            ANOMALY EXPOSED"
+			else:
+				redaction_text = "REJECTED\n            EXCESS INK"
+	else:
+		redaction_text = "REJECTED\n            INK ON CLEAN PAPER" if stray else "NOT REQUIRED"
+	return {
+		"case_id": str(case_data.id),
+		"tray_name": _tray_display_name(tray_type),
+		"sort_ok": sort_ok,
+		"redaction_text": redaction_text,
+		"remark": SlipDeck.draw(tray_type),
+	}
+
+
+func _tray_display_name(tray_type: int) -> String:
+	match tray_type:
+		FilingTray.TrayType.PUBLIC_ARCHIVE:
+			return "PUBLIC ARCHIVE"
+		FilingTray.TrayType.DEPARTMENT_OF_TRUTH:
+			return "DEPARTMENT OF TRUTH"
+		FilingTray.TrayType.INCINERATOR:
+			return "INCINERATOR"
+	return "UNKNOWN"
+
+
+func _on_fax_report_requested(report: Dictionary) -> void:
+	clipboard_panel.close()
+	# Desk files read touches in _input, ahead of the report's own layer, so
+	# they are switched off while the sheet is up.
+	_set_desk_input_enabled(false)
+	fax_report.show_report(report)
+
+
+func _on_fax_report_closed() -> void:
+	_set_desk_input_enabled(true)
 
 
 ## Turns the whole desk on or off: every paper on it, and the clipboard. Used

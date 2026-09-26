@@ -31,11 +31,17 @@ signal tapped
 ## cabinet): it never outlines or reacts, but contains_point() still works,
 ## e.g. to tell whether the desk is covering something behind it.
 @export var interactive := true
+## One on/off cycle of the attention blink, in seconds (see `attention`).
+@export var attention_period := 0.9
 
 const SHADER := preload("res://Shaders/desk_prop.gdshader")
 
 ## Set by Main. Returns true while the desk may be touched at all.
 var can_interact: Callable = Callable()
+## While true the outline blinks on its own to call the player over (e.g. the
+## fax has a report waiting). Shown even when the desk is busy, so the player
+## notices it; touching still waits for the desk to be free.
+var attention := false
 
 var _hit_mask: BitMap
 var _material: ShaderMaterial
@@ -93,7 +99,11 @@ func _process(_delta: float) -> void:
 	var available := is_available()
 	if _pressing and not available:
 		cancel_touch()
-	_set_outline((_hovered or _pressing) and available)
+	var blink_on := false
+	if attention and is_visible_in_tree():
+		var t := Time.get_ticks_msec() / 1000.0
+		blink_on = fmod(t, attention_period) < attention_period * 0.55
+	_set_outline(((_hovered or _pressing) and available) or blink_on)
 
 
 func _unhandled_input(event: InputEvent) -> void:
