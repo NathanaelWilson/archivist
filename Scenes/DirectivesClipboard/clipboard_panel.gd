@@ -77,12 +77,62 @@ func _current_board() -> ClipboardBoard:
 	return board_source.call() as ClipboardBoard
 
 
+## Built on first render from the scene's own labels, so they share their
+## font, size and colour: the board's free text, and a two-column FILE table.
+var _body: Label
+var _file_grid: GridContainer
+
+
 func _render(board: ClipboardBoard) -> void:
+	_ensure_extra_nodes()
 	notice.text = _fill_notice(board.notice_text)
-	cover_heading.text = "WHAT TO COVER"
-	cover_lines.text = "\n".join(board.cover_lines)
-	file_heading.text = "WHERE IT GOES"
-	file_lines.text = "\n".join(board.file_lines)
+
+	_body.text = board.body_text
+	_body.visible = not board.body_text.is_empty()
+
+	cover_heading.text = "COVER"
+	var numbered: Array[String] = []
+	for i in board.cover_lines.size():
+		# Continuation lines hang under the rule's text, not its number.
+		numbered.append("%d  %s" % [i + 1, board.cover_lines[i].replace("\n", "\n    ")])
+	cover_lines.text = "\n".join(numbered)
+	cover_heading.visible = not board.cover_lines.is_empty()
+	cover_lines.visible = cover_heading.visible
+
+	file_heading.text = "FILE"
+	file_lines.visible = false # replaced by the grid
+	for child in _file_grid.get_children():
+		child.queue_free()
+	for line in board.file_lines:
+		var parts := line.split("\t", true, 1)
+		_file_grid.add_child(_cell(parts[0].strip_edges()))
+		_file_grid.add_child(_cell(parts[1].strip_edges() if parts.size() > 1 else ""))
+	file_heading.visible = not board.file_lines.is_empty()
+	_file_grid.visible = file_heading.visible
+
+
+func _ensure_extra_nodes() -> void:
+	if _body != null:
+		return
+	_body = cover_lines.duplicate() as Label
+	_body.name = "Body"
+	_body.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	notice.add_sibling(_body)
+	_file_grid = GridContainer.new()
+	_file_grid.name = "FileGrid"
+	_file_grid.columns = 2
+	_file_grid.add_theme_constant_override("h_separation", 18)
+	_file_grid.add_theme_constant_override("v_separation", 4)
+	file_lines.add_sibling(_file_grid)
+
+
+func _cell(text: String) -> Label:
+	var label := file_lines.duplicate() as Label
+	label.visible = true
+	label.text = text
+	label.autowrap_mode = TextServer.AUTOWRAP_OFF
+	label.vertical_alignment = VERTICAL_ALIGNMENT_TOP # names line up with a description's first line
+	return label
 
 
 ## Substitutes "{N}" with the number of files filed since the last read.

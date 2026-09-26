@@ -55,6 +55,11 @@ var _stroke_points := PackedVector2Array() ## just this stroke, for its drips
 var _drips: Array[Dictionary] = []
 var _bleed_activity := 0.0 ## 1 right after a stroke, decays to 0 as it settles
 var _bleed_clock := 0.0
+## The page as it was before each stroke of this viewing, newest last (see
+## undo_last_stroke): {"ink": Image, "bleed": Image or null}. Emptied
+## whenever a page is (re)loaded.
+var _undo_stack: Array[Dictionary] = []
+const MAX_UNDO := 30
 
 @onready var debug_overlay: Sprite2D = $"../DebugAnomalyOverlay"
 
@@ -76,6 +81,7 @@ func _ready() -> void:
 ## saved_bleed restores how far that ink had already bled.
 func set_case_data(new_case_data: CaseData, canvas_size: Vector2i = IMG_SIZE, saved_ink: Image = null, saved_bleed: Image = null) -> void:
 	case_data = new_case_data
+	_undo_stack.clear()
 	_bleeding = case_data != null and case_data.ink_bleeds
 	_create_canvases(canvas_size)
 	if saved_ink != null and not saved_ink.is_empty() and saved_ink.get_format() == Image.FORMAT_RGBA8:
@@ -113,6 +119,12 @@ func clear_ink() -> void:
 
 
 func begin_stroke(screen_position: Vector2) -> void:
+	_undo_stack.append({
+		"ink": ink_image.duplicate() as Image,
+		"bleed": bleed_image.duplicate() as Image if _bleeding and bleed_image != null else null,
+	})
+	if _undo_stack.size() > MAX_UNDO:
+		_undo_stack.pop_front()
 	_last_image_position = _to_image_position(screen_position)
 	_stamp(_last_image_position)
 	_record_bleed_point(_last_image_position)
@@ -128,6 +140,31 @@ func stroke_to(screen_position: Vector2) -> void:
 		_record_bleed_point(point)
 	_last_image_position = target
 	(texture as ImageTexture).update(ink_image)
+
+
+## True when there is a stroke from this viewing that can be taken back.
+func can_undo() -> bool:
+	return not _undo_stack.is_empty()
+
+
+## Takes back the most recent stroke: the ink returns to how it was just
+## before it. Returns the re-evaluated redaction result.
+func undo_last_stroke() -> Dictionary:
+	if _undo_stack.is_empty():
+		return evaluate_redaction()
+	var before: Dictionary = _undo_stack.pop_back()
+	ink_image = before["ink"]
+	(texture as ImageTexture).set_image(ink_image)
+	if _bleeding:
+		# Bleeding ink: roll the stain back too and let it creep only from
+		# what is left.
+		if before["bleed"] != null:
+			bleed_image = before["bleed"]
+			(_bleed_sprite.texture as ImageTexture).set_image(bleed_image)
+		_drips.clear()
+		_stroke_points.clear()
+		_reseed_bleed_from_ink()
+	return evaluate_redaction()
 
 
 func end_stroke() -> Dictionary:

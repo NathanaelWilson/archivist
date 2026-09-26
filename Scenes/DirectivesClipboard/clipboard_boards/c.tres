@@ -5,8 +5,7 @@
 [resource]
 script = ExtResource("1_mmheg")
 id = &"C"
-notice_text = "READ THIS BOARD BEFORE EVERY FILE.
-YOU LAST READ IT {N} FILES AGO."
-cover_lines = Array[String](["Cover any face with more than two eyes.", "DO NOT cover a face that has no eyes.", "Cover any smile that does not fit the face.", "Cover any line that talks to you.", "Staff are not subjects. Staff are not to be covered."])
-file_lines = Array[String](["PUBLIC ARCHIVE                    Clean work, and work you have covered.", "DEPARTMENT OF TRUTH         What cannot be covered is not yours to judge.", "INCINERATOR                         What is dangerous to look at. Do not study it."])
+notice_text = "READ THIS BOARD BEFORE EVERY FILE.\nYOU LAST READ IT {N} FILES AGO."
+cover_lines = Array[String](["Cover any extra eyes with more than two eyes.", "DO NOT cover a face that has no eyes.\nThey need to see.", "Cover any smile that does not fit the face.", "Cover any document line that talks to you.", "STAFF ARE NOT subjects. DO NOT cover them."])
+file_lines = Array[String](["PUBLIC ARCHIVE	Clean document, and work you have redacted safely.", "DEPARTMENT OF TRUTH	Something is in the document, but don't know what to cover.", "INCINERATOR	What is dangerous to look at.\nWhat is endless."])
 metadata/_custom_type_script = "uid://b15dnmj1xcu7s"

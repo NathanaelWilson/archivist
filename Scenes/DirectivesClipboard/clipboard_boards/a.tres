@@ -6,6 +6,6 @@
 script = ExtResource("1_bo8ip")
 id = &"A"
 notice_text = "READ THIS BOARD BEFORE EVERY FILE."
-cover_lines = Array[String](["Cover any face with more than two eyes.", "Cover any face that has no eyes.", "Cover any window that should not be there."])
-file_lines = Array[String](["PUBLIC ARCHIVE                    Clean work, and work you have covered.", "DEPARTMENT OF TRUTH         What cannot be covered is not yours to judge.", "INCINERATOR                         You will be told."])
+cover_lines = Array[String](["Cover any extra eyes with more than two eyes.", "Cover any face that has no eyes.", "Cover any window that should not be there."])
+file_lines = Array[String](["PUBLIC ARCHIVE	Clean document, and work you have redacted safely.", "DEPARTMENT OF TRUTH	You felt something is off, but don't know what to cover.", "INCINERATOR	You will be told."])
 metadata/_custom_type_script = "uid://b15dnmj1xcu7s"

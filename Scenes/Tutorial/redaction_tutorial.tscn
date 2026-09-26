@@ -71,6 +71,31 @@ theme_override_styles/hover = SubResource("HelpHover")
 theme_override_styles/pressed = SubResource("HelpHover")
 text = "?"
 
+[node name="UndoButton" type="Button" parent="."]
+layout_mode = 1
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -130.0
+offset_top = -70.0
+offset_right = -24.0
+offset_bottom = -24.0
+grow_horizontal = 0
+grow_vertical = 0
+focus_mode = 0
+mouse_default_cursor_shape = 2
+theme_override_colors/font_color = Color(0.93, 0.89, 0.8, 1)
+theme_override_colors/font_hover_color = Color(1, 0.86, 0.35, 1)
+theme_override_colors/font_disabled_color = Color(0.93, 0.89, 0.8, 0.3)
+theme_override_font_sizes/font_size = 18
+theme_override_styles/normal = SubResource("HelpNormal")
+theme_override_styles/hover = SubResource("HelpHover")
+theme_override_styles/pressed = SubResource("HelpHover")
+theme_override_styles/disabled = SubResource("HelpNormal")
+text = "UNDO"
+
 [node name="HintPanel" type="PanelContainer" parent="."]
 layout_mode = 1
 anchors_preset = 1

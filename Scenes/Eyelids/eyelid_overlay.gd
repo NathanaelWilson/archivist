@@ -4,36 +4,38 @@ extends CanvasLayer
 ## The archivist's eyes. Purely visual — it never blocks input on its own
 ## (Main locks the desk while the eyes are moving).
 ##
-## The lid is a real shape (Shaders/eyelid.gdshader): it rises from the bottom
-## of the screen to open and drops from the top to close, instead of fading.
-##   wake  — start of every shift: one continuous rise, coming into focus.
-##   sleep — end of every shift: one continuous fall, going out of focus.
+## The lids are real shapes (Shaders/eyelid.gdshader): an upper and a lower
+## lid that meet in the middle, instead of a fade.
+##   wake  — start of every shift: a couple of heavy blinks, coming into focus.
+##   sleep — end of every shift: a couple of blinks, then shut, out of focus.
 ## The layer sits under the shift card and the ending screens, so those are
 ## read over closed eyes.
 
 signal wake_finished
 signal sleep_finished
 
-@export var wake_duration_sec := 3.0
-@export var sleep_duration_sec := 3.0
+@export var wake_duration_sec := 1.3
+@export var sleep_duration_sec := 1.1
 @export var max_blur := 4.0
 
 ## Keyframes as [fraction of the duration, openness, fraction of max_blur].
-## A single segment each: the lid moves the whole way without stopping.
-## Add rows in between to bring back a flutter.
-## An optional 4th entry sets that segment's easing (default EASE_IN_OUT).
-##
-## Waking: the lids drag open slowly for the first half, then speed up — the
-## first segment eases IN (ending at its fastest) and hands over to a faster
-## segment that eases OUT, so the pace jumps up at the half-way mark and
-## never stops in between.
+## Both are blinks, not slow fades: the lids flutter a couple of times —
+## heavy, fighting it — before the eye finally shuts (sleep) or settles open
+## (wake). Remove the middle rows for a single straight close/open.
 const WAKE_KEYS := [
 	[0.00, 0.00, 1.00],
-	[0.50, 0.28, 0.75, Tween.EASE_IN],
-	[1.00, 1.00, 0.00, Tween.EASE_OUT],
+	[0.25, 0.55, 0.70],
+	[0.38, 0.10, 0.80],
+	[0.62, 0.85, 0.30],
+	[0.72, 0.60, 0.25],
+	[1.00, 1.00, 0.00],
 ]
 const SLEEP_KEYS := [
 	[0.00, 1.00, 0.00],
+	[0.16, 0.20, 0.20],
+	[0.30, 0.85, 0.10],
+	[0.48, 0.10, 0.45],
+	[0.60, 0.45, 0.50],
 	[1.00, 0.00, 1.00],
 ]
 
