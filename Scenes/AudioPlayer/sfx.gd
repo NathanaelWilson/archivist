@@ -51,7 +51,8 @@ const SOUNDS := {
 	&"ending_liability": {},                      # when missing, ending_reveal
 	&"ending_paranoid": {},                       # plays instead
 	&"ending_zealot": {},
-	&"clock_out": {},                             # CLOCK OUT (punch clock)
+	&"ending_blood": {"path": "res://Assets/SFX/bell-sound.mp3"}, # Liability ending: the blood starts to run
+	&"redact_stroke": {"pitch_var": 0.06, "path": "res://Assets/SFX/highlighter.mp3"}, # Paranoid ending: each redaction on screen
 	# --- Menu & Record of Outcomes (main_menu.gd, outcome_slot.gd)
 	&"ui_hover": {"volume_db": -10.0, "pitch_var": 0.05},
 	&"ui_click": {},

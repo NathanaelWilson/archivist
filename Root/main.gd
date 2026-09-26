@@ -492,7 +492,10 @@ func _finish_current_shift() -> void:
 	while _fax_in_flight > 0 or fax.has_report() or fax_report.visible:
 		await get_tree().process_frame
 	_set_desk_input_enabled(false)
-	await eyelids.play_sleep()
+	# After the last shift the eyes stay open: the ending notice is read at
+	# the desk, and the ending itself takes the screen to dark.
+	if _shift_index + 1 < shifts.size():
+		await eyelids.play_sleep()
 	_shift_ending = false
 	_shift_index += 1
 	# Storyboard p.9: the player leaves at the shift card and comes back to a
@@ -508,8 +511,6 @@ func _finish_current_shift() -> void:
 ## scene, and shows it in place of the old generic "SHIFT COMPLETE" screen.
 func _present_ending() -> void:
 	shift_screen.dismiss()
-	# The eyes already closed at the end of the last shift; the verdict is
-	# read in that darkness.
 	_stop_atmosphere()
 	var ending_id := GameScore.evaluate_ending()
 	OutcomeRecord.file_ending(ending_id)
@@ -520,5 +521,5 @@ func _present_ending() -> void:
 		return
 	var ending: EndingScreen = ending_scene.instantiate()
 	add_child(ending)
-	ending.clocked_out.connect(func(): get_tree().change_scene_to_file(MAIN_MENU_SCENE_PATH))
+	ending.finished.connect(func(): get_tree().change_scene_to_file(MAIN_MENU_SCENE_PATH))
 	ending.present()
