@@ -64,7 +64,6 @@ const FILE_PAPER_SIZE := Vector2(207, 246)
 @onready var shift_screen: ShiftScreen = $ShiftScreen
 @onready var clipboard_panel: ClipboardPanel = $ClipboardPanel
 @onready var eyelids: EyelidOverlay = $EyelidOverlay
-@onready var splash_screen: SplashScreen = $SplashScreen
 @onready var desk: Desk = $Desk
 @onready var case_container: CaseContainer = $Desk/CaseContainer
 @onready var desk_clipboard: DeskProp = $Desk/Clipboard
@@ -105,8 +104,8 @@ func _ready() -> void:
 	cabinet.can_interact = _is_desk_free
 	document_viewer.closed.connect(_on_document_closed)
 	shift_screen.begin_requested.connect(_begin_current_shift)
-	# The game opens with the eyes shut: the first shift card is read in the
-	# dark, and pressing BEGIN opens them onto the desk.
+	# The game scene opens with the eyes shut; Shift 1 begins by opening them.
+	# (The title card plays before the main menu — see main_menu.gd.)
 	eyelids.close_now()
 	_show_current_shift()
 
@@ -145,8 +144,6 @@ func _begin_current_shift() -> void:
 	# board is put in front of the player before they touch a single file.
 	_set_desk_input_enabled(false)
 	await eyelids.play_wake()
-	if _shift_index == 0:
-		await splash_screen.play()
 	_set_desk_input_enabled(true)
 	if _shift_index == 0:
 		clipboard_panel.open()

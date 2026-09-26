@@ -1,9 +1,10 @@
 class_name SplashScreen
 extends CanvasLayer
 
-## The title card at the very start of Shift 1: once the eyes have opened on
-## the desk, the photo and the "Department of Truth" title come up over it,
-## with the desk behind them blurred (Shaders/backdrop_blur.gdshader).
+## The title card at launch, before the main menu: the photo and the
+## "Department of Truth" title over the menu's desk, blurred behind them
+## (Shaders/backdrop_blur.gdshader). The main menu plays it once per launch
+## (shown_this_launch) — coming back to the menu after a run skips it.
 ##
 ## Both images (Assets/Images/SplashScreen/Photo.png, Assets/Images/Title.png)
 ## are full frames in the desk's source-art space (4083 x 1750), exactly like
@@ -22,6 +23,9 @@ extends CanvasLayer
 ## How long the card stays fully on screen, between fading in and out.
 @export var hold_sec := 1.0
 
+## Set once the card has played, so returning to the menu does not replay it.
+static var shown_this_launch := false
+
 @onready var root: Control = $Root
 @onready var art: Node2D = $Art
 
@@ -33,15 +37,26 @@ func _ready() -> void:
 
 
 func play() -> void:
+	shown_this_launch = true
+	await show_card()
+	await hide_card()
+
+
+## Blurs the desk at once (no crisp first frames at game start), fades the
+## photo and title in, and holds them for hold_sec. Awaitable.
+func show_card() -> void:
 	_fit_art()
 	visible = true
-	root.modulate.a = 0.0
+	root.modulate.a = 1.0
 	art.modulate.a = 0.0
-	var fade_in := create_tween().set_parallel(true)
-	fade_in.tween_property(root, "modulate:a", 1.0, fade_in_sec)
+	var fade_in := create_tween()
 	fade_in.tween_property(art, "modulate:a", 1.0, fade_in_sec)
 	await fade_in.finished
 	await get_tree().create_timer(hold_sec).timeout
+
+
+## Fades the whole card out. Awaitable.
+func hide_card() -> void:
 	var fade_out := create_tween().set_parallel(true)
 	fade_out.tween_property(root, "modulate:a", 0.0, fade_out_sec)
 	fade_out.tween_property(art, "modulate:a", 0.0, fade_out_sec)

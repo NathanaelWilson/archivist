@@ -21,9 +21,16 @@ signal sleep_finished
 ## Keyframes as [fraction of the duration, openness, fraction of max_blur].
 ## A single segment each: the lid moves the whole way without stopping.
 ## Add rows in between to bring back a flutter.
+## An optional 4th entry sets that segment's easing (default EASE_IN_OUT).
+##
+## Waking: the lids drag open slowly for the first half, then speed up — the
+## first segment eases IN (ending at its fastest) and hands over to a faster
+## segment that eases OUT, so the pace jumps up at the half-way mark and
+## never stops in between.
 const WAKE_KEYS := [
 	[0.00, 0.00, 1.00],
-	[1.00, 1.00, 0.00],
+	[0.50, 0.28, 0.75, Tween.EASE_IN],
+	[1.00, 1.00, 0.00, Tween.EASE_OUT],
 ]
 const SLEEP_KEYS := [
 	[0.00, 1.00, 0.00],
@@ -47,8 +54,9 @@ func play_wake() -> void:
 
 
 ## End of the last shift: the eyes close for good. Awaitable.
-func play_sleep() -> void:
-	_play_keys(SLEEP_KEYS, sleep_duration_sec)
+## duration_sec overrides sleep_duration_sec (the title card uses a short one).
+func play_sleep(duration_sec := -1.0) -> void:
+	_play_keys(SLEEP_KEYS, sleep_duration_sec if duration_sec <= 0.0 else duration_sec)
 	await _tween.finished
 	sleep_finished.emit()
 
@@ -81,10 +89,12 @@ func _play_keys(keys: Array, duration_sec: float) -> void:
 		var from: Array = keys[i - 1]
 		var to: Array = keys[i]
 		var seconds := maxf((float(to[0]) - float(from[0])) * duration_sec, 0.01)
-		# Ease in-out: starts and ends gently, never stops in the middle.
+		# Ease in-out by default: starts and ends gently, never stops in the
+		# middle. A key can override it (see WAKE_KEYS).
+		var easing: int = int(to[3]) if to.size() > 3 else Tween.EASE_IN_OUT
 		_tween.tween_method(
 			_apply_between.bind(float(from[1]), float(from[2]), float(to[1]), float(to[2])),
-			0.0, 1.0, seconds).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
+			0.0, 1.0, seconds).set_trans(Tween.TRANS_SINE).set_ease(easing)
 
 
 func _apply_between(t: float, from_open: float, from_blur: float, to_open: float, to_blur: float) -> void:

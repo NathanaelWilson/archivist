@@ -15,6 +15,9 @@ const GAME_SCENE_PATH := "res://Root/main.tscn"
 
 @onready var journal_screen: Control = $JournalScreen
 @onready var journal_close_button: Button = $JournalScreen/CloseButton
+@onready var splash_screen: SplashScreen = $SplashScreen
+## Everything the player can press, held back while the title card is up.
+@onready var menu_controls: Array[Control] = [$CenterContainer, settings_button, exit_button]
 
 
 func _ready() -> void:
@@ -34,6 +37,20 @@ func _ready() -> void:
 	_wire_outline(records_button, records_outline)
 	_wire_outline(exit_button, null)
 	_wire_outline(settings_button, null)
+
+	# First time the menu appears after launch: the title card comes first,
+	# over the blurred desk, and the menu's buttons fade in once it is gone.
+	if not SplashScreen.shown_this_launch:
+		_play_title_card()
+
+
+func _play_title_card() -> void:
+	for control in menu_controls:
+		control.modulate.a = 0.0
+	await splash_screen.play()
+	var fade := create_tween().set_parallel(true)
+	for control in menu_controls:
+		fade.tween_property(control, "modulate:a", 1.0, 0.5)
 
 
 func _wire_outline(control: Control, outline: InteractableOutline) -> void:

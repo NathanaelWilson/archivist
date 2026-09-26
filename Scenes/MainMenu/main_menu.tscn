@@ -14,6 +14,7 @@
 [ext_resource type="Script" uid="uid://cclbq85god4ll" path="res://Scenes/records_screen.gd" id="16"]
 [ext_resource type="PackedScene" path="res://Scenes/Records/outcome_slot.tscn" id="17"]
 [ext_resource type="PackedScene" path="res://Scenes/Settings/audio_settings_panel.tscn" id="audio_settings_panel"]
+[ext_resource type="PackedScene" path="res://Scenes/SplashScreen/splash_screen.tscn" id="splash_screen"]
 
 [sub_resource type="StyleBoxEmpty" id="StyleBox_transparent"]
 
@@ -280,3 +281,5 @@ offset_right = 172.0
 offset_bottom = 66.0
 focus_mode = 0
 text = "< Return"
+
+[node name="SplashScreen" parent="." instance=ExtResource("splash_screen")]
