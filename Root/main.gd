@@ -79,6 +79,10 @@ var _flicker_timer: Timer
 ## False while the eyes are opening or closing — the desk is visible but must
 ## not be touched, so no file can be picked up, opened or filed.
 var _desk_input_enabled := true
+## True from a filing until its fax report has been read and put down. The
+## next case (or the end-of-shift eye close) waits for it, so every result is
+## seen before the game moves on.
+var _awaiting_report := false
 var _last_ambient_msec := -100000
 
 
@@ -290,8 +294,10 @@ func _on_file_filed(tray_type: int, redaction_result: Dictionary, case_data: Cas
 		" (coverage %.0f%%, overspill %.0f%%)" % [float(redaction_result.get("coverage", 0.0)) * 100.0, float(redaction_result.get("overspill", 0.0)) * 100.0],
 		" | accuracy: ", GameScore.accuracy, " paranoia: ", GameScore.paranoia)
 	_case_index += 1
-	# The document finishes its filing tween before the next one is spawned.
-	call_deferred("_spawn_next_case")
+	# Nothing new arrives until the fax report for this filing has come out
+	# and been put down — see _on_fax_report_closed. On the last case of a
+	# shift that also holds back the eyes closing.
+	_awaiting_report = true
 
 
 ## The fax starts ~0.3 s after the drawer shuts (Build Guide 3.6) and the next
@@ -301,6 +307,8 @@ func _send_fax_report_after_delay(case_data: CaseData, tray_type: int, redaction
 	await get_tree().create_timer(0.3).timeout
 	if is_instance_valid(fax):
 		fax.receive(_build_fax_report(case_data, tray_type, redaction_result))
+	else:
+		_continue_after_report() # no fax to wait for
 
 
 ## What the filing report says about one case: where it went, whether that
@@ -353,6 +361,16 @@ func _on_fax_report_requested(report: Dictionary) -> void:
 
 func _on_fax_report_closed() -> void:
 	_set_desk_input_enabled(true)
+	_continue_after_report()
+
+
+## The report for the last filing has been read: bring in the next case, or
+## end the shift if that was the last one.
+func _continue_after_report() -> void:
+	if not _awaiting_report:
+		return
+	_awaiting_report = false
+	_spawn_next_case()
 
 
 ## Turns the whole desk on or off: every paper on it, and the clipboard. Used
