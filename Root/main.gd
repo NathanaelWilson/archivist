@@ -197,7 +197,6 @@ func _on_case_pulled(case_data: CaseData, from_position: Vector2) -> void:
 	_open_document(file)
 
 
-## Keeps something of this size fully on screen when centred on point.
 # ------------------------------------------------------- Tutorial hint --
 ## Tutorial cases (CaseData.show_tutorial): once the page is closed, an arrow
 ## shows the envelope being dragged into its drawer, until it is filed. It
@@ -237,6 +236,7 @@ func _tray_of_type(tray_type: int) -> FilingTray:
 	return null
 
 
+## Keeps something of this size fully on screen when centred on point.
 func _clamp_to_screen(point: Vector2, size: Vector2) -> Vector2:
 	var view := get_viewport_rect().size
 	var half := size * 0.5

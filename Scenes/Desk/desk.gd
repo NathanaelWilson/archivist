@@ -122,7 +122,9 @@ func _apply_state() -> void:
 	_set_mask(desk_front, not layered, grade)
 	desk_front.texture = grade if layered else room
 
-	$Lamp.visible = not layered
+	# The flat paintings have no lamp, and the bloody grade has blood painted
+	# over it — the clean Lamp goes on top so the blood stays underneath.
+	$Lamp.visible = not layered or bloody
 	_set_art($Lamp, lamp_on if on else lamp_off, null if on else lamp_on)
 	# The fax is always drawn on top: it is the FaxMachine the player taps for
 	# filing reports, and in the bloody rooms it keeps the blood underneath.

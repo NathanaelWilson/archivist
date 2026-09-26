@@ -17,18 +17,13 @@ extends DeskProp
 ## uses DeskProp for its alpha cut-off, which strips the tinted padding the
 ## Affinity slice carries around the cabinet.
 ##
-## Open-drawer pictures only exist lit (no separate dark set — a drawer slid
-## out in the dark shows lit for as long as it is out), but they DO come in
-## a bloody flavor: Desk calls set_bloody() whenever the room's blood state
-## changes, and open_textures_blood is used instead of open_textures for as
-## long as it is bloody.
+## Every room state (lit, dark, bloody, bloody-dark) has the full set of four
+## pictures; Desk calls set_room() whenever the lights or the blood change,
+## and a drawer already pulled out swaps with the room.
 
 @export var closed_texture: Texture2D
 ## One per drawer, top to bottom — indexed by FilingTray.tray_type.
 @export var open_textures: Array[Texture2D] = []
-## Same, for the bloody room (storyboard p.9 onward). Falls back to
-## open_textures if left empty.
-@export var open_textures_blood: Array[Texture2D] = []
 @export var close_delay_sec := 0.15
 ## The same four pictures (all shut, then drawers 1-3 out) for the other room
 ## states, made from the lit art so labels and edges match exactly. Desk
@@ -40,10 +35,6 @@ extends DeskProp
 @export_group("")
 
 var _trays: Array[FilingTray] = []
-## Silhouette for the shut picture when Desk swaps in a nearly opaque dark
-## slice (Desk calls set_closed_art); open-drawer pictures never use it.
-var _closed_silhouette: Texture2D
-var _bloody := false
 var _lit_closed: Texture2D
 var _lit_open: Array[Texture2D] = []
 var _mouse_tray: FilingTray
@@ -102,9 +93,8 @@ func _show_open(tray: FilingTray) -> void:
 		SFX.play(&"cabinet_open")
 	_open_tray = tray
 	var art := closed_texture
-	var textures := open_textures_blood if _bloody and not open_textures_blood.is_empty() else open_textures
-	if tray != null and tray.tray_type < textures.size() and textures[tray.tray_type] != null:
-		art = textures[tray.tray_type]
+	if tray != null and tray.tray_type < open_textures.size() and open_textures[tray.tray_type] != null:
+		art = open_textures[tray.tray_type]
 	if art != null:
 		texture = art
 	for each in _trays:

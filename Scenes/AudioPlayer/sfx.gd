@@ -32,15 +32,15 @@ const SOUNDS := {
 	&"marker_down": {"pitch_var": 0.1},           # marker touches paper
 	# Looping scribble while drawing; alternates between the variations.
 	&"marker_loop": {"volume_db": -4.0, "pitch_var": 0.06, "paths": [
-		"res://Assets/SFX/highlighter",
-		"res://Assets/SFX/highlighter-2",
+		"res://Assets/SFX/highlighter.mp3",
+		"res://Assets/SFX/highlighter-2.mp3",
 	]},
 	# --- In-game atmosphere (main.gd)
 	&"ambience_crickets": {"volume_db": -12.0, "path": "res://Assets/SFX/night-cricket-ambience.mp3"}, # looped for the whole shift
 	&"door_knock": {"volume_db": -4.0, "pitch_var": 0.04, "path": "res://Assets/SFX/door-knocking.mp3"}, # random, spaced out
 	&"whisper": {"volume_db": -8.0, "pitch_var": 0.05, "path": "res://Assets/SFX/whisper.mp3"}, # random, rarer than knocks
 	&"case_arrive": {"pitch_var": 0.06, "path": "res://Assets/SFX/paper-slide.mp3"}, # new case lands on the desk
-	&"printer": {"path": "res://Assets/SFX/printer.mp3"}, # reserved: call when the printing machine is built
+	&"printer": {"path": "res://Assets/SFX/printer.mp3"}, # a filing report comes through the fax (fax_machine.gd)
 	# --- Shift & ending (shift_screen.gd, ending_screen.gd)
 	&"shift_card": {"path": "res://Assets/SFX/bell-sound.mp3"}, # the "SHIFT N" card appears
 	&"shift_begin": {},                           # BEGIN SHIFT pressed
