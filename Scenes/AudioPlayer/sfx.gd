@@ -17,6 +17,7 @@ const POOL_SIZE := 8
 ##   paths      several files = random variations (never the same twice in a
 ##              row; loops switch on every repeat). Missing files are skipped,
 ##              and a path without an extension accepts .ogg/.wav/.mp3
+##   start_sec  skip this much silence at the start of the file (default 0)
 const SOUNDS := {
 	# --- Desk: documents & trays (file_entity.gd, filing_tray.gd)
 	&"file_pickup": {"pitch_var": 0.08},          # paper lifted off the desk
@@ -40,6 +41,7 @@ const SOUNDS := {
 	&"door_knock": {"volume_db": -4.0, "pitch_var": 0.04, "path": "res://Assets/SFX/door-knocking.mp3"}, # random, spaced out
 	&"whisper": {"volume_db": -8.0, "pitch_var": 0.05, "path": "res://Assets/SFX/whisper.mp3"}, # random, rarer than knocks
 	&"case_arrive": {"pitch_var": 0.06, "path": "res://Assets/SFX/paper-slide.mp3"}, # new case lands on the desk
+	&"light_glitch": {"volume_db": -2.0, "start_sec": 0.2, "path": "res://Assets/SFX/light-glitch.mp3"}, # the room lights flicker (main.gd)
 	&"printer": {"path": "res://Assets/SFX/printer.mp3"}, # a filing report comes through the fax (fax_machine.gd)
 	# --- Shift & ending (shift_screen.gd, ending_screen.gd)
 	&"shift_card": {"path": "res://Assets/SFX/bell-sound.mp3"}, # the "SHIFT N" card appears
@@ -79,8 +81,17 @@ func play(id: StringName) -> bool:
 	var player := _pool[_next]
 	_next = (_next + 1) % _pool.size()
 	_apply(player, id)
-	player.play()
+	player.play(float(SOUNDS.get(id, {}).get("start_sec", 0.0)))
 	return true
+
+
+## Cuts a one-shot short, e.g. when what it belongs to ends before the file
+## does. Stops every pool player currently playing one of that id's files.
+func stop(id: StringName) -> void:
+	var streams := _get_streams(id)
+	for player in _pool:
+		if player.playing and player.stream in streams:
+			player.stop()
 
 
 ## Starts a sound that repeats until stop_loop(id) (e.g. the marker scribble).

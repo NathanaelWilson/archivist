@@ -430,12 +430,15 @@ func _on_flicker_timeout() -> void:
 
 
 func _flicker_lights() -> void:
+	# The crackle of a failing tube, cut off the moment the lights hold again.
+	SFX.play(&"light_glitch")
 	for step: Array in FLICKER_PATTERN:
 		_set_lights(bool(step[0]))
 		await get_tree().create_timer(float(step[1])).timeout
 		if _flicker_case == null:
 			break # filed mid-flicker: _stop_flickering already put them back on
 	_set_lights(true)
+	SFX.stop(&"light_glitch")
 
 
 ## The flicker is nothing but the art swap: every desk slice goes to its

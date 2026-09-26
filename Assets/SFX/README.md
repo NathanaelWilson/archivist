@@ -31,6 +31,7 @@ Atur volume/variasi pitch per suara di `Scenes/sfx.gd` → `SOUNDS`.
 | door_knock | door-knocking.mp3 | Acak tiap 35–75 detik di ingame (atur `knock_min_sec`/`knock_max_sec` di node Main) |
 | whisper | whisper.mp3 | Acak tiap 60–120 detik (`whisper_min_sec`/`whisper_max_sec`). Jarak minimal antar suara acak 10 detik (`ambient_min_gap_sec`) |
 | case_arrive | paper-slide.mp3 | Case baru muncul di meja |
+| light_glitch | light-glitch.mp3 | Lampu ruangan berkedip (case dengan `lights_flicker`, mis. case 8 & 11); berhenti saat lampu kembali stabil |
 | slot_locked | error-sound.mp3 | Klik outcome yang belum unlock di Record of Outcomes |
 | printer | printer.mp3 | Belum dipakai: panggil `SFX.play(&"printer")` saat mesin cetak dibuat |
 | cabinet_open | cabinet-open.mp3 | Laci cabinet terbuka (setiap gambar berganti ke laci terbuka) |
