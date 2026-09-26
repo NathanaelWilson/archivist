@@ -11,6 +11,7 @@
 [ext_resource type="PackedScene" path="res://Scenes/Eyelids/eyelid_overlay.tscn" id="8_eyelids"]
 [ext_resource type="Script" path="res://Scenes/Desk/desk_parallax.gd" id="11_parallax"]
 [ext_resource type="PackedScene" path="res://Scenes/Desk/desk.tscn" id="9_desk"]
+[ext_resource type="PackedScene" path="res://Scenes/Fax/fax_report.tscn" id="12_fax_report"]
 
 [node name="Main" type="Node2D" unique_id=1907770346]
 script = ExtResource("1_main")
@@ -25,6 +26,8 @@ shifts = Array[ExtResource("2_ro5j4")]([ExtResource("2_shift_01"), ExtResource("
 [node name="ClipboardPanel" parent="." unique_id=733570815 instance=ExtResource("7_clipboard")]
 
 [node name="EyelidOverlay" parent="." unique_id=1648783443 instance=ExtResource("8_eyelids")]
+
+[node name="FaxReport" parent="." instance=ExtResource("12_fax_report")]
 
 
 [node name="DeskParallax" type="Node" parent="." node_paths=PackedStringArray("target", "desk")]

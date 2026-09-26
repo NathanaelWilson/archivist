@@ -1,6 +1,7 @@
 [gd_scene format=3]
 
 [ext_resource type="Script" path="res://Scenes/Desk/desk.gd" id="1_desk"]
+[ext_resource type="Script" path="res://Scenes/Fax/fax_machine.gd" id="27_fax_script"]
 [ext_resource type="Texture2D" uid="uid://drwdodifju043" path="res://Assets/Images/Background/background_layer1.jpg" id="2_layer1"]
 [ext_resource type="Script" path="res://Scenes/Desk/case_container.gd" id="3_container_script"]
 [ext_resource type="Texture2D" uid="uid://bnri5t4cj61fk" path="res://Assets/Objects/container_on.png" id="4_container"]
@@ -109,10 +110,10 @@ script = ExtResource("5_prop_script")
 interactive = false
 
 [node name="Fax" type="Sprite2D" parent="."]
-visible = false
 position = Vector2(2013, 173)
 texture = ExtResource("25_fax_on")
 centered = false
+script = ExtResource("27_fax_script")
 
 [node name="Lamp" type="Sprite2D" parent="."]
 visible = false

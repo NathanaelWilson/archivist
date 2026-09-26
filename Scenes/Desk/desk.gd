@@ -122,7 +122,8 @@ func _apply_state() -> void:
 
 	$Lamp.visible = not layered
 	_set_art($Lamp, lamp_on if on else lamp_off, null if on else lamp_on)
-	$Fax.visible = bloody
+	# The fax is always drawn on top: it is the FaxMachine the player taps for
+	# filing reports, and in the bloody rooms it keeps the blood underneath.
 	_set_art($Fax, fax_on if on else fax_off, null)
 
 	var shut: Texture2D = cabinet_closed
