@@ -1,9 +1,10 @@
 class_name DragHint
 extends Node2D
 
-## Case 1 tutorial: a dashed arrow from the envelope on the desk to the drawer
-## it belongs in, with a fingertip dot travelling along it — the "hold and
-## drag it here" gesture. Main adds it as its own child, so it moves with the
+## Case 1 tutorial: a dashed arrow from the envelope on the desk to the side
+## of the cabinet, with a fingertip dot travelling along it — the "hold and
+## drag it here" gesture — and a line telling the player to pick the drawer
+## by the rules. Main adds it as its own child, so it moves with the
 ## desk (DeskParallax) like the envelope and cabinet do.
 
 @export var travel_sec := 1.6
@@ -12,6 +13,10 @@ extends Node2D
 @export var width := 3.0
 ## How high the arrow bows above the straight line, as a share of its length.
 @export var arc_height := 0.22
+@export_multiline var text := "Archive the document\nbased on the rules"
+@export var text_color := Color.BLACK
+@export var font: Font = preload("res://Assets/Fonts/SpecialElite-Regular.ttf")
+@export var font_size := 18
 
 var _from_node: Node2D
 var _from_offset := Vector2.ZERO
@@ -20,7 +25,7 @@ var _time := 0.0
 
 
 ## from_node is the envelope (followed live, so parallax and nudges are
-## respected); to_global is the drawer's drop point.
+## respected); to_global is where the arrow ends, beside the cabinet.
 func point(from_node: Node2D, to_global: Vector2, from_offset := Vector2.ZERO) -> void:
 	_from_node = from_node
 	_to_global = to_global
@@ -67,7 +72,7 @@ func _draw() -> void:
 	for i in steps + 1:
 		points.append(_curve_point(a, b, float(i) / steps))
 
-	# Dashes crawl toward the drawer.
+	# Dashes crawl toward the cabinet.
 	var crawl := fmod(_time * 30.0, dash_length * 2.0)
 	var walked := -crawl
 	for i in steps:
@@ -78,13 +83,17 @@ func _draw() -> void:
 			draw_line(p0, p1, color, width, true)
 		walked += seg
 
-	# Arrowhead at the drawer.
+	# Arrowhead at the cabinet.
 	var tail := points[steps - 2]
 	var dir := (b - tail).normalized()
 	var side := dir.orthogonal()
 	draw_colored_polygon(PackedVector2Array([b + dir * 4.0, b - dir * 12.0 + side * 8.0, b - dir * 12.0 - side * 8.0]), color)
 
-	# Fingertip travelling from the envelope to the drawer.
+	# Instruction centred under the middle of the arrow's body.
+	var text_width := font.get_multiline_string_size(text, HORIZONTAL_ALIGNMENT_CENTER, -1, font_size).x
+	draw_multiline_string(font, points[steps / 2] + Vector2(-text_width * 0.5, 36.0 + font.get_ascent(font_size)), text, HORIZONTAL_ALIGNMENT_CENTER, text_width, font_size, -1, text_color)
+
+	# Fingertip travelling from the envelope to the cabinet.
 	var t := clampf(_time / travel_sec, 0.0, 1.0)
 	var fade := 1.0 - clampf((_time - travel_sec) / 0.5, 0.0, 1.0)
 	var tip := _curve_point(a, b, ease(t, -1.6))

@@ -24,6 +24,9 @@ uniform float grain_strength : hint_range(0.0, 0.2) = 0.05;
 uniform float edge_shade : hint_range(0.0, 1.0) = 0.25;
 // The lamp is up and to the left: the far-left corner is a little brighter.
 uniform float lamp_falloff : hint_range(0.0, 1.0) = 0.18;
+// Which corner of the art (0..1) faces the lamp. Art drawn rotated on the
+// desk (the envelope lying sideways in the case tray) points it elsewhere.
+uniform vec2 lamp_corner = vec2(0.0, 0.0);
 // 1 = lights on, 0 = the dark room (set by FileEntity.set_lights).
 uniform float room_light : hint_range(0.0, 1.0) = 1.0;
 // What the dark room does to a lit colour: matched to the *_off desk slices
@@ -63,7 +66,8 @@ void fragment() {
 		// Overlay: lamp light, edge falloff and grain, all procedural.
 		vec2 centred = vec2(x, local.y) - 0.5;
 		float edge = 1.0 - edge_shade * smoothstep(0.25, 0.75, length(centred * vec2(1.3, 1.0)));
-		float lamp = 1.0 + lamp_falloff * (0.5 - 0.5 * (x + local.y));
+		vec2 from_lamp = abs(vec2(x, local.y) - lamp_corner);
+		float lamp = 1.0 + lamp_falloff * (0.5 - 0.5 * (from_lamp.x + from_lamp.y));
 		graded *= edge * lamp;
 		graded += (hash(floor(UV * 900.0)) - 0.5) * grain_strength;
 

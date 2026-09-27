@@ -133,6 +133,8 @@ func _apply_state() -> void:
 	cabinet.set_room(on, bloody)
 
 	_set_art($CaseContainer, container_on if on else container_off, null if on else container_on)
+	# Same grade as the FileEntity envelope, so it goes dark with the room too.
+	($CaseContainer/Envelope.material as ShaderMaterial).set_shader_parameter("room_light", 1.0 if on else 0.0)
 	_set_art($Clipboard, clipboard_on if on else clipboard_off, null if on else clipboard_on)
 
 

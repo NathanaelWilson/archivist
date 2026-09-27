@@ -4,6 +4,10 @@ extends DeskProp
 ## The in-tray on the desk. Each new case lands in here instead of on the
 ## desk. Pressing the tray is enough: the case comes straight out and Main
 ## lays it in the middle of the desk — no dragging it out by hand.
+##
+## While a case waits, the Envelope child (Amplop.png, UV-mapped onto the
+## tray's paper in desk.tscn) sits in the tray, so what the player picks up
+## already looks like the envelope it becomes.
 
 ## Emitted the moment the tray is pressed. from_position is where the paper
 ## leaves from (the tray's centre), so Main can slide it onto the desk.
@@ -11,6 +15,8 @@ signal case_pulled(case_data: CaseData, from_position: Vector2)
 
 var _case: CaseData
 var _arrive_tween: Tween
+
+@onready var envelope: Polygon2D = $Envelope
 
 
 func has_case() -> bool:
@@ -20,11 +26,13 @@ func has_case() -> bool:
 ## A new case arrives in the tray.
 func load_case(case_data: CaseData) -> void:
 	_case = case_data
+	envelope.visible = true
 	_play_arrival()
 
 
 func clear_case() -> void:
 	_case = null
+	envelope.visible = true
 	cancel_touch()
 
 
@@ -53,7 +61,12 @@ func _on_release(_screen_position: Vector2) -> void:
 func _play_arrival() -> void:
 	if _arrive_tween != null and _arrive_tween.is_valid():
 		_arrive_tween.kill()
-	offset = Vector2(0, -30)
 	_arrive_tween = create_tween()
-	_arrive_tween.tween_property(self, "offset", Vector2.ZERO, 0.3) \
+	_arrive_tween.tween_method(_set_hop, Vector2(0, -30), Vector2.ZERO, 0.3) \
 		.set_trans(Tween.TRANS_BOUNCE).set_ease(Tween.EASE_OUT)
+
+
+## The envelope is a child, which offset doesn't move, so it hops alongside.
+func _set_hop(value: Vector2) -> void:
+	offset = value
+	envelope.position = value

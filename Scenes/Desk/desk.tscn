@@ -38,12 +38,28 @@
 [ext_resource type="Texture2D" path="res://Assets/Objects/fax_on.png" id="25_fax_on"]
 [ext_resource type="Texture2D" path="res://Assets/Objects/fax_off.png" id="25_fax_off"]
 [ext_resource type="Shader" path="res://Shaders/desk_prop.gdshader" id="26_prop_shader"]
+[ext_resource type="Texture2D" uid="uid://bi87t0qoqx8rp" path="res://Assets/Objects/Amplop.png" id="27_envelope"]
+[ext_resource type="Shader" uid="uid://dkxcmejxdawxa" path="res://Shaders/desk_object.gdshader" id="28_desk_object"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_lamp"]
 shader = ExtResource("26_prop_shader")
 shader_parameter/alpha_floor = 0.55
 shader_parameter/alpha_ceiling = 0.8
 shader_parameter/outline_width = 0.0
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_tray_envelope"]
+shader = ExtResource("28_desk_object")
+shader_parameter/region = Vector4(0.189941, 0.027344, 0.555176, 0.925293)
+shader_parameter/top_width = 1.0
+shader_parameter/saturation = 0.4
+shader_parameter/tint = Color(0.86, 0.78, 0.62, 1)
+shader_parameter/tint_strength = 0.55
+shader_parameter/brightness = 0.85
+shader_parameter/grain_strength = 0.05
+shader_parameter/edge_shade = 0.25
+shader_parameter/lamp_falloff = 0.18
+shader_parameter/lamp_corner = Vector2(1, 0)
+shader_parameter/room_light = 1.0
 
 [node name="Desk" type="Node2D"]
 texture_filter = 4
@@ -135,6 +151,13 @@ position = Vector2(1494, 414)
 texture = ExtResource("4_container")
 centered = false
 script = ExtResource("3_container_script")
+
+[node name="Envelope" type="Polygon2D" parent="CaseContainer"]
+texture_filter = 4
+material = SubResource("ShaderMaterial_tray_envelope")
+texture = ExtResource("27_envelope")
+polygon = PackedVector2Array(117, 63, 527, 63, 516, 243, 392, 243, 381, 273, 204, 273, 190, 243, 76, 243)
+uv = PackedVector2Array(1526, 56, 1526, 1951, 560.6, 1954.8, 560.6, 1419.4, 399.7, 1386.7, 399.7, 630.7, 560.6, 547.2, 560.6, 54.9)
 
 [node name="Clipboard" type="Sprite2D" parent="."]
 position = Vector2(901, 873)

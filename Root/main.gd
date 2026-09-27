@@ -107,6 +107,7 @@ func _ready() -> void:
 	case_container.case_pulled.connect(_on_case_pulled)
 	desk_clipboard.can_interact = _is_desk_free
 	desk_clipboard.tapped.connect(clipboard_panel.open)
+	desk_clipboard.tapped.connect(func() -> void: desk_clipboard.attention = false)
 	# Drawers slide open under a hovering mouse only while the desk is free.
 	cabinet.can_interact = _is_desk_free
 	# Every filing sends a report to the fax; it blinks until tapped.
@@ -154,6 +155,12 @@ func _begin_current_shift() -> void:
 	# may have changed while they were away.
 	_set_desk_input_enabled(false)
 	await eyelids.play_wake()
+	# Prologue: the welcome letter, once, before the very first shift's work.
+	if _shift_index == 0:
+		var letter := WelcomeLetter.new()
+		add_child(letter)
+		letter.play()
+		await letter.finished
 	_set_desk_input_enabled(true)
 	clipboard_panel.open()
 
@@ -163,6 +170,9 @@ func _spawn_next_case() -> void:
 	if _case_index >= shift.cases.size():
 		_finish_current_shift()
 		return
+	# Case 2 of the game: the clipboard blinks like the fax to show it can be
+	# tapped, until the next case arrives.
+	desk_clipboard.attention = _shift_index == 0 and _case_index == 1
 	spawn_case(shift.cases[_case_index])
 
 
@@ -205,7 +215,7 @@ func _on_case_pulled(case_data: CaseData, from_position: Vector2) -> void:
 
 # ------------------------------------------------------- Tutorial hint --
 ## Tutorial cases (CaseData.show_tutorial): once the page is closed, an arrow
-## shows the envelope being dragged into its drawer, until it is filed. It
+## shows the envelope being dragged to the cabinet, until it is filed. It
 ## hides while the envelope is carried and comes back if it is put down.
 
 const DRAG_HINT_SCRIPT := preload("res://Scenes/Tutorial/drag_hint.gd")
@@ -215,31 +225,39 @@ var _drag_hint: DragHint
 func _show_drag_hint(file: FileEntity) -> void:
 	if not is_instance_valid(file) or file.case_data == null or not file.case_data.show_tutorial:
 		return
-	var tray := _tray_of_type(file.case_data.correct_tray)
-	if tray == null:
+	var target := _cabinet_side_point()
+	if not target.is_finite():
 		return
 	if _drag_hint == null:
 		_drag_hint = DRAG_HINT_SCRIPT.new()
 		add_child(_drag_hint)
 	var reach := FILE_PAPER_SIZE * file.scale * 0.5
-	_drag_hint.point(file, tray.get_drop_point(), Vector2(reach.x * 0.6, -reach.y * 0.6))
+	_drag_hint.point(file, target, Vector2(reach.x * 0.6, -reach.y * 0.6))
 	if not file.picked_up.is_connected(_hide_drag_hint):
 		file.picked_up.connect(_hide_drag_hint)
 		file.returned_to_desk.connect(_show_drag_hint.bind(file))
 		file.filed.connect(func(_tray: int): _hide_drag_hint())
 
 
+## Just left of the drawer stack, level with its middle, so the hint shows
+## where to go without giving away which drawer is right.
+func _cabinet_side_point() -> Vector2:
+	var left := INF
+	var y_sum := 0.0
+	var trays := get_tree().get_nodes_in_group(FilingTray.GROUP)
+	for node in trays:
+		var tray := node as FilingTray
+		y_sum += tray.get_drop_point().y
+		for p in tray.closed_area.polygon:
+			left = minf(left, tray.closed_area.to_global(p).x)
+	if trays.is_empty():
+		return Vector2(INF, INF)
+	return Vector2(left - 24.0, y_sum / trays.size())
+
+
 func _hide_drag_hint() -> void:
 	if _drag_hint != null:
 		_drag_hint.hide_hint()
-
-
-func _tray_of_type(tray_type: int) -> FilingTray:
-	for node in get_tree().get_nodes_in_group(FilingTray.GROUP):
-		var tray := node as FilingTray
-		if tray != null and tray.tray_type == tray_type:
-			return tray
-	return null
 
 
 ## Keeps something of this size fully on screen when centred on point.
