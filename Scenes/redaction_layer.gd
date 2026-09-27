@@ -56,8 +56,9 @@ var _drips: Array[Dictionary] = []
 var _bleed_activity := 0.0 ## 1 right after a stroke, decays to 0 as it settles
 var _bleed_clock := 0.0
 ## The page as it was before each stroke of this viewing, newest last (see
-## undo_last_stroke): {"ink": Image, "bleed": Image or null}. Emptied
-## whenever a page is (re)loaded.
+## undo_last_stroke): {"ink": Image, "bleed": Image or null}. Kept with the
+## document while it is closed (get_undo_history / set_case_data), so UNDO
+## still works after the file is put down and picked up again.
 var _undo_stack: Array[Dictionary] = []
 const MAX_UNDO := 30
 
@@ -79,9 +80,15 @@ func _ready() -> void:
 ## size it fitted the case art to so ink, anomaly mask and art stay aligned.
 ## saved_ink restores ink the player already put on this document.
 ## saved_bleed restores how far that ink had already bled.
-func set_case_data(new_case_data: CaseData, canvas_size: Vector2i = IMG_SIZE, saved_ink: Image = null, saved_bleed: Image = null) -> void:
+func set_case_data(new_case_data: CaseData, canvas_size: Vector2i = IMG_SIZE, saved_ink: Image = null, saved_bleed: Image = null, saved_undo: Array[Dictionary] = []) -> void:
 	case_data = new_case_data
 	_undo_stack.clear()
+	# Earlier strokes stay undoable — as long as the page is the same size
+	# (it always is, unless the screen size changed in between).
+	for entry in saved_undo:
+		var entry_ink: Image = entry.get("ink")
+		if entry_ink != null and entry_ink.get_size() == canvas_size:
+			_undo_stack.append(entry)
 	_bleeding = case_data != null and case_data.ink_bleeds
 	_create_canvases(canvas_size)
 	if saved_ink != null and not saved_ink.is_empty() and saved_ink.get_format() == Image.FORMAT_RGBA8:
@@ -105,6 +112,11 @@ func get_bleed_image() -> Image:
 	if not _bleeding or bleed_image == null:
 		return null
 	return bleed_image.duplicate() as Image
+
+
+## The undo history, for the document to keep while it is closed.
+func get_undo_history() -> Array[Dictionary]:
+	return _undo_stack.duplicate()
 
 
 ## A copy of the current ink, for the document to keep while it is closed.

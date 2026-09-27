@@ -14,6 +14,8 @@ extends Control
 
 signal undo_requested
 signal done_requested
+## RULES (top left, every case): lift the clipboard over the document.
+signal rules_requested
 
 const DEMO_SCRIPT := preload("res://Scenes/Tutorial/redaction_demo.gd")
 
@@ -25,6 +27,7 @@ const DEMO_SCRIPT := preload("res://Scenes/Tutorial/redaction_demo.gd")
 @onready var got_it_button: Button = $HintPanel/Margin/Content/GotItButton
 @onready var undo_button: Button = $UndoButton
 @onready var done_button: Button = $DoneButton
+@onready var rules_button: Button = $RulesButton
 
 var _demo: RedactionDemo
 var _pulse: Tween
@@ -39,10 +42,15 @@ func _ready() -> void:
 	got_it_button.pressed.connect(hide_help)
 	undo_button.pressed.connect(_on_undo_pressed)
 	done_button.pressed.connect(_on_done_pressed)
+	rules_button.pressed.connect(func():
+		SFX.play(&"ui_click")
+		rules_requested.emit()
+	)
 	hint_panel.visible = false
 	help_button.visible = false
 	undo_button.visible = false
 	done_button.visible = false
+	rules_button.visible = false
 
 
 ## Called by DocumentViewer every time a page opens. Shows the "?" only for
@@ -54,6 +62,7 @@ func present(case_data: CaseData, document: Node2D, document_size: Vector2) -> v
 	help_button.visible = wanted
 	undo_button.visible = true
 	done_button.visible = true
+	rules_button.visible = true
 	if not wanted:
 		_stop_pulse()
 		return
@@ -78,6 +87,7 @@ func dismiss() -> void:
 	help_button.visible = false
 	undo_button.visible = false
 	done_button.visible = false
+	rules_button.visible = false
 	_stop_pulse()
 
 
@@ -89,7 +99,7 @@ func on_ink_started() -> void:
 ## True if screen_position is on one of this overlay's buttons or the help
 ## panel, so a tap there is not mistaken for a tap off the page.
 func is_over_controls(screen_position: Vector2) -> bool:
-	for control: Control in [help_button, undo_button, done_button, hint_panel]:
+	for control: Control in [help_button, undo_button, done_button, rules_button, hint_panel]:
 		if control.is_visible_in_tree() and control.get_global_rect().has_point(screen_position):
 			return true
 	return false

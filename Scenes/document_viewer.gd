@@ -18,6 +18,12 @@ extends CanvasLayer
 ## hand it back the next time it is opened.
 ## bleed_image is how far that ink has bled (null unless the case bleeds).
 signal closed(redaction_result: Dictionary, ink_image: Image, bleed_image: Image)
+## RULES was tapped: Main lifts the clipboard over the page.
+signal rules_requested
+
+## Set by Main. While it returns true (the clipboard is up over the page),
+## the page ignores touches, so reading the rules never inks the document.
+var input_blocked: Callable = Callable()
 
 ## Space kept clear between the document and the screen edges, in viewport
 ## pixels, on top of room for the "?" / UNDO / DONE buttons at the sides.
@@ -64,10 +70,11 @@ func _ready() -> void:
 	add_child(_tutorial)
 	_tutorial.undo_requested.connect(_on_undo_requested)
 	_tutorial.done_requested.connect(close)
+	_tutorial.rules_requested.connect(rules_requested.emit)
 	visible = false
 
 
-func open(new_case_data: CaseData, saved_ink: Image = null, saved_bleed: Image = null) -> void:
+func open(new_case_data: CaseData, saved_ink: Image = null, saved_bleed: Image = null, saved_undo: Array[Dictionary] = []) -> void:
 	if new_case_data == null:
 		push_error("DocumentViewer.open() was called without a CaseData.")
 		return
@@ -80,7 +87,7 @@ func open(new_case_data: CaseData, saved_ink: Image = null, saved_bleed: Image =
 	_document_size = _fit_document(viewport_size)
 	paper.position = -_document_size * 0.5
 	paper.size = _document_size
-	redaction.set_case_data(case_data, Vector2i(_document_size), saved_ink, saved_bleed)
+	redaction.set_case_data(case_data, Vector2i(_document_size), saved_ink, saved_bleed, saved_undo)
 	visible = true
 	_tutorial.present(case_data, document, _document_size)
 	_tutorial.set_undo_available(redaction.can_undo())
@@ -107,6 +114,11 @@ func _fit_document(viewport_size: Vector2) -> Vector2:
 	return fitted
 
 
+## The strokes that can still be undone, for the file to keep while closed.
+func get_undo_history() -> Array[Dictionary]:
+	return redaction.get_undo_history()
+
+
 func close() -> void:
 	if not visible:
 		return
@@ -123,6 +135,10 @@ func close() -> void:
 
 func _unhandled_input(event: InputEvent) -> void:
 	if not visible:
+		return
+	if input_blocked.is_valid() and bool(input_blocked.call()):
+		_touches.clear()
+		_outside_press = null
 		return
 	if _handle_zoom_input(event):
 		get_viewport().set_input_as_handled()

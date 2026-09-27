@@ -68,6 +68,7 @@ const FILE_PAPER_SIZE := Vector2(259, 200)
 @onready var cabinet: FilingCabinet = $Desk/Cabinet
 @onready var fax: FaxMachine = $Desk/Fax
 @onready var fax_report: FaxReport = $FaxReport
+@onready var pause_menu: PauseMenu = $PauseMenu
 var active_file: FileEntity
 var _shift_index := 0
 var _case_index := 0
@@ -99,6 +100,7 @@ func _ready() -> void:
 	_start_ambient(&"whisper", whisper_min_sec, whisper_max_sec)
 	# The clipboard asks Main which board is live, so swaps stay Main's call.
 	clipboard_panel.board_source = get_active_board
+	clipboard_panel.board_catalog = CLIPBOARD_BOARDS.values()
 	# The desk art itself is the interface: pressing the tray lays the case in
 	# the middle of the desk, and the rules are read by tapping the clipboard.
 	case_container.can_interact = _is_desk_free
@@ -112,6 +114,10 @@ func _ready() -> void:
 	fax.report_requested.connect(_on_fax_report_requested)
 	fax_report.closed.connect(_on_fax_report_closed)
 	document_viewer.closed.connect(_on_document_closed)
+	# The rules can be read over an open document; while they are up the page
+	# ignores touches, and putting the document down puts them down too.
+	document_viewer.rules_requested.connect(clipboard_panel.open.bind(true))
+	document_viewer.input_blocked = clipboard_panel.is_open
 	shift_screen.begin_requested.connect(_begin_current_shift)
 	# The game scene opens with the eyes shut; Shift 1 begins by opening them.
 	# (The title card plays before the main menu — see main_menu.gd.)
@@ -273,13 +279,17 @@ func _open_document(file: FileEntity) -> void:
 	active_file = file
 	file.set_interaction_enabled(false)
 	_hide_drag_hint()
-	document_viewer.open(file.case_data, file.ink_image, file.bleed_image)
+	pause_menu.set_button_visible(false) # the page's "?" uses that corner
+	document_viewer.open(file.case_data, file.ink_image, file.bleed_image, file.undo_history)
 
 
 func _on_document_closed(redaction_result: Dictionary, ink_image: Image, bleed_image: Image) -> void:
+	clipboard_panel.close()
+	pause_menu.set_button_visible(true)
 	if is_instance_valid(active_file):
 		active_file.ink_image = ink_image
 		active_file.bleed_image = bleed_image
+		active_file.undo_history = document_viewer.get_undo_history()
 		active_file.set_redaction_result(redaction_result)
 		active_file.set_interaction_enabled(_desk_input_enabled)
 		_show_drag_hint(active_file)

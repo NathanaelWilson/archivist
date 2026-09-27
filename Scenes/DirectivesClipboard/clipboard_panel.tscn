@@ -61,6 +61,7 @@ theme_override_constants/separation = 8
 
 [node name="Page1" type="VBoxContainer" parent="Board/Margin/Content" unique_id=418630697]
 layout_mode = 2
+size_flags_vertical = 3
 theme_override_constants/separation = 15
 
 [node name="Notice" type="Label" parent="Board/Margin/Content/Page1" unique_id=1082464857]
@@ -89,6 +90,7 @@ autowrap_mode = 2
 [node name="SpacerBottom" type="Control" parent="Board/Margin/Content/Page1" unique_id=325448637]
 custom_minimum_size = Vector2(0, 50)
 layout_mode = 2
+size_flags_vertical = 3
 
 [node name="NextButton" type="Button" parent="Board/Margin/Content/Page1" unique_id=597286748]
 layout_mode = 2
@@ -102,6 +104,7 @@ flat = true
 
 [node name="Page2" type="VBoxContainer" parent="Board/Margin/Content" unique_id=1166672438]
 layout_mode = 2
+size_flags_vertical = 3
 theme_override_constants/separation = 15
 
 [node name="FileHeading" type="Label" parent="Board/Margin/Content/Page2" unique_id=2021928471]
@@ -121,6 +124,7 @@ autowrap_mode = 2
 [node name="SpacerBottom" type="Control" parent="Board/Margin/Content/Page2" unique_id=880334117]
 custom_minimum_size = Vector2(0, 30)
 layout_mode = 2
+size_flags_vertical = 3
 
 [node name="BackButton" type="Button" parent="Board/Margin/Content/Page2" unique_id=163539745]
 layout_mode = 2

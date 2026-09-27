@@ -50,6 +50,8 @@ var _redaction_result: Dictionary = {"is_valid": false, "reason": "Document has 
 var ink_image: Image
 ## How far that ink has bled, for cases whose marker bleeds. Never scored.
 var bleed_image: Image
+## The page before each stroke, so UNDO still works when it is reopened.
+var undo_history: Array[Dictionary] = []
 
 
 func _ready() -> void:
