@@ -20,11 +20,18 @@ signal report_requested(report: Dictionary)
 @export var shake_px := 1.6
 @export var shake_rate := 28.0
 @export var shake_sec := 0.9
+## The rattle is felt as well as seen: short buzzes, haptic_pulse_ms long,
+## haptic_interval seconds apart, for as long as the machine shakes. They
+## ease off with the shake. Phones only; a desktop session ignores them.
+@export var haptic_pulse_ms := 40
+@export var haptic_interval := 0.15
+@export_range(0.0, 1.0, 0.05) var haptic_strength := 0.6
 
 var _pending: Array[Dictionary] = []
 var _blink_left := 0.0
 var _shake_left := 0.0
 var _shake_tick := 0.0
+var _haptic_tick := 0.0
 
 
 func _ready() -> void:
@@ -38,6 +45,7 @@ func receive(report: Dictionary) -> void:
 	attention = true
 	_blink_left = auto_show_delay
 	_shake_left = shake_sec
+	_haptic_tick = 0.0
 	SFX.play(&"printer")
 
 
@@ -66,13 +74,17 @@ func _update_shake(delta: float) -> void:
 	if _shake_left <= 0.0:
 		offset = Vector2.ZERO
 		return
+	# Eases off over the last third so it settles instead of stopping dead.
+	var strength := clampf(_shake_left / (shake_sec / 3.0), 0.0, 1.0)
+	_haptic_tick -= delta
+	if _haptic_tick <= 0.0:
+		_haptic_tick = haptic_interval
+		Input.vibrate_handheld(haptic_pulse_ms, haptic_strength * maxf(strength, 0.3))
 	_shake_tick -= delta
 	if _shake_tick > 0.0:
 		return
 	_shake_tick = 1.0 / shake_rate
 	var to_local_px := 1.0 / maxf(absf(global_scale.x), 0.001)
-	# Eases off over the last third so it settles instead of stopping dead.
-	var strength := clampf(_shake_left / (shake_sec / 3.0), 0.0, 1.0)
 	offset = Vector2(randf_range(-1.0, 1.0), randf_range(-0.6, 0.6)) * shake_px * to_local_px * strength
 
 
