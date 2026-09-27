@@ -37,8 +37,8 @@ const OVER_DOCUMENT_LAYER := 12
 
 func _ready() -> void:
 	_crop_paper_to_sheet()
-	# The rect drawn in the scene, before any content has stretched it.
-	_base_size = Vector2(panel.offset_right - panel.offset_left, panel.offset_bottom - panel.offset_top)
+	# The board is the paper sheet at its own pixel size, only widened a little.
+	_base_size = ($Board/PaperBackground as TextureRect).texture.get_size() + Vector2(PAPER_EXTRA_WIDTH, 0)
 	handle.pressed.connect(toggle)
 	dim.gui_input.connect(_on_dim_input)
 	panel.visible = false
@@ -61,9 +61,10 @@ func _show_page(_page_number: int = 1, _with_sound := true) -> void:
 			spacer.visible = false
 
 
-## Both pages share one fixed board size: the board's size in the scene,
-## clamped to the screen. Each page's spacer stretches to fill it, so Next /
-## Back never change the board's shape, and it never runs off screen.
+## The board is one fixed size: the paper sheet's own height, and its width
+## plus PAPER_EXTRA_WIDTH (the paper is stretched only sideways, never
+## cropped). Only its position is kept on screen.
+const PAPER_EXTRA_WIDTH := 50.0
 @export var screen_margin := 16.0
 var _base_size := Vector2.ZERO
 
@@ -104,8 +105,7 @@ var board_catalog: Array = []
 
 func _fit_board_to_pages() -> void:
 	var view := get_viewport().get_visible_rect().size
-	var room := view - Vector2.ONE * screen_margin * 2.0
-	var board_size := _base_size.min(room)
+	var board_size := _base_size
 	panel.custom_minimum_size = board_size
 	_apply_font_sizes()
 	_show_page(1, false)
@@ -114,6 +114,11 @@ func _fit_board_to_pages() -> void:
 	panel.position = panel.position.clamp(
 		Vector2.ONE * screen_margin,
 		(view - board_size - Vector2.ONE * screen_margin).max(Vector2.ONE * screen_margin))
+	# On the first layout pass the wrapping labels are measured 1px wide, which
+	# blows the board up to thousands of px tall, and a Control never shrinks
+	# back on its own. Size it again once the text has been laid out.
+	await get_tree().process_frame
+	panel.size = board_size
 
 
 ## Applies the fixed sizes above to everything on the board.

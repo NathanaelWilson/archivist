@@ -34,12 +34,11 @@ theme_override_font_sizes/font_size = 16
 text = "CLIPBOARD"
 
 [node name="Board" type="PanelContainer" parent="." unique_id=1008082334]
-clip_contents = true
 anchors_preset = -1
 offset_left = 16.0
-offset_top = 16.0
-offset_right = 342.8
-offset_bottom = 366.0
+offset_top = 14.0
+offset_right = 334.0
+offset_bottom = 388.0
 theme_override_styles/panel = SubResource("StyleBoxFlat_board")
 
 [node name="PaperBackground" type="TextureRect" parent="Board" unique_id=1339971537]
@@ -47,14 +46,13 @@ layout_mode = 2
 mouse_filter = 2
 texture = SubResource("AtlasTexture_paper")
 expand_mode = 1
-stretch_mode = 6
 
 [node name="Margin" type="MarginContainer" parent="Board" unique_id=1132790684]
 layout_mode = 2
-theme_override_constants/margin_left = 18
-theme_override_constants/margin_top = 14
-theme_override_constants/margin_right = 18
-theme_override_constants/margin_bottom = 14
+theme_override_constants/margin_left = 28
+theme_override_constants/margin_top = 22
+theme_override_constants/margin_right = 28
+theme_override_constants/margin_bottom = 22
 
 [node name="Content" type="VBoxContainer" parent="Board/Margin" unique_id=2092749922]
 layout_mode = 2
