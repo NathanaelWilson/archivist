@@ -28,8 +28,6 @@ var _files_at_last_read: int = -1
 # New Page Control Nodes
 @onready var page1: VBoxContainer = $Board/Margin/Content/Page1
 @onready var page2: VBoxContainer = $Board/Margin/Content/Page2
-@onready var next_button: Button = $Board/Margin/Content/Page1/NextButton
-@onready var back_button: Button = $Board/Margin/Content/Page2/BackButton
 
 ## The clipboard normally sits under the document viewer; opened while a
 ## document is up (from its RULES button) it is lifted above it.
@@ -38,6 +36,7 @@ const OVER_DOCUMENT_LAYER := 12
 
 
 func _ready() -> void:
+	_crop_paper_to_sheet()
 	# The rect drawn in the scene, before any content has stretched it.
 	_base_size = Vector2(panel.offset_right - panel.offset_left, panel.offset_bottom - panel.offset_top)
 	handle.pressed.connect(toggle)
@@ -46,18 +45,20 @@ func _ready() -> void:
 	dim.visible = false
 	
 	# Connect the page buttons
-	next_button.pressed.connect(_show_page.bind(2))
-	back_button.pressed.connect(_show_page.bind(1))
 	
 	# Start on page 1
 	_show_page(1, false)
 
 
-func _show_page(page_number: int, with_sound := true) -> void:
-	page1.visible = (page_number == 1)
-	page2.visible = (page_number == 2)
-	if with_sound:
-		SFX.play(&"page_flip")
+## The clipboard is a single page now: WHAT TO COVER? on top and HOW TO
+## ARCHIVE? underneath, always both. The old Page1 / Page2 nodes are kept as
+## the two halves; their Next / Back buttons and bottom spacers are hidden.
+func _show_page(_page_number: int = 1, _with_sound := true) -> void:
+	page1.visible = true
+	page2.visible = true
+	for spacer in [page1.get_node_or_null("SpacerBottom"), page2.get_node_or_null("SpacerBottom")]:
+		if spacer != null:
+			spacer.visible = false
 
 
 ## Both pages share one fixed board size: the board's size in the scene,
@@ -66,78 +67,112 @@ func _show_page(page_number: int, with_sound := true) -> void:
 @export var screen_margin := 16.0
 var _base_size := Vector2.ZERO
 
+## Fixed text sizes, set by hand in the Inspector — the same on every board.
+@export_group("Text sizes")
+## The boxed notice at the top ("READ THIS BOARD BEFORE EVERY FILE.").
+@export var notice_font_size := 16:
+	set(value):
+		notice_font_size = value
+		_apply_font_sizes()
+## "WHAT TO COVER?" and "HOW TO ARCHIVE?".
+@export var heading_font_size := 15:
+	set(value):
+		heading_font_size = value
+		_apply_font_sizes()
+## The numbered rules AND the HOW TO ARCHIVE? entries (drawer names and
+## what goes in them), and board C2's message.
+@export var rule_font_size := 11:
+	set(value):
+		rule_font_size = value
+		_apply_font_sizes()
+@export_group("Spacing")
+## Gestalt proximity: things that belong together sit closer than things
+## that don't. Smallest inside one item, largest between the sections.
+## Between the notice and the first section, and between the two sections.
+@export var section_gap := 16
+## Between a heading and the list under it.
+@export var heading_gap := 4
+## Between two rules / two drawer entries.
+@export var item_gap := 7
+## Inside one drawer entry: its name and the line that says what goes in it.
+@export var inside_item_gap := 1
+@export_group("")
 
-var _fit_id := 0
-## Smallest the clipboard text may shrink to when a board is too long.
-@export_range(0.5, 1.0, 0.05) var min_text_scale := 0.6
-## Every board the game can show (Main sets it). The text size is chosen
-## once so that the LONGEST of them fits, and then used for all of them —
-## so the clipboard reads the same in Shift 1, 2 and 3.
+## Main still hands over every board; kept so that call keeps working.
 var board_catalog: Array = []
-var _shared_text_scale := -1.0
 
 
 func _fit_board_to_pages() -> void:
-	_fit_id += 1
-	var my_id := _fit_id
 	var view := get_viewport().get_visible_rect().size
 	var room := view - Vector2.ONE * screen_margin * 2.0
 	var board_size := _base_size.min(room)
 	panel.custom_minimum_size = board_size
-	if _shared_text_scale < 0.0:
-		# First time only, laid out invisibly: every board is tried, and the
-		# text shrinks a step at a time until the longest one fits — so
-		# Next / Back always stay on the board, whatever the copy says.
-		panel.modulate.a = 0.0
-		var shown := _current_board()
-		var boards: Array = board_catalog if not board_catalog.is_empty() else [shown]
-		var text_scale := 1.0
-		for board in boards:
-			_render(board)
-			while true:
-				var fits = await _fits_at(text_scale, board_size, my_id)
-				if fits == null:
-					return # opened again meanwhile; the newer fit wins
-				if fits or text_scale <= min_text_scale:
-					break
-				text_scale = maxf(min_text_scale, text_scale - 0.08)
-		_shared_text_scale = text_scale
-		_render(shown)
-	_apply_text_scale(_shared_text_scale)
+	_apply_font_sizes()
 	_show_page(1, false)
 	panel.reset_size()
 	panel.size = board_size
 	panel.position = panel.position.clamp(
 		Vector2.ONE * screen_margin,
 		(view - board_size - Vector2.ONE * screen_margin).max(Vector2.ONE * screen_margin))
-	panel.modulate.a = 1.0
 
 
-## Whether both pages of the rendered board fit at this text scale. null if
-## the clipboard was reopened while measuring.
-func _fits_at(text_scale: float, board_size: Vector2, my_id: int) -> Variant:
-	_apply_text_scale(text_scale)
-	var fits := true
-	for page_number in [2, 1]:
-		_show_page(page_number, false)
-		panel.reset_size()
-		await get_tree().process_frame
-		if my_id != _fit_id:
-			return null
-		var needed := panel.get_combined_minimum_size()
-		if needed.y > board_size.y + 0.5 or needed.x > board_size.x + 0.5:
-			fits = false
-	return fits
+## Applies the fixed sizes above to everything on the board.
+func _apply_font_sizes() -> void:
+	if not is_node_ready():
+		return
+	notice.add_theme_font_size_override("font_size", notice_font_size)
+	cover_heading.add_theme_font_size_override("font_size", heading_font_size)
+	file_heading.add_theme_font_size_override("font_size", heading_font_size)
+	cover_lines.add_theme_font_size_override("font_size", rule_font_size)
+	if _rule_list != null:
+		for rule in _rule_list.get_children():
+			if not rule.is_queued_for_deletion():
+				(rule as Label).add_theme_font_size_override("font_size", rule_font_size)
+	if _body != null:
+		_body.add_theme_font_size_override("font_size", rule_font_size)
+	if _file_grid != null:
+		for entry in _file_grid.get_children():
+			if entry.is_queued_for_deletion() or entry.get_child_count() < 2:
+				continue
+			(entry.get_child(0) as Label).add_theme_font_size_override("font_size", rule_font_size)
+			(entry.get_child(1) as Label).add_theme_font_size_override("font_size", rule_font_size)
 
 
-## Scales every label on the board from its own designed font size.
-func _apply_text_scale(text_scale: float) -> void:
-	for node in panel.find_children("*", "Label", true, false):
-		var label := node as Label
-		if not label.has_meta("base_font_size"):
-			label.set_meta("base_font_size", label.get_theme_font_size("font_size"))
-		var base: int = label.get_meta("base_font_size")
-		label.add_theme_font_size_override("font_size", maxi(8, roundi(base * text_scale)))
+## Proximity spacing (see the Spacing exports). The sections' own VBox
+## gaps are the heading-to-list gap; the notice and the two sections are
+## pushed apart with the larger section gap.
+func _apply_spacing() -> void:
+	if _rule_list == null:
+		return
+	page1.add_theme_constant_override("separation", heading_gap)
+	page2.add_theme_constant_override("separation", heading_gap)
+	(page1.get_parent() as Container).add_theme_constant_override("separation", section_gap)
+	_notice_gap.custom_minimum_size = Vector2(0, maxf(0.0, section_gap - heading_gap * 2))
+	_rule_list.add_theme_constant_override("separation", item_gap)
+	_file_grid.add_theme_constant_override("separation", item_gap)
+	for entry in _file_grid.get_children():
+		entry.add_theme_constant_override("separation", inside_item_gap)
+
+
+## PaperBackground.png has empty, transparent space around the sheet. The
+## board shows just the sheet: the crop is worked out from the picture
+## itself, so it stays right whenever the PNG is replaced or resized.
+func _crop_paper_to_sheet() -> void:
+	var paper := get_node_or_null("Board/PaperBackground") as TextureRect
+	if paper == null:
+		return
+	var atlas := paper.texture as AtlasTexture
+	if atlas == null or atlas.atlas == null:
+		return
+	var full := Rect2(Vector2.ZERO, atlas.atlas.get_size())
+	var image := atlas.atlas.get_image()
+	if image == null:
+		atlas.region = full
+		return
+	if image.is_compressed():
+		image.decompress()
+	var used := image.get_used_rect()
+	atlas.region = Rect2(used) if used.has_area() else full
 
 
 func is_open() -> bool:
@@ -192,6 +227,8 @@ func _current_board() -> ClipboardBoard:
 ## font, size and colour: the board's free text, and a two-column FILE table.
 var _body: Label
 var _file_grid: VBoxContainer
+var _rule_list: VBoxContainer
+var _notice_gap: Control
 
 
 func _render(board: ClipboardBoard) -> void:
@@ -201,15 +238,19 @@ func _render(board: ClipboardBoard) -> void:
 	_body.text = board.body_text
 	_body.visible = not board.body_text.is_empty()
 
-	cover_heading.text = "COVER"
-	var numbered: Array[String] = []
+	cover_heading.text = "WHAT TO COVER?"
+	cover_lines.visible = false # replaced by one label per rule
+	for child in _rule_list.get_children():
+		child.queue_free()
 	for i in board.cover_lines.size():
-		numbered.append("%d  %s" % [i + 1, board.cover_lines[i].replace("\n", "\n    ")])
-	cover_lines.text = "\n".join(numbered)
+		var rule := _cell("%d. %s" % [i + 1, board.cover_lines[i].replace("\n", " ")])
+		rule.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		rule.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		_rule_list.add_child(rule)
 	cover_heading.visible = not board.cover_lines.is_empty()
-	cover_lines.visible = cover_heading.visible
+	_rule_list.visible = cover_heading.visible
 
-	file_heading.text = "FILE"
+	file_heading.text = "HOW TO ARCHIVE?"
 	file_lines.visible = false # replaced by the grid
 	
 	# Clear old grid items
@@ -217,14 +258,16 @@ func _render(board: ClipboardBoard) -> void:
 		child.queue_free()
 		
 	# Build the new hierarchical list
+	var drawer_number := 0
 	for line in board.file_lines:
+		drawer_number += 1
 		var parts := _split_file_line(line)
 		var drawer_name: String = parts[0]
 		var description: String = parts[1]
 		
 		# One entry per drawer: the name, then (on the next line) what goes
 		# there, wrapping across the full width of the board.
-		var name_label := _cell(drawer_name)
+		var name_label := _cell("%d. %s" % [drawer_number, drawer_name])
 		name_label.add_theme_color_override("font_color", Color(0.2, 0.1, 0.05))
 		name_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 
@@ -235,7 +278,7 @@ func _render(board: ClipboardBoard) -> void:
 		name_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		var entry := VBoxContainer.new()
 		entry.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		entry.add_theme_constant_override("separation", 2)
+		entry.add_theme_constant_override("separation", inside_item_gap)
 		entry.add_child(name_label)
 		entry.add_child(desc_label)
 		_file_grid.add_child(entry)
@@ -243,6 +286,7 @@ func _render(board: ClipboardBoard) -> void:
 	file_heading.visible = not board.file_lines.is_empty()
 	_file_grid.visible = file_heading.visible
 	
+	_apply_spacing()
 	# Always start on page 1 when opening a new board
 	_show_page(1, false)
 
@@ -254,13 +298,26 @@ func _ensure_extra_nodes() -> void:
 	_body.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	notice.add_sibling(_body)
 	
-	# A plain vertical list: a GridContainer sizes its column to the
+	# Gap under the notice (and C2's message), before WHAT TO COVER?.
+	_notice_gap = Control.new()
+	_notice_gap.name = "NoticeGap"
+	_notice_gap.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_body.add_sibling(_notice_gap)
+
+	# One label per rule, so the space BETWEEN rules can be larger than the
+	# line spacing INSIDE a rule that wraps.
+	_rule_list = VBoxContainer.new()
+	_rule_list.name = "RuleList"
+	_rule_list.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	cover_lines.add_sibling(_rule_list)
+
+		# A plain vertical list: a GridContainer sizes its column to the
 	# narrowest child, and wrapping labels are 0 wide on their own, which
 	# squeezed the text into one letter per line.
 	_file_grid = VBoxContainer.new()
 	_file_grid.name = "FileGrid"
 	_file_grid.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	_file_grid.add_theme_constant_override("separation", 12)
+	_file_grid.add_theme_constant_override("separation", 6)
 	
 	# Add the grid to Page2, right before the back button
 	page2.add_child(_file_grid)

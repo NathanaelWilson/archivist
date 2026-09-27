@@ -3,9 +3,16 @@
 [ext_resource type="Script" uid="uid://dsbucjekpymil" path="res://Scenes/file_entity.gd" id="1"]
 [ext_resource type="Texture2D" uid="uid://bi87t0qoqx8rp" path="res://Assets/Objects/Amplop.png" id="2_envelope"]
 [ext_resource type="Shader" uid="uid://dkxcmejxdawxa" path="res://Shaders/desk_object.gdshader" id="3_desk_object"]
-[ext_resource type="Texture2D" uid="uid://bearn6adfvj4n" path="res://Assets/Objects/Amplop_off.png" id="4_envelope_off"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_shadow"]
+shader = ExtResource("3_desk_object")
+shader_parameter/region = Vector4(0.192871, 0.024902, 0.583008, 0.964355)
+shader_parameter/top_width = 0.86
+shader_parameter/as_shadow = true
+shader_parameter/shadow_opacity = 0.32
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_envelope"]
+resource_local_to_scene = true
 shader = ExtResource("3_desk_object")
 shader_parameter/region = Vector4(0.192871, 0.024902, 0.583008, 0.964355)
 shader_parameter/top_width = 0.86
@@ -13,34 +20,35 @@ shader_parameter/saturation = 0.4
 shader_parameter/tint = Color(0.86, 0.78, 0.62, 1)
 shader_parameter/tint_strength = 0.55
 shader_parameter/brightness = 0.85
-shader_parameter/as_shadow = true
-shader_parameter/shadow_opacity = 0.32
+shader_parameter/grain_strength = 0.05
+shader_parameter/edge_shade = 0.25
+shader_parameter/lamp_falloff = 0.18
+shader_parameter/room_light = 1.0
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_1"]
-size = Vector2(259, 200)
+size = Vector2(207, 246)
 
 [node name="FileEntity" type="Area2D" unique_id=1520834845]
 script = ExtResource("1")
-envelope_on = ExtResource("2_envelope")
-envelope_off = ExtResource("4_envelope_off")
 
 [node name="Shadow" type="Sprite2D" parent="." unique_id=447379879]
 texture_filter = 4
 material = SubResource("ShaderMaterial_shadow")
-position = Vector2(97.81341, 0.9687731)
+position = Vector2(7, 10)
 rotation = -0.052
-scale = Vector2(0.3862226, 0.102599084)
+scale = Vector2(0.1732, 0.1247)
 texture = ExtResource("2_envelope")
 region_enabled = true
 region_rect = Rect2(395, 51, 1194, 1975)
 
 [node name="Envelope" type="Sprite2D" parent="." unique_id=702617464]
 texture_filter = 4
+material = SubResource("ShaderMaterial_envelope")
 rotation = -0.052
-scale = Vector2(0.2, 0.2)
+scale = Vector2(0.1732, 0.1247)
 texture = ExtResource("2_envelope")
+region_enabled = true
 region_rect = Rect2(395, 51, 1194, 1975)
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=944070149]
-position = Vector2(1, 2)
 shape = SubResource("RectangleShape2D_1")

@@ -39,7 +39,7 @@ const BOARD_PLAN := [
 
 ## Unscaled size of the desk file — the envelope in Scenes/file_entity.tscn,
 ## matching its CollisionShape2D. Used to keep the file fully on screen.
-const FILE_PAPER_SIZE := Vector2(259, 200)
+const FILE_PAPER_SIZE := Vector2(207, 246)
 
 @export var shifts: Array[ShiftData] = []
 ## Random atmosphere sounds: each plays again after a random wait in its range.

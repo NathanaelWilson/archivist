@@ -25,10 +25,6 @@ enum State { RESTING, HELD, FILING }
 @export var file_time_sec: float = 0.12
 
 @export var case_data: CaseData
-## The envelope as painted for the lit room and for the dark room (the
-## flicker swaps between them, like every other desk object).
-@export var envelope_on: Texture2D
-@export var envelope_off: Texture2D
 
 @onready var collision: CollisionShape2D = $CollisionShape2D
 
@@ -61,11 +57,12 @@ func _ready() -> void:
 	monitorable = true
 
 
-## Lit or dark room: swaps the envelope art (Main follows Desk.set_lights).
+## Lit or dark room (the flicker): the envelope's overlay darkens with the
+## room instead of swapping to another picture.
 func set_lights(on: bool) -> void:
-	var art: Texture2D = envelope_on if on else envelope_off
-	if art != null:
-		$Envelope.texture = art
+	var envelope_material := $Envelope.material as ShaderMaterial
+	if envelope_material != null:
+		envelope_material.set_shader_parameter("room_light", 1.0 if on else 0.0)
 
 
 ## Moves the file and makes that its resting spot, so a drop outside every
