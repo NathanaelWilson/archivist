@@ -90,8 +90,17 @@ func _on_settings_pressed() -> void:
 	# panel (Scenes/Settings/audio_settings_panel.tscn).
 	SFX.play(&"ui_click")
 	journal_screen.visible = true
+	# The menu's own Settings and Exit buttons sit over the popup's corners;
+	# they are hidden while it is open.
+	_set_corner_buttons_visible(false)
 
 
 func _on_journal_close_pressed() -> void:
 	SFX.play(&"ui_click")
 	journal_screen.visible = false
+	_set_corner_buttons_visible(true)
+
+
+func _set_corner_buttons_visible(shown: bool) -> void:
+	settings_button.visible = shown
+	exit_button.visible = shown

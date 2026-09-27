@@ -6,8 +6,9 @@ extends CanvasLayer
 ##
 ## Controls (touch first, mouse/trackpad for desktop):
 ##   * one finger on the page     — draw with the marker
-##   * UNDO (bottom right)        — take back the last stroke, any case
-##   * tap anywhere off the page  — put the document down (close)
+##   * UNDO (bottom left)         — take back the last stroke, any case
+##   * DONE (bottom right), or a tap anywhere off the page — put the
+##     document down (close)
 ##   * two-finger pinch / drag    — zoom in and move around the page
 ##     (desktop: mouse wheel / trackpad pinch to zoom, right- or
 ##     middle-drag / two-finger scroll to move)
@@ -19,7 +20,7 @@ extends CanvasLayer
 signal closed(redaction_result: Dictionary, ink_image: Image, bleed_image: Image)
 
 ## Space kept clear between the document and the screen edges, in viewport
-## pixels, on top of room for the "?" / UNDO buttons at the sides.
+## pixels, on top of room for the "?" / UNDO / DONE buttons at the sides.
 @export var screen_margin := 16.0
 @export var side_buttons_width := 76.0
 @export var max_zoom := 4.0
@@ -62,6 +63,7 @@ func _ready() -> void:
 	_tutorial = TUTORIAL_SCENE.instantiate()
 	add_child(_tutorial)
 	_tutorial.undo_requested.connect(_on_undo_requested)
+	_tutorial.done_requested.connect(close)
 	visible = false
 
 
