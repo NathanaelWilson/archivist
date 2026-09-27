@@ -1,7 +1,8 @@
-[gd_scene format=3]
+[gd_scene format=3 uid="uid://cmpqrbt3x73c7"]
 
 [ext_resource type="Script" uid="uid://ce56jfxrlomq1" path="res://Scenes/DirectivesClipboard/clipboard_panel.gd" id="1_panel"]
 [ext_resource type="FontFile" uid="uid://c4ca10mvotspn" path="res://Assets/Fonts/SpecialElite-Regular.ttf" id="2_font"]
+[ext_resource type="Texture2D" uid="uid://dix1ieak2a0wl" path="res://Assets/Objects/PaperBackground.png" id="3_fq48c"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_board"]
 bg_color = Color(0.878, 0.859, 0.792, 1)
@@ -11,23 +12,11 @@ border_width_right = 3
 border_width_bottom = 3
 border_color = Color(0.22, 0.2, 0.17, 1)
 
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_notice"]
-bg_color = Color(0.82, 0.8, 0.72, 1)
-border_width_left = 2
-border_width_top = 2
-border_width_right = 2
-border_width_bottom = 2
-border_color = Color(0.22, 0.2, 0.17, 1)
-content_margin_left = 8.0
-content_margin_top = 6.0
-content_margin_right = 8.0
-content_margin_bottom = 6.0
-
-[node name="ClipboardPanel" type="CanvasLayer"]
+[node name="ClipboardPanel" type="CanvasLayer" unique_id=652394610]
 layer = 5
 script = ExtResource("1_panel")
 
-[node name="Dim" type="ColorRect" parent="."]
+[node name="Dim" type="ColorRect" parent="." unique_id=1577179868]
 visible = false
 anchors_preset = 15
 anchor_right = 1.0
@@ -36,7 +25,7 @@ grow_horizontal = 2
 grow_vertical = 2
 color = Color(0, 0, 0, 0.45)
 
-[node name="Handle" type="Button" parent="."]
+[node name="Handle" type="Button" parent="." unique_id=1567516419]
 visible = false
 offset_left = 16.0
 offset_top = 336.0
@@ -46,57 +35,99 @@ theme_override_fonts/font = ExtResource("2_font")
 theme_override_font_sizes/font_size = 16
 text = "CLIPBOARD"
 
-[node name="Board" type="PanelContainer" parent="."]
+[node name="Board" type="PanelContainer" parent="." unique_id=1008082334]
+anchors_preset = -1
 offset_left = 16.0
 offset_top = 16.0
-offset_right = 556.0
-offset_bottom = 326.0
+offset_right = 242.8
+offset_bottom = 366.0
 theme_override_styles/panel = SubResource("StyleBoxFlat_board")
 
-[node name="Margin" type="MarginContainer" parent="Board"]
+[node name="PaperBackground" type="TextureRect" parent="Board" unique_id=1339971537]
+layout_mode = 2
+texture = ExtResource("3_fq48c")
+expand_mode = 1
+
+[node name="Margin" type="MarginContainer" parent="Board" unique_id=1132790684]
 layout_mode = 2
 theme_override_constants/margin_left = 18
 theme_override_constants/margin_top = 14
 theme_override_constants/margin_right = 18
 theme_override_constants/margin_bottom = 14
 
-[node name="Content" type="VBoxContainer" parent="Board/Margin"]
+[node name="Content" type="VBoxContainer" parent="Board/Margin" unique_id=2092749922]
 layout_mode = 2
 theme_override_constants/separation = 8
 
-[node name="Notice" type="Label" parent="Board/Margin/Content"]
+[node name="Page1" type="VBoxContainer" parent="Board/Margin/Content" unique_id=418630697]
+layout_mode = 2
+theme_override_constants/separation = 15
+
+[node name="Notice" type="Label" parent="Board/Margin/Content/Page1" unique_id=1082464857]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.12, 0.1, 0.08, 1)
 theme_override_fonts/font = ExtResource("2_font")
-theme_override_font_sizes/font_size = 15
-theme_override_styles/normal = SubResource("StyleBoxFlat_notice")
+theme_override_font_sizes/font_size = 18
 text = "READ THIS BOARD BEFORE EVERY FILE."
+horizontal_alignment = 1
 autowrap_mode = 2
 
-[node name="CoverHeading" type="Label" parent="Board/Margin/Content"]
+[node name="CoverHeading" type="Label" parent="Board/Margin/Content/Page1" unique_id=74524922]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.3, 0.12, 0.1, 1)
 theme_override_fonts/font = ExtResource("2_font")
-theme_override_font_sizes/font_size = 14
+theme_override_font_sizes/font_size = 16
 text = "WHAT TO COVER"
 
-[node name="CoverLines" type="Label" parent="Board/Margin/Content"]
+[node name="CoverLines" type="Label" parent="Board/Margin/Content/Page1" unique_id=1231139729]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.12, 0.1, 0.08, 1)
 theme_override_fonts/font = ExtResource("2_font")
-theme_override_font_sizes/font_size = 13
+theme_override_font_sizes/font_size = 14
 autowrap_mode = 2
 
-[node name="FileHeading" type="Label" parent="Board/Margin/Content"]
+[node name="SpacerBottom" type="Control" parent="Board/Margin/Content/Page1" unique_id=325448637]
+custom_minimum_size = Vector2(0, 50)
+layout_mode = 2
+
+[node name="NextButton" type="Button" parent="Board/Margin/Content/Page1" unique_id=597286748]
+layout_mode = 2
+size_flags_horizontal = 8
+theme_override_colors/font_color = Color(0.24313726, 0.15294118, 0.13725491, 1)
+theme_override_colors/font_pressed_color = Color(0.11764706, 0.07450981, 0.06666667, 1)
+theme_override_colors/font_hover_color = Color(0.42745098, 0.29803923, 0.25490198, 1)
+theme_override_font_sizes/font_size = 12
+text = "Next >"
+flat = true
+
+[node name="Page2" type="VBoxContainer" parent="Board/Margin/Content" unique_id=1166672438]
+layout_mode = 2
+theme_override_constants/separation = 15
+
+[node name="FileHeading" type="Label" parent="Board/Margin/Content/Page2" unique_id=2021928471]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.3, 0.12, 0.1, 1)
 theme_override_fonts/font = ExtResource("2_font")
-theme_override_font_sizes/font_size = 14
+theme_override_font_sizes/font_size = 16
 text = "WHERE IT GOES"
 
-[node name="FileLines" type="Label" parent="Board/Margin/Content"]
+[node name="FileLines" type="Label" parent="Board/Margin/Content/Page2" unique_id=633699591]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.12, 0.1, 0.08, 1)
 theme_override_fonts/font = ExtResource("2_font")
-theme_override_font_sizes/font_size = 13
+theme_override_font_sizes/font_size = 14
 autowrap_mode = 2
+
+[node name="SpacerBottom" type="Control" parent="Board/Margin/Content/Page2" unique_id=880334117]
+custom_minimum_size = Vector2(0, 30)
+layout_mode = 2
+
+[node name="BackButton" type="Button" parent="Board/Margin/Content/Page2" unique_id=163539745]
+layout_mode = 2
+size_flags_horizontal = 0
+theme_override_colors/font_color = Color(0.24313726, 0.15294118, 0.13725491, 1)
+theme_override_colors/font_pressed_color = Color(0.11764706, 0.07450981, 0.06666667, 1)
+theme_override_colors/font_hover_color = Color(0.42745098, 0.29803923, 0.25490198, 1)
+theme_override_font_sizes/font_size = 12
+text = "Back <"
+flat = true

@@ -19,11 +19,17 @@ var _files_at_last_read: int = -1
 @onready var handle: Button = $Handle
 @onready var dim: ColorRect = $Dim
 @onready var panel: Control = $Board
-@onready var notice: Label = $Board/Margin/Content/Notice
-@onready var cover_heading: Label = $Board/Margin/Content/CoverHeading
-@onready var cover_lines: Label = $Board/Margin/Content/CoverLines
-@onready var file_heading: Label = $Board/Margin/Content/FileHeading
-@onready var file_lines: Label = $Board/Margin/Content/FileLines
+@onready var notice: Label = $Board/Margin/Content/Page1/Notice
+@onready var cover_heading: Label = $Board/Margin/Content/Page1/CoverHeading
+@onready var cover_lines: Label = $Board/Margin/Content/Page1/CoverLines
+@onready var file_heading: Label = $Board/Margin/Content/Page2/FileHeading
+@onready var file_lines: Label = $Board/Margin/Content/Page2/FileLines
+
+# New Page Control Nodes
+@onready var page1: VBoxContainer = $Board/Margin/Content/Page1
+@onready var page2: VBoxContainer = $Board/Margin/Content/Page2
+@onready var next_button: Button = $Board/Margin/Content/Page1/NextButton
+@onready var back_button: Button = $Board/Margin/Content/Page2/BackButton
 
 
 func _ready() -> void:
@@ -31,6 +37,19 @@ func _ready() -> void:
 	dim.gui_input.connect(_on_dim_input)
 	panel.visible = false
 	dim.visible = false
+	
+	# Connect the page buttons
+	next_button.pressed.connect(_show_page.bind(2))
+	back_button.pressed.connect(_show_page.bind(1))
+	
+	# Start on page 1
+	_show_page(1)
+
+
+func _show_page(page_number: int) -> void:
+	page1.visible = (page_number == 1)
+	page2.visible = (page_number == 2)
+	SFX.play(&"page_flip") # Reuse your existing sound!
 
 
 func is_open() -> bool:
@@ -93,7 +112,6 @@ func _render(board: ClipboardBoard) -> void:
 	cover_heading.text = "COVER"
 	var numbered: Array[String] = []
 	for i in board.cover_lines.size():
-		# Continuation lines hang under the rule's text, not its number.
 		numbered.append("%d  %s" % [i + 1, board.cover_lines[i].replace("\n", "\n    ")])
 	cover_lines.text = "\n".join(numbered)
 	cover_heading.visible = not board.cover_lines.is_empty()
@@ -101,15 +119,36 @@ func _render(board: ClipboardBoard) -> void:
 
 	file_heading.text = "FILE"
 	file_lines.visible = false # replaced by the grid
+	
+	# Clear old grid items
 	for child in _file_grid.get_children():
 		child.queue_free()
+		
+	# Build the new hierarchical list
 	for line in board.file_lines:
 		var parts := line.split("\t", true, 1)
-		_file_grid.add_child(_cell(parts[0].strip_edges()))
-		_file_grid.add_child(_cell(parts[1].strip_edges() if parts.size() > 1 else ""))
+		var drawer_name := parts[0].strip_edges()
+		var description := parts[1].strip_edges() if parts.size() > 1 else ""
+		
+		var row_vbox := VBoxContainer.new()
+		row_vbox.add_theme_constant_override("separation", 2)
+		
+		var name_label := _cell(drawer_name)
+		name_label.add_theme_color_override("font_color", Color(0.2, 0.1, 0.05))
+		name_label.add_theme_font_size_override("font_size", 16)
+		
+		var desc_label := _cell(description)
+		desc_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		
+		row_vbox.add_child(name_label)
+		row_vbox.add_child(desc_label)
+		_file_grid.add_child(row_vbox)
+
 	file_heading.visible = not board.file_lines.is_empty()
 	_file_grid.visible = file_heading.visible
-
+	
+	# Always start on page 1 when opening a new board
+	_show_page(1)
 
 func _ensure_extra_nodes() -> void:
 	if _body != null:
@@ -118,12 +157,16 @@ func _ensure_extra_nodes() -> void:
 	_body.name = "Body"
 	_body.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	notice.add_sibling(_body)
+	
 	_file_grid = GridContainer.new()
 	_file_grid.name = "FileGrid"
-	_file_grid.columns = 2
-	_file_grid.add_theme_constant_override("h_separation", 18)
-	_file_grid.add_theme_constant_override("v_separation", 4)
-	file_lines.add_sibling(_file_grid)
+	_file_grid.columns = 1 
+	_file_grid.add_theme_constant_override("h_separation", 0)
+	_file_grid.add_theme_constant_override("v_separation", 12)
+	
+	# Add the grid to Page2, right before the back button
+	page2.add_child(_file_grid)
+	page2.move_child(_file_grid, page2.get_child_count() - 2) # Put it before the back button
 
 
 func _cell(text: String) -> Label:
