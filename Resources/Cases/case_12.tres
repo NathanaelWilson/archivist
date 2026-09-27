@@ -1,4 +1,4 @@
-[gd_resource type="Resource" script_class="CaseData" format=3]
+[gd_resource type="Resource" script_class="CaseData" format=3 uid="uid://dthuo3duhowr"]
 
 [ext_resource type="Texture2D" uid="uid://cnc4d21q5q2vv" path="res://Assets/Images/Cases/Case_12.png" id="1_art"]
 [ext_resource type="Script" uid="uid://dyxpn0feejs5a" path="res://Scenes/case_data.gd" id="2_case_data"]
@@ -8,4 +8,6 @@ script = ExtResource("2_case_data")
 id = "CASE-12"
 level = 0
 correct_tray = 3
+required_coverage = 0.7
+maximum_overspill = 0.2
 asset = ExtResource("1_art")

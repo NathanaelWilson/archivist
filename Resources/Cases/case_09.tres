@@ -8,4 +8,6 @@ script = ExtResource("2_case_data")
 id = "CASE-09"
 level = 0
 correct_tray = 2
+required_coverage = 0.7
+maximum_overspill = 0.2
 asset = ExtResource("1_art")

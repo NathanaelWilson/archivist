@@ -17,22 +17,20 @@ texture = ExtResource("3_image")
 centered = false
 
 [node name="SafeZoneBox" type="Area2D" parent="." unique_id=161197598]
-position = Vector2(176.15, 258)
+position = Vector2(128.5, 258)
 script = ExtResource("1_box")
 case_data = ExtResource("2_case")
 region_kind = 1
 document_size = Vector2(354, 472)
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="SafeZoneBox" unique_id=551680438]
-position = Vector2(-47.649994, 0)
 shape = SubResource("RectangleShape_safe_zone")
 
 [node name="RedactionBox" type="Area2D" parent="." unique_id=417807902]
-position = Vector2(173.14499, 263.61996)
+position = Vector2(126.5, 263.61996)
 script = ExtResource("1_box")
 case_data = ExtResource("2_case")
 document_size = Vector2(354, 472)
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="RedactionBox" unique_id=131646713]
-position = Vector2(-46.64499, 0)
 shape = SubResource("RectangleShape_box")
