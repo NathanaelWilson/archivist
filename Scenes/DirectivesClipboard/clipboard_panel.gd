@@ -37,8 +37,8 @@ const OVER_DOCUMENT_LAYER := 12
 
 func _ready() -> void:
 	_crop_paper_to_sheet()
-	# The board is the paper sheet at its own pixel size, only widened a little.
-	_base_size = ($Board/PaperBackground as TextureRect).texture.get_size() + Vector2(PAPER_EXTRA_WIDTH, 0)
+	# The paper sheet's own size; the board keeps exactly this shape.
+	_base_size = ($Board/PaperBackground as TextureRect).texture.get_size()
 	handle.pressed.connect(toggle)
 	dim.gui_input.connect(_on_dim_input)
 	panel.visible = false
@@ -61,12 +61,17 @@ func _show_page(_page_number: int = 1, _with_sound := true) -> void:
 			spacer.visible = false
 
 
-## The board is one fixed size: the paper sheet's own height, and its width
-## plus PAPER_EXTRA_WIDTH (the paper is stretched only sideways, never
-## cropped). Only its position is kept on screen.
-const PAPER_EXTRA_WIDTH := 50.0
+## The board is one fixed size on every board: the paper sheet's own shape,
+## scaled evenly to fit the screen. The paper is never stretched one way
+## more than the other, and the board never grows to fit its text: if a
+## board's rules do not fit, the text steps down a size (up to
+## MAX_FONT_SHRINK steps) instead.
 @export var screen_margin := 16.0
+const MAX_FONT_SHRINK := 5
+const MIN_FONT_SIZE := 8
 var _base_size := Vector2.ZERO
+## How many sizes the text is currently stepped down to fit this board.
+var _font_shrink := 0
 
 ## Fixed text sizes, set by hand in the Inspector — the same on every board.
 @export_group("Text sizes")
@@ -105,7 +110,13 @@ var board_catalog: Array = []
 
 func _fit_board_to_pages() -> void:
 	var view := get_viewport().get_visible_rect().size
-	var board_size := _base_size
+	var room := (view - Vector2.ONE * screen_margin * 2.0).max(Vector2.ONE)
+	var fit := minf(room.x / _base_size.x, room.y / _base_size.y)
+	var board_size := (_base_size * fit).floor()
+	# Hidden until it is measured, so the first, mis-sized layout pass never
+	# shows as a flash of stretched paper.
+	panel.modulate.a = 0.0
+	_font_shrink = 0
 	panel.custom_minimum_size = board_size
 	_apply_font_sizes()
 	_show_page(1, false)
@@ -116,31 +127,48 @@ func _fit_board_to_pages() -> void:
 		(view - board_size - Vector2.ONE * screen_margin).max(Vector2.ONE * screen_margin))
 	# On the first layout pass the wrapping labels are measured 1px wide, which
 	# blows the board up to thousands of px tall, and a Control never shrinks
-	# back on its own. Size it again once the text has been laid out.
+	# back on its own. Size it again once the text has been laid out, and step
+	# the text down while it is still taller than the sheet.
+	var margin := $Board/Margin as Control
+	for _i in MAX_FONT_SHRINK + 1:
+		await get_tree().process_frame
+		if not panel.visible:
+			return
+		panel.size = board_size
+		if margin.get_combined_minimum_size().y <= board_size.y or _font_shrink >= MAX_FONT_SHRINK:
+			break
+		_font_shrink += 1
+		_apply_font_sizes()
 	await get_tree().process_frame
+	if not panel.visible:
+		return
 	panel.size = board_size
+	panel.modulate.a = 1.0
 
 
 ## Applies the fixed sizes above to everything on the board.
 func _apply_font_sizes() -> void:
 	if not is_node_ready():
 		return
-	notice.add_theme_font_size_override("font_size", notice_font_size)
-	cover_heading.add_theme_font_size_override("font_size", heading_font_size)
-	file_heading.add_theme_font_size_override("font_size", heading_font_size)
-	cover_lines.add_theme_font_size_override("font_size", rule_font_size)
+	var notice_size := maxi(notice_font_size - _font_shrink, MIN_FONT_SIZE)
+	var heading_size := maxi(heading_font_size - _font_shrink, MIN_FONT_SIZE)
+	var rule_size := maxi(rule_font_size - _font_shrink, MIN_FONT_SIZE)
+	notice.add_theme_font_size_override("font_size", notice_size)
+	cover_heading.add_theme_font_size_override("font_size", heading_size)
+	file_heading.add_theme_font_size_override("font_size", heading_size)
+	cover_lines.add_theme_font_size_override("font_size", rule_size)
 	if _rule_list != null:
 		for rule in _rule_list.get_children():
 			if not rule.is_queued_for_deletion():
-				(rule as Label).add_theme_font_size_override("font_size", rule_font_size)
+				(rule as Label).add_theme_font_size_override("font_size", rule_size)
 	if _body != null:
-		_body.add_theme_font_size_override("font_size", rule_font_size)
+		_body.add_theme_font_size_override("font_size", rule_size)
 	if _file_grid != null:
 		for entry in _file_grid.get_children():
 			if entry.is_queued_for_deletion() or entry.get_child_count() < 2:
 				continue
-			(entry.get_child(0) as Label).add_theme_font_size_override("font_size", rule_font_size)
-			(entry.get_child(1) as Label).add_theme_font_size_override("font_size", rule_font_size)
+			(entry.get_child(0) as Label).add_theme_font_size_override("font_size", rule_size)
+			(entry.get_child(1) as Label).add_theme_font_size_override("font_size", rule_size)
 
 
 ## Proximity spacing (see the Spacing exports). The sections' own VBox

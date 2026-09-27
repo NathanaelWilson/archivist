@@ -46,6 +46,7 @@ layout_mode = 2
 mouse_filter = 2
 texture = SubResource("AtlasTexture_paper")
 expand_mode = 1
+stretch_mode = 5
 
 [node name="Margin" type="MarginContainer" parent="Board" unique_id=1132790684]
 layout_mode = 2
