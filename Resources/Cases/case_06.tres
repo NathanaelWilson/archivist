@@ -6,6 +6,6 @@
 [resource]
 script = ExtResource("2_case_data")
 id = "CASE-06"
-anomaly_regions = Array[Rect2]([Rect2(0.076271184, 0.5068643, 0.5621469, 0.10330508)])
-overspill_regions = Array[Rect2]([Rect2(0.04519774, 0.43855932, 0.63559324, 0.21610172)])
+anomaly_regions = Array[Rect2]([Rect2(0.073446326, 0.8029661, 0.47740114, 0.06991524)])
+overspill_regions = Array[Rect2]([Rect2(0.04519774, 0.43855932, 0.63559324, 0.46822035)])
 asset = ExtResource("1_art")

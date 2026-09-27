@@ -10,9 +10,6 @@ size = Vector2(191, 98)
 [sub_resource type="RectangleShape2D" id="RectangleShape_box"]
 size = Vector2(130, 56.999992)
 
-[sub_resource type="RectangleShape2D" id="RectangleShape_box2"]
-size = Vector2(130, 57)
-
 [node name="Case07Authoring" type="Node2D" unique_id=1264761373]
 
 [node name="Document" type="Sprite2D" parent="." unique_id=1054638433]
@@ -20,14 +17,13 @@ texture = ExtResource("3_image")
 centered = false
 
 [node name="SafeZoneBox" type="Area2D" parent="." unique_id=1658067913]
-position = Vector2(402, 487)
+position = Vector2(404.5, 487)
 script = ExtResource("1_box")
 case_data = ExtResource("2_case")
 region_kind = 1
 document_size = Vector2(807, 1076)
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="SafeZoneBox" unique_id=358872802]
-position = Vector2(2.5, 0)
 shape = SubResource("RectangleShape_safe_zone")
 
 [node name="RedactionBox" type="Area2D" parent="." unique_id=1449099866]
@@ -38,13 +34,3 @@ document_size = Vector2(807, 1076)
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="RedactionBox" unique_id=581105273]
 shape = SubResource("RectangleShape_box")
-
-[node name="RedactionBox2" type="Area2D" parent="."]
-position = Vector2(407, 620.3)
-script = ExtResource("1_box")
-case_data = ExtResource("2_case")
-region_index = 1
-document_size = Vector2(807, 1076)
-
-[node name="CollisionShape2D" type="CollisionShape2D" parent="RedactionBox2"]
-shape = SubResource("RectangleShape_box2")

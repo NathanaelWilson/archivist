@@ -5,10 +5,10 @@
 [ext_resource type="Texture2D" uid="uid://bi2yknvpfscym" path="res://Assets/Images/Cases/Case_6.png" id="3_image"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape_safe_zone"]
-size = Vector2(225, 102.000015)
+size = Vector2(225, 221)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape_box"]
-size = Vector2(199, 48.76)
+size = Vector2(169, 32.999996)
 
 [node name="Case06Authoring" type="Node2D" unique_id=696881344]
 
@@ -24,6 +24,7 @@ region_kind = 1
 document_size = Vector2(354, 472)
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="SafeZoneBox" unique_id=551680438]
+position = Vector2(0, 59.5)
 shape = SubResource("RectangleShape_safe_zone")
 
 [node name="RedactionBox" type="Area2D" parent="." unique_id=417807902]
@@ -33,4 +34,5 @@ case_data = ExtResource("2_case")
 document_size = Vector2(354, 472)
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="RedactionBox" unique_id=131646713]
+position = Vector2(-16, 131.88004)
 shape = SubResource("RectangleShape_box")
